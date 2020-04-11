@@ -1,1 +1,1 @@
-# IncredibleAI
+# 私が考えた最強のオセロAI！
