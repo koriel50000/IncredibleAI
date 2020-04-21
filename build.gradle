@@ -1,0 +1,16 @@
+plugins {
+    id 'application'
+}
+
+mainClassName = 'com.github.koriel50000.prelude.Hello'
+
+group 'com.github.koriel50000'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
