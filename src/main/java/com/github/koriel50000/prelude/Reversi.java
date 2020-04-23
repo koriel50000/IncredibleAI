@@ -242,7 +242,7 @@ public class Reversi {
             int i = 0;
             for (int y = 1; y <= 8; y++) {
                 for (int x = 1; x <= 8; x++) {
-                    String coord = String.format("{0}{1}", 'A' + (x - 1), y);
+                    String coord = String.format("%c%d", 'A' + (x - 1), y);
                     values[i++] = new Move(x, y, coord);
                 }
             }
