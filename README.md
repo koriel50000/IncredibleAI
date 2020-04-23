@@ -1,6 +1,6 @@
 # 私の考えた最強のオセロAI。
 
-![IncredibleWorld](./docs/images/IncredibleWorld.png)
+![IncredibleWorld](./doc/images/IncredibleWorld.png)
 
 「私の考えた最強のオセロAI。」
 と言うことで、どうせ会社の人しか見ないので大風呂敷を広げてみました。:smile:  
@@ -48,5 +48,5 @@ https://qiita.com/tanaka-a/items/6d6725d5866ebe85fb0b
 「盤面の周囲3マスから特長量を抽出してCNNで学習する」と考えています。  
 
 イメージ図は以下になります。
-![CNN](./docs/images/cnn.png)
+![CNN](./doc/images/cnn.png)
 
