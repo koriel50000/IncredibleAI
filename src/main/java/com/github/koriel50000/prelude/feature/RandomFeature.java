@@ -14,6 +14,14 @@ public class RandomFeature implements Feature {
     }
 
     @Override
+    public void init(Reversi reversi) {
+    }
+
+    @Override
+    public void destroy(Reversi reversi) {
+    }
+
+    @Override
     public Reversi.Move evaluate(Reversi reversi, List<Reversi.Move> moves, Reversi.Turn turn) {
         Reversi.Move move = moves.get(random.nextInt(moves.size()));
         return move;

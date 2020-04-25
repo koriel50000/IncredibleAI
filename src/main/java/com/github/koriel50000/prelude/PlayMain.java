@@ -22,8 +22,10 @@ public class PlayMain {
      */
     private void play(Feature blackFeature, Feature whiteFeature) {
         Reversi reversi = new Reversi();
-
         reversi.initialize();
+        
+        blackFeature.init(reversi);
+        whiteFeature.init(reversi);
 
         while (true) {
             printBoard(reversi.getBoard());
@@ -45,16 +47,20 @@ public class PlayMain {
 
             // ゲーム終了を判定
             if (reversi.hasCompleted()) {
-                printBoard(reversi.getBoard());
-                printScore(reversi.getTurnCount(),
-                        reversi.getBlackCount(),
-                        reversi.getWhiteCount(),
-                        reversi.getEmptyCount());
                 break;
             }
 
             reversi.nextTurn();
         }
+
+        printBoard(reversi.getBoard());
+        printScore(reversi.getTurnCount(),
+                reversi.getBlackCount(),
+                reversi.getWhiteCount(),
+                reversi.getEmptyCount());
+
+        blackFeature.destroy(reversi);
+        whiteFeature.destroy(reversi);
     }
 
     /**

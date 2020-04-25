@@ -21,11 +21,13 @@ public class PreludeFeature implements Feature {
         random = new Random(System.currentTimeMillis());
     }
 
-    public void init() {
+    @Override
+    public void init(Reversi reversi) {
         model.init();
     }
 
-    public void destroy() {
+    @Override
+    public void destroy(Reversi reversi) {
         model.destroy();
     }
 
