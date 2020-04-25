@@ -23,23 +23,27 @@ public class PlayMain {
     private void play(Feature blackFeature, Feature whiteFeature) {
         Reversi reversi = new Reversi();
         reversi.initialize();
-        
+
         blackFeature.init(reversi);
         whiteFeature.init(reversi);
 
         while (true) {
+            Reversi.Turn turn = reversi.getCurrentTurn();
+
             printBoard(reversi.getBoard());
             printStatus(reversi.getTurnCount(),
                     reversi.getBlackCount(),
                     reversi.getWhiteCount(),
-                    reversi.getCurrentTurn());
+                    turn);
 
             List<Reversi.Move> moves = reversi.availableMoves();
             if (moves.size() > 0) {
-                Reversi.Turn turn = reversi.getCurrentTurn();
-                Reversi.Move move = (turn == Reversi.Turn.Black)
-                        ? blackFeature.evaluate(reversi, moves, turn)
-                        : whiteFeature.evaluate(reversi, moves, turn);
+                Reversi.Move move;
+                if (turn == Reversi.Turn.Black) {
+                    move = blackFeature.evaluate(reversi, moves, turn);
+                } else {
+                    move = whiteFeature.evaluate(reversi, moves, turn);
+                }
                 reversi.makeMove(move);
             } else{
                 System.out.println("Pass!");

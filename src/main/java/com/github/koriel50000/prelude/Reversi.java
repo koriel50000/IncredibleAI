@@ -227,12 +227,12 @@ public class Reversi {
 
         public final int x;
         public final int y;
-        public final String coord;
+        public final String symbol;
 
         private Move(int x, int y, String coord) {
             this.x = x;
             this.y = y;
-            this.coord = coord;
+            this.symbol = coord;
         }
 
         private static Move[] values;
@@ -255,7 +255,7 @@ public class Reversi {
             return values[(y - 1) * 8 + (x - 1)];
         }
 
-        public static Move valueOf(String coord) {
+        public static Move valueOf(String symbol) {
             return null; // TODO
         }
     }

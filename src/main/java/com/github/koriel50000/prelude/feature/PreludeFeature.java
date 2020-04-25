@@ -6,6 +6,7 @@ import com.github.koriel50000.prelude.learning.PreludeConverter;
 import org.tensorflow.Tensor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -33,7 +34,7 @@ public class PreludeFeature implements Feature {
 
     @Override
     public Reversi.Move evaluate(Reversi reversi, List<Reversi.Move> moves, Reversi.Turn turn) {
-        List<Eval> evals = availablesToEvals(moves);
+        List<Eval> evals = clearEvals(moves);
         for (Eval eval : evals) {
             Reversi.Move move = eval.getMove();
             Tensor state = converter.convertState(reversi, move);
@@ -43,16 +44,13 @@ public class PreludeFeature implements Feature {
 
         if (evals.size() > 0) {
             Reversi.Move actualMove = optimumChoice(evals);
-            reversi.makeMove(actualMove);
-            reversi.nextTurn();
             return actualMove;
         } else {
-            reversi.nextTurn();
-            return null;
+            throw new IllegalArgumentException("not found");
         }
     }
 
-    private List<Eval> availablesToEvals(List<Reversi.Move> moves) {
+    private List<Eval> clearEvals(List<Reversi.Move> moves) {
         List<Eval> evals = new ArrayList<>();
         for (Reversi.Move move : moves) {
             evals.add(new Eval(move, 0.0f)); // valueはダミー
@@ -61,15 +59,15 @@ public class PreludeFeature implements Feature {
     }
 
     private Reversi.Move optimumChoice(List<Eval> evals) {
-        evals.sort(null); // TODO valueで降順
-        //evals.sort(key = lambda x:x['value'], reverse = True);
+        Collections.sort(evals, Collections.reverseOrder()); // 評価値で降順
 
         List<Reversi.Move> moves = new ArrayList<>();
         float maximumValue = Float.MIN_VALUE;
-        for (Eval entry : evals) {
-            Reversi.Move move = entry.getMove();
-            float value = entry.getValue();
-            if (value < maximumValue) {
+        float delta = 0.001f; // 近い値を考慮
+        for (Eval evel : evals) {
+            Reversi.Move move = evel.getMove();
+            float value = evel.getValue();
+            if (value + delta < maximumValue) {
                 break;
             }
             moves.add(move);
@@ -79,7 +77,8 @@ public class PreludeFeature implements Feature {
         return moves.get(random.nextInt(moves.size()));
     }
 
-    private static class Eval {
+    private static class Eval implements Comparable<Eval> {
+
         private Reversi.Move move;
         private float value;
 
@@ -98,6 +97,11 @@ public class PreludeFeature implements Feature {
 
         void setValue(float value) {
             this.value = value;
+        }
+
+        @Override
+        public int compareTo(Eval eval) {
+            return Float.compare(value, eval.value);
         }
     }
 }

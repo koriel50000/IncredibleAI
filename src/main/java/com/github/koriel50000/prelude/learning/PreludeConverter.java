@@ -30,33 +30,40 @@ public class PreludeConverter {
     };
 
     /**
-     * 対角位置を対称変換する
-     */
-    private Reversi.Move symmetricMove(int diagonal, Reversi.Move move) {
-        switch (diagonal) {
-            case 8:
-                return Reversi.Move.valueOf(move.x, move.y); // 変換なし
-            case 10:
-                return Reversi.Move.valueOf(9 - move.x, move.y); // 左右反転
-            case 12:
-                return Reversi.Move.valueOf(move.x,9 - move.y); // 上下反転
-            case 14:
-                return Reversi.Move.valueOf(9 - move.x,9 - move.y); // 上下左右反転
-            default:
-                throw new IllegalArgumentException("no match: " + diagonal);
-        }
-    }
-
-    /**
      * 対角位置の対称変換が必要か
      */
     private boolean isSymmetric(int diagonal, int[][] board, Reversi.Turn turn) {
         for (int y = 1; y <= 8; y++) {
             for (int x = y + 1; x <= 8; x++) {
-                Reversi.Move move = symmetricMove(diagonal, Reversi.Move.valueOf(x, y));
+                int x_;
+                int y_;
+                switch (diagonal) {
+                    case 8:
+                        // 変換なし
+                        x_ = x;
+                        y_ = y;
+                        break;
+                    case 10:
+                        // 左右反転
+                        x_ = 9 - x;
+                        y_ = y;
+                        break;
+                    case 12:
+                        // 上下反転
+                        x_ = x;
+                        y_ = 9 - y;
+                        break;
+                    case 14:
+                        // 上下左右反転
+                        x_ = 9 - x;
+                        y_ = 9 - y;
+                        break;
+                    default:
+                        throw new IllegalArgumentException("no match: " + diagonal);
+                }
                 // FIXME 説明を記載
-                if (board[move.y][move.x] != board[move.x][move.y]) {
-                    return board[move.y][move.x] != turn.boardValue();
+                if (board[y_][x_] != board[x_][y_]) {
+                    return board[y_][x_] != turn.boardValue();
                 }
             }
         }
@@ -66,8 +73,8 @@ public class PreludeConverter {
     /**
      * 領域を判定する
      */
-    private int checkRegion(int[][] board, Reversi.Move move, Reversi.Turn turn) {
-        int region = REGION[move.y - 1][move.x - 1];
+    private int checkRegion(int[][] board, int x, int y, Reversi.Turn turn) {
+        int region = REGION[y - 1][x - 1];
         if (region >= 8 && isSymmetric(region, board, turn)) {
             region += 1;
         }
@@ -75,52 +82,15 @@ public class PreludeConverter {
     }
 
     /**
-     * 着手の領域から座標を変換する
-     */
-    private Reversi.Move normalizeMove(int region, int x, int y) {
-        Reversi.Move move;
-        switch (region) {
-            case 0: case 8:
-                move = Reversi.Move.valueOf(x - 1, y - 1); // 変換なし
-                break;
-            case 1: case 10:
-                move = Reversi.Move.valueOf(8 - x, y - 1); // 左右反転
-                break;
-            case 2: case 12:
-                move = Reversi.Move.valueOf(x - 1, 8 - y); // 上下反転
-                break;
-            case 3: case 14:
-                move = Reversi.Move.valueOf(8 - x, 8 - y); // 上下左右反転
-                break;
-            case 4: case 9:
-                move = Reversi.Move.valueOf(y - 1, x - 1); // 対称反転
-                break;
-            case 5: case 11:
-                move = Reversi.Move.valueOf(y - 1, 8 - x); // 左右対称反転
-                break;
-            case 6: case 13:
-                move = Reversi.Move.valueOf(8 - y, x - 1); // 上下対称反転
-                break;
-            case 7: case 15:
-                move = Reversi.Move.valueOf(8 - y, 8 - x); // 上下左右対称反転
-                break;
-            default:
-                throw new IllegalArgumentException("no match: " + region);
-        }
-
-        return move;
-    }
-
-    /**
      *
      */
     private int groupingAreaRecursive(int x, int y, int count) {
-        oddevenBoard[y][x] = AREA_UNKNOWN;
+        oddevenArea[y][x] = AREA_UNKNOWN;
         count += 1;
         for (Reversi.Direction dir : Reversi.Direction.corssValues()) {
             int x_ = x + dir.dx;
             int y_ = y + dir.dy;
-            if (oddevenBoard[y_][x_] == AREA_EMPTY) {
+            if (oddevenArea[y_][x_] == AREA_EMPTY) {
                 count = groupingAreaRecursive(x_, y_, count);
             }
         }
@@ -131,40 +101,42 @@ public class PreludeConverter {
      * 空白領域を偶数領域と奇数領域に分割する
      */
     private int groupingArea(int x, int y) {
-        if (oddevenBoard[y][x] == AREA_ODD || oddevenBoard[y][x] == AREA_EVEN) {
+        if (oddevenArea[y][x] == AREA_ODD || oddevenArea[y][x] == AREA_EVEN) {
             return 0; // すでに分割済み
         }
 
-        int number_of_empty = groupingAreaRecursive(x, y, 0);
-        int oddeven = (number_of_empty % 2 == 1) ? AREA_ODD : AREA_EVEN;
+        int count = groupingAreaRecursive(x, y, 0);
+        int oddeven = (count % 2 == 1) ? AREA_ODD : AREA_EVEN;
 
         for (Reversi.Move move : Reversi.Move.values()) {
-            if (oddevenBoard[move.y][move.x] == AREA_UNKNOWN) {
-                oddevenBoard[move.y][move.x] = oddeven;
+            int x_ = move.x;
+            int y_ = move.y;
+            if (oddevenArea[y_][x_] == AREA_UNKNOWN) {
+                oddevenArea[y_][x_] = oddeven;
             }
         }
         return oddeven;
     }
 
     private boolean earlyStage;
-    private int[][] oddevenBoard = new int[10][10];
+    private int[][] oddevenArea = new int[10][10];
     private int emptyCount;
     private int oddCount;
     private int evenCount;
 
     private void clearArea(int[][] board) {
+        earlyStage = true;
         emptyCount = 0;
         oddCount = 0;
         evenCount = 0;
-        earlyStage = true;
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 if (board[y][x] == Reversi.EMPTY) {
-                    oddevenBoard[y][x] = AREA_EMPTY;
+                    oddevenArea[y][x] = AREA_EMPTY;
                 } else if (board[y][x] == Reversi.BORDER) {
-                    oddevenBoard[y][x] = AREA_NOT_EMPTY;
+                    oddevenArea[y][x] = AREA_NOT_EMPTY;
                 } else {
-                    oddevenBoard[y][x] = AREA_NOT_EMPTY;
+                    oddevenArea[y][x] = AREA_NOT_EMPTY;
                     if (x == 1 || x == 8 || y == 1 || y == 8) {
                         earlyStage = false;
                     }
@@ -175,9 +147,11 @@ public class PreludeConverter {
 
     private void countingArea() {
         for (Reversi.Move move : Reversi.Move.values()) {
-            if (oddevenBoard[move.y][move.x] != AREA_NOT_EMPTY) {
+            int x = move.x;
+            int y = move.y;
+            if (oddevenArea[y][x] != AREA_NOT_EMPTY) {
                 emptyCount += 1;
-                int oddeven = groupingArea(move.x, move.y);
+                int oddeven = groupingArea(x, y);
                 if (oddeven == AREA_ODD) {
                     oddCount += 1;
                 } else if (oddeven == AREA_EVEN) {
@@ -191,8 +165,53 @@ public class PreludeConverter {
      * 着手をプロットする
      */
     private void putState(ByteBuffer state, int region, int x, int y, int channel) {
-        Reversi.Move move = normalizeMove(region, x, y);
-        int index = channel * ROWS * COLUMS + move.y * COLUMS + move.x;
+        int x_;
+        int y_;
+        switch (region) {
+            case 0: case 8:
+                // 変換なし
+                x_ = x - 1;
+                y_ = y - 1;
+                break;
+            case 1: case 10:
+                // 左右反転
+                x_ = 8 - x;
+                y_ = y - 1;
+                break;
+            case 2: case 12:
+                // 上下反転
+                x_ = x - 1;
+                y_ = 8 - y;
+                break;
+            case 3: case 14:
+                // 上下左右反転
+                x_ = 8 - x;
+                y_ = 8 - y;
+                break;
+            case 4: case 9:
+                // 対称反転
+                x_ = y - 1;
+                y_ = x - 1;
+                break;
+            case 5: case 11:
+                // 左右対称反転
+                x_ = y - 1;
+                y_ = 8 - x;
+                break;
+            case 6: case 13:
+                // 上下対称反転
+                x_ = 8 - y;
+                y_ = x - 1;
+                break;
+            case 7: case 15:
+                // 上下左右対称反転
+                x_ = 8 - y;
+                y_ = 8 - x;
+                break;
+            default:
+                throw new IllegalArgumentException("no match: " + region);
+        }
+        int index = channel * ROWS * COLUMS + y_ * COLUMS + x_;
         state.put(index, (byte)1);
     }
 
@@ -209,49 +228,50 @@ public class PreludeConverter {
         int[][] reverse = reversi.getTempReverse();
         Reversi.Turn turn = reversi.getCurrentTurn();
 
-        int region = checkRegion(nextBoard, newMove, turn);
+        int x = newMove.x;
+        int y = newMove.y;
+        int region = checkRegion(nextBoard, x, y, turn);
 
-        //
         clearArea(board);
         countingArea();
 
+        putState(state, region, x, y, 3); // 着手
+
         for (Reversi.Move move : Reversi.Move.values()) {
-            int x = move.x;
-            int y = move.y;
-            if (board[y][x] == turn.boardValue()) {
-                putState(state, region, x, y, 0); // 着手前に自石
-            } else if (board[y][x] == turn.opponentBoardValue()) {
-                putState(state, region, x, y, 1); // 着手前に相手石
+            int x_ = move.x;
+            int y_ = move.y;
+            if (board[y_][x_] == turn.boardValue()) {
+                putState(state, region, x_, y_, 0); // 着手前に自石
+            } else if (board[y_][x_] == turn.opponentBoardValue()) {
+                putState(state, region, x_, y_, 1); // 着手前に相手石
             } else {
-                putState(state, region, x, y, 2); // 着手前に空白
+                putState(state, region, x_, y_, 2); // 着手前に空白
             }
-            if (board[y][x] != nextBoard[y][x]) {
-                putState(state, region, x, y, 4); // 変化した石
+            if (board[y_][x_] != nextBoard[y_][x_]) {
+                putState(state, region, x_, y_, 4); // 変化した石
             }
-            if (oddevenBoard[y][x] == AREA_ODD) {
-                putState(state, region, x, y, 5); // 奇数領域
-            } else if (oddevenBoard[y][x] == AREA_EVEN) {
-                putState(state, region, x, y, 6); // 偶数領域
+            if (oddevenArea[y_][x_] == AREA_ODD) {
+                putState(state, region, x_, y_, 5); // 奇数領域
+            } else if (oddevenArea[y_][x_] == AREA_EVEN) {
+                putState(state, region, x_, y_, 6); // 偶数領域
             }
             if (!earlyStage) {
-                putState(state, region, x, y, 7); // 序盤でない
+                putState(state, region, x_, y_, 7); // 序盤でない
             }
             if (emptyCount % 2 == 1) {
-                putState(state, region, x, y, 8); // 空白数が奇数
+                putState(state, region, x_, y_, 8); // 空白数が奇数
             }
             if (oddCount == 1 || oddCount % 2 == 0) {
-                putState(state, region, x, y, 9); // 奇数領域が1個または偶数
+                putState(state, region, x_, y_, 9); // 奇数領域が1個または偶数
             }
-            int reverse_count = (reverse[y][x] < 6) ? reverse[y][x] : 6; // 6以上は6プレーン目とする
-            if (reverse_count > 0) {
-                putState(state, region, x, y, 9 + reverse_count); // 反転数
+            int reverseCount = (reverse[y_][x_] < 6) ? reverse[y_][x_] : 6; // 6以上は6プレーン目とする
+            if (reverseCount > 0) {
+                putState(state, region, x_, y_, 9 + reverseCount); // 反転数
             }
         }
 
-        putState(state, region, newMove.x, newMove.y, 3); // 着手
-
         reversi.undoBoard();
 
-        return Tensor.create(UInt8.class, new long[] {COLUMS, ROWS, CHANNEL}, state);
+        return Tensor.create(UInt8.class, new long[] { COLUMS, ROWS, CHANNEL }, state);
     }
 }
