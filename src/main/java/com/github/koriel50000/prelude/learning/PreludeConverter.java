@@ -1,15 +1,13 @@
 package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.Reversi;
-import org.tensorflow.Tensor;
-import org.tensorflow.types.UInt8;
 
 import java.nio.ByteBuffer;
 
 public class PreludeConverter {
 
-    private static final int ROWS = 8;
     private static final int COLUMS = 8;
+    private static final int ROWS = 8;
     private static final int CHANNEL = 16;
 
     private static final int AREA_EMPTY = 0;
@@ -81,6 +79,33 @@ public class PreludeConverter {
         return region;
     }
 
+    private boolean earlyStage;
+    private int[][] oddevenArea = new int[10][10];
+    private int emptyCount;
+    private int oddCount;
+    private int evenCount;
+
+    private void clearArea(int[][] board) {
+        earlyStage = true;
+        emptyCount = 0;
+        oddCount = 0;
+        evenCount = 0;
+        for (int y = 0; y < 10; y++) {
+            for (int x = 0; x < 10; x++) {
+                if (board[y][x] == Reversi.EMPTY) {
+                    oddevenArea[y][x] = AREA_EMPTY;
+                } else if (board[y][x] == Reversi.BORDER) {
+                    oddevenArea[y][x] = AREA_NOT_EMPTY;
+                } else {
+                    oddevenArea[y][x] = AREA_NOT_EMPTY;
+                    if (x == 1 || x == 8 || y == 1 || y == 8) {
+                        earlyStage = false;
+                    }
+                }
+            }
+        }
+    }
+
     /**
      *
      */
@@ -118,33 +143,6 @@ public class PreludeConverter {
         return oddeven;
     }
 
-    private boolean earlyStage;
-    private int[][] oddevenArea = new int[10][10];
-    private int emptyCount;
-    private int oddCount;
-    private int evenCount;
-
-    private void clearArea(int[][] board) {
-        earlyStage = true;
-        emptyCount = 0;
-        oddCount = 0;
-        evenCount = 0;
-        for (int y = 0; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
-                if (board[y][x] == Reversi.EMPTY) {
-                    oddevenArea[y][x] = AREA_EMPTY;
-                } else if (board[y][x] == Reversi.BORDER) {
-                    oddevenArea[y][x] = AREA_NOT_EMPTY;
-                } else {
-                    oddevenArea[y][x] = AREA_NOT_EMPTY;
-                    if (x == 1 || x == 8 || y == 1 || y == 8) {
-                        earlyStage = false;
-                    }
-                }
-            }
-        }
-    }
-
     private void countingArea() {
         for (Reversi.Move move : Reversi.Move.values()) {
             int x = move.x;
@@ -160,6 +158,8 @@ public class PreludeConverter {
             }
         }
     }
+
+    private ByteBuffer state = ByteBuffer.allocate(COLUMS * ROWS * CHANNEL);
 
     /**
      * 着手をプロットする
@@ -218,9 +218,7 @@ public class PreludeConverter {
     /**
      * 石を置いたときの状態を返す
      */
-    public Tensor convertState(Reversi reversi, Reversi.Move newMove) {
-        ByteBuffer state = ByteBuffer.allocate(COLUMS * ROWS * CHANNEL);
-
+    public ByteBuffer convertState(Reversi reversi, Reversi.Move newMove) {
         reversi.makeMove(newMove);
 
         int[][] board = reversi.getTempBoard();
@@ -234,6 +232,8 @@ public class PreludeConverter {
 
         clearArea(board);
         countingArea();
+
+        state.clear();
 
         putState(state, region, x, y, 3); // 着手
 
@@ -272,6 +272,6 @@ public class PreludeConverter {
 
         reversi.undoBoard();
 
-        return Tensor.create(UInt8.class, new long[] { COLUMS, ROWS, CHANNEL }, state);
+        return state;
     }
 }

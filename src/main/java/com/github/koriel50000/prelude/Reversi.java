@@ -229,10 +229,10 @@ public class Reversi {
         public final int y;
         public final String symbol;
 
-        private Move(int x, int y, String coord) {
+        private Move(int x, int y, String symbol) {
             this.x = x;
             this.y = y;
-            this.symbol = coord;
+            this.symbol = symbol;
         }
 
         private static Move[] values;
@@ -242,8 +242,8 @@ public class Reversi {
             int i = 0;
             for (int y = 1; y <= 8; y++) {
                 for (int x = 1; x <= 8; x++) {
-                    String coord = String.format("%c%d", 'A' + (x - 1), y);
-                    values[i++] = new Move(x, y, coord);
+                    String symbol = String.format("%c%d", 'A' + (x - 1), y);
+                    values[i++] = new Move(x, y, symbol);
                 }
             }
         }

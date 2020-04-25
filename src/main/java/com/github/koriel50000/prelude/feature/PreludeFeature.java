@@ -5,6 +5,7 @@ import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
 import org.tensorflow.Tensor;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -37,7 +38,7 @@ public class PreludeFeature implements Feature {
         List<Eval> evals = clearEvals(moves);
         for (Eval eval : evals) {
             Reversi.Move move = eval.getMove();
-            Tensor state = converter.convertState(reversi, move);
+            ByteBuffer state = converter.convertState(reversi, move);
             float value = model.calculatePredicatedValue(state);
             eval.setValue(value);
         }
