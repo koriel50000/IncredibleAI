@@ -21,9 +21,11 @@ public class CNNModel {
     private Session session;
 
     public void init() {
-        SavedModelBundle bundle = SavedModelBundle.load("./checkpoint/model.ckpt-1");
-        graph = bundle.graph();
-        session = bundle.session();
+//        SavedModelBundle bundle = SavedModelBundle.load("./checkpoint/model.ckpt-1");
+//        graph = bundle.graph();
+//        session = bundle.session();
+        graph = new Graph();
+        session = new Session(graph);
     }
 
 //    public void createModel() {
