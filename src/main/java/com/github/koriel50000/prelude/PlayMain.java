@@ -1,33 +1,49 @@
 package com.github.koriel50000.prelude;
 
-import java.util.List;
-import java.util.Random;
+import com.github.koriel50000.prelude.feature.Feature;
+import com.github.koriel50000.prelude.feature.PreludeFeature;
+import com.github.koriel50000.prelude.feature.RandomFeature;
 
-public class ReversiMain {
+import java.util.List;
+
+public class PlayMain {
 
     private String[] STONES = { ".", "@", "O" };
 
     public static void main(String[] args) {
-        ReversiMain main = new ReversiMain();
-        main.play();
+        PlayMain main = new PlayMain();
+        Feature blackFeature = new PreludeFeature();
+        Feature whiteFeature = new RandomFeature();
+        main.play(blackFeature, whiteFeature);
     }
 
     /**
      * ゲームを開始する
      */
-    private void play() {
+    private void play(Feature blackFeature, Feature whiteFeature) {
         Reversi reversi = new Reversi();
-        Random rand = new Random(System.currentTimeMillis());
-
         reversi.initialize();
 
+        blackFeature.init(reversi);
+        whiteFeature.init(reversi);
+
         while (true) {
-            printBoard(reversi);
-            printStatus(reversi);
+            Reversi.Turn turn = reversi.getCurrentTurn();
+
+            printBoard(reversi.getBoard());
+            printStatus(reversi.getTurnCount(),
+                    reversi.getBlackCount(),
+                    reversi.getWhiteCount(),
+                    turn);
 
             List<Reversi.Move> moves = reversi.availableMoves();
             if (moves.size() > 0) {
-                Reversi.Move move = moves.get(rand.nextInt(moves.size()));
+                Reversi.Move move;
+                if (turn == Reversi.Turn.Black) {
+                    move = blackFeature.evaluate(reversi, moves, turn);
+                } else {
+                    move = whiteFeature.evaluate(reversi, moves, turn);
+                }
                 reversi.makeMove(move);
             } else{
                 System.out.println("Pass!");
@@ -35,25 +51,32 @@ public class ReversiMain {
 
             // ゲーム終了を判定
             if (reversi.hasCompleted()) {
-                printBoard(reversi);
-                printScore(reversi);
                 break;
             }
 
             reversi.nextTurn();
         }
+
+        printBoard(reversi.getBoard());
+        printScore(reversi.getTurnCount(),
+                reversi.getBlackCount(),
+                reversi.getWhiteCount(),
+                reversi.getEmptyCount());
+
+        blackFeature.destroy(reversi);
+        whiteFeature.destroy(reversi);
     }
 
     /**
      * 盤面を表示する
      */
-    private void printBoard(Reversi reversi) {
+    private void printBoard(int[][] board) {
         System.out.println();
         System.out.println("  A B C D E F G H");
         for (int y = 1; y <= 8; y++) {
             System.out.print(y);
             for (int x = 1; x <= 8; x++) {
-                System.out.print(" " + STONES[reversi.boardValue(x, y)]);
+                System.out.print(" " + STONES[board[y][x]]);
             }
             System.out.println();
         }
@@ -62,13 +85,10 @@ public class ReversiMain {
     /**
      * 現在の状態を表示する
      */
-    private void printStatus(Reversi reversi) {
-        int turnCount = reversi.getTurnCount();
-        int blackCount = reversi.getBlackCount();
-        int whiteCount = reversi.getWhiteCount();
+    private void printStatus(int turnCount, int blackCount, int whiteCount, Reversi.Turn currentTurn) {
         String turn;
         String stone;
-        if (reversi.getCurrentTurn() == Reversi.Turn.Black) {
+        if (currentTurn == Reversi.Turn.Black) {
             turn = "black";
             stone = STONES[Reversi.Turn.Black.boardValue()];
         } else {
@@ -84,11 +104,7 @@ public class ReversiMain {
     /**
      * スコアを表示する
      */
-    private void printScore(Reversi reversi) {
-        int turnCount = reversi.getTurnCount();
-        int blackCount = reversi.getBlackCount();
-        int whiteCount = reversi.getWhiteCount();
-        int emptyCount = reversi.getEmptyCount();
+    private void printScore(int turnCount, int blackCount, int whiteCount, int emptyCount) {
         System.out.print(String.format("move count:%d ", turnCount));
         String winner;
         if (blackCount > whiteCount) {

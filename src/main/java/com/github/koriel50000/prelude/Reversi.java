@@ -7,10 +7,10 @@ import java.util.List;
 
 public class Reversi {
 
-    private static final int EMPTY = 0;
-    private static final int BLACK = 1;
-    private static final int WHITE = 2;
-    private static final int BORDER = 3;
+    public static final int EMPTY = 0;
+    public static final int BLACK = 1;
+    public static final int WHITE = 2;
+    public static final int BORDER = 3;
 
     private int[][] board = new int[10][10];
     private int[][] reverse = new int[10][10];
@@ -185,8 +185,16 @@ public class Reversi {
         return turnCount;
     }
 
-    public int boardValue(int x, int y) {
-        return board[y][x];
+    public int[][] getBoard() {
+        return board;
+    }
+
+    public int[][] getTempBoard() {
+        return tempBoard;
+    }
+
+    public int[][] getTempReverse() {
+        return tempReverse;
     }
 
     public enum Turn {
@@ -206,57 +214,56 @@ public class Reversi {
             return this == Black ? White : Black;
         }
 
-        int boardValue() {
+        public int boardValue() {
             return boardValue;
         }
 
-        int opponentBoardValue() {
+        public int opponentBoardValue() {
             return opponentTurn().boardValue();
         }
     }
 
     public static class Move {
 
-        final int x;
-        final int y;
-        final String coord;
+        public final int x;
+        public final int y;
+        public final String symbol;
 
-        private Move(int x, int y, String coord) {
+        private Move(int x, int y, String symbol) {
             this.x = x;
             this.y = y;
-            this.coord = coord;
-        }
-
-        static Move valueOf(int x, int y) {
-            return values[(y - 1) * 8 + (x - 1)];
-        }
-
-        static Move valueOf(String coord) {
-            return null; // TODO
+            this.symbol = symbol;
         }
 
         private static Move[] values;
 
         static {
-            values = new Move[8*8];
+            values = new Move[8 * 8];
             int i = 0;
             for (int y = 1; y <= 8; y++) {
                 for (int x = 1; x <= 8; x++) {
-                    String coord = String.format("%c%d", 'A' + (x - 1), y);
-                    values[i++] = new Move(x, y, coord);
+                    String symbol = String.format("%c%d", 'A' + (x - 1), y);
+                    values[i++] = new Move(x, y, symbol);
                 }
             }
         }
 
-        static Move[] values() {
+        public static Move[] values() {
             return values;
+        }
+        public static Move valueOf(int x, int y) {
+            return values[(y - 1) * 8 + (x - 1)];
+        }
+
+        public static Move valueOf(String symbol) {
+            return null; // TODO
         }
     }
 
-    static class Direction {
+    public static class Direction {
 
-        final int dx;
-        final int dy;
+        public final int dx;
+        public final int dy;
 
         private Direction(int dx, int dy) {
             this.dx = dx;
@@ -264,6 +271,7 @@ public class Reversi {
         }
 
         private static Direction[] values;
+        private static Direction[] crossValues;
 
         static {
             values = new Direction[] {
@@ -276,10 +284,20 @@ public class Reversi {
                     new Direction(-1, 0),
                     new Direction(-1, -1),
             };
+            crossValues = new Direction[] {
+                    values[0],
+                    values[2],
+                    values[4],
+                    values[6]
+            };
         }
 
-        static Direction[] values() {
+        public static Direction[] values() {
             return values;
+        }
+
+        public static Direction[] corssValues() {
+            return crossValues;
         }
     }
 }
