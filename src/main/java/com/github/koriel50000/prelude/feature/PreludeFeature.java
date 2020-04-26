@@ -3,7 +3,6 @@ package com.github.koriel50000.prelude.feature;
 import com.github.koriel50000.prelude.Reversi;
 import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
-import org.tensorflow.Tensor;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
