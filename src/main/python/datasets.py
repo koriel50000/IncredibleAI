@@ -2,7 +2,6 @@ import gzip
 import collections
 
 import numpy
-from six.moves import xrange  # pylint: disable=redefined-builtin
 
 from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import random_seed

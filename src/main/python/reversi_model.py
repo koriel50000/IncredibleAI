@@ -94,7 +94,7 @@ def training_model(sess, prefix):
     print("images;", reversi_data.train.images.shape)
     print("labels:", reversi_data.train.labels.shape)
     i = 0
-    while reversi_data.train.epochs_completed < 10:
+    while reversi_data.train.epochs_completed < 1: # 10:
         batch_xs, batch_ys = reversi_data.train.next_batch(1, shuffle=False)
         sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.99})
         #index, loss = sess.run(loop, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.99})

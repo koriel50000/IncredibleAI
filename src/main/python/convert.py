@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import math
 import numpy as np
 import statistics as stat
 
@@ -18,6 +17,7 @@ AREA = (( 8, 0, 0, 0, 1, 1, 1,10),
         ( 6,12, 2, 2, 3, 3,14, 7),
         (12, 2, 2, 2, 3, 3, 3,14))
 
+
 #
 # 着手を位置に変換する
 #
@@ -26,12 +26,14 @@ def move_to_coord(move):
     y = int(move[1:])
     return x, y
 
+
 #
 # 位置を着手に変換する
 #
 def coord_to_move(coord):
     x, y = coord
     return "{0}{1}".format(chr(ord("A") + x - 1), y)
+
 
 #
 # 対角位置を対称変換する
