@@ -275,14 +275,14 @@ public class Reversi {
 
         static {
             values = new Direction[] {
+                    new Direction(-1, 0),
+                    new Direction(-1, -1),
                     new Direction(0, -1),
                     new Direction(1, -1),
                     new Direction(1, 0),
                     new Direction(1, 1),
                     new Direction(0, 1),
                     new Direction(-1, 1),
-                    new Direction(-1, 0),
-                    new Direction(-1, -1),
             };
             crossValues = new Direction[] {
                     values[0],

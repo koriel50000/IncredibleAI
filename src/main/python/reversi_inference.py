@@ -1,15 +1,10 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-#import pychecker.checker
 import sys
 import glob
 import os.path
-import struct
-from datetime import datetime
-import numpy as np
 import reversi
-import convert
+import converter
 import reversi_model
 
 import tensorflow.compat.v1 as tf
@@ -27,15 +22,15 @@ def evaluate_records(sess, move_record, eval_record):
     
     reversi.init()
 
-    for index, actual_move in enumerate(convert.convert_moves(move_record)):
+    for index, actual_move in enumerate(converter.convert_moves(move_record)):
         #print "count:{0} move:{1}".format(index + 1, actual_move)
         values = []
         predicted_values = []
-        evals = convert.convert_evals(eval_record[index])
+        evals = converter.convert_evals(eval_record[index])
         for entry in evals:
             move = entry['move']
             value = entry['value']
-            state = convert.convert_state(reversi, move)
+            state = converter.convert_state(reversi, move)
             predicted_value = reversi_model.calculate_predicted_value(sess, state)
             values.append(value)
             predicted_values.append(predicted_value)
@@ -52,7 +47,7 @@ def evaluate_records(sess, move_record, eval_record):
         if predicted_value == value:
             num_correct += 1
         
-        coord = convert.move_to_coord(actual_move)
+        coord = converter.move_to_coord(actual_move)
         reversi.make_a_move(coord)
         reversi.next_turn();
 

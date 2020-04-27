@@ -1,9 +1,5 @@
-#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-#import pychecker.checker
-import struct
-import numpy as np
 import datasets
 
 import tensorflow.compat.v1 as tf
@@ -25,6 +21,7 @@ def bias_variable(shape):
 
 def conv2d(x, W):
   return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+
 
 # 変数宣言
 x = tf.placeholder(tf.float32, [None, input_rows*input_cols*input_channel])

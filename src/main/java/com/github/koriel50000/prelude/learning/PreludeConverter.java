@@ -85,7 +85,47 @@ public class PreludeConverter {
     private int oddCount;
     private int evenCount;
 
-    private void clearArea(int[][] board) {
+    /**
+     * 空白領域を再帰的にたどって偶数か奇数かを分類する
+     */
+    private int calculateOddEvenRecursive(int x, int y, int count) {
+        oddevenArea[y][x] = AREA_UNKNOWN;
+        count += 1;
+        for (Reversi.Direction dir : Reversi.Direction.corssValues()) {
+            int x_ = x + dir.dx;
+            int y_ = y + dir.dy;
+            if (oddevenArea[y_][x_] == AREA_EMPTY) {
+                count = calculateOddEvenRecursive(x_, y_, count);
+            }
+        }
+        return count;
+    }
+
+    /**
+     * 空白領域が偶数か奇数かを分類する
+     */
+    private int calculateOddEven(int x, int y) {
+        if (oddevenArea[y][x] == AREA_ODD || oddevenArea[y][x] == AREA_EVEN) {
+            return -1; // すでに分類済み
+        }
+
+        int count = calculateOddEvenRecursive(x, y, 0);
+        int oddeven = (count % 2 == 1) ? AREA_ODD : AREA_EVEN;
+
+        for (Reversi.Move move : Reversi.Move.values()) {
+            int x_ = move.x;
+            int y_ = move.y;
+            if (oddevenArea[y_][x_] == AREA_UNKNOWN) {
+                oddevenArea[y_][x_] = oddeven;
+            }
+        }
+        return oddeven;
+    }
+
+    /**
+     * 偶数/奇数/空白領域を列挙する
+     */
+    private void enumerateArea(int[][] board) {
         earlyStage = true;
         emptyCount = 0;
         oddCount = 0;
@@ -104,52 +144,13 @@ public class PreludeConverter {
                 }
             }
         }
-    }
 
-    /**
-     *
-     */
-    private int groupingAreaRecursive(int x, int y, int count) {
-        oddevenArea[y][x] = AREA_UNKNOWN;
-        count += 1;
-        for (Reversi.Direction dir : Reversi.Direction.corssValues()) {
-            int x_ = x + dir.dx;
-            int y_ = y + dir.dy;
-            if (oddevenArea[y_][x_] == AREA_EMPTY) {
-                count = groupingAreaRecursive(x_, y_, count);
-            }
-        }
-        return count;
-    }
-
-    /**
-     * 空白領域を偶数領域と奇数領域に分割する
-     */
-    private int groupingArea(int x, int y) {
-        if (oddevenArea[y][x] == AREA_ODD || oddevenArea[y][x] == AREA_EVEN) {
-            return 0; // すでに分割済み
-        }
-
-        int count = groupingAreaRecursive(x, y, 0);
-        int oddeven = (count % 2 == 1) ? AREA_ODD : AREA_EVEN;
-
-        for (Reversi.Move move : Reversi.Move.values()) {
-            int x_ = move.x;
-            int y_ = move.y;
-            if (oddevenArea[y_][x_] == AREA_UNKNOWN) {
-                oddevenArea[y_][x_] = oddeven;
-            }
-        }
-        return oddeven;
-    }
-
-    private void countingArea() {
         for (Reversi.Move move : Reversi.Move.values()) {
             int x = move.x;
             int y = move.y;
             if (oddevenArea[y][x] != AREA_NOT_EMPTY) {
                 emptyCount += 1;
-                int oddeven = groupingArea(x, y);
+                int oddeven = calculateOddEven(x, y);
                 if (oddeven == AREA_ODD) {
                     oddCount += 1;
                 } else if (oddeven == AREA_EVEN) {
@@ -230,8 +231,7 @@ public class PreludeConverter {
         int y = newMove.y;
         int region = checkRegion(nextBoard, x, y, turn);
 
-        clearArea(board);
-        countingArea();
+        enumerateArea(board);
 
         state.clear();
 

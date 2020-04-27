@@ -8,7 +8,7 @@ import zipfile
 import gzip
 import shutil
 import reversi
-import convert
+import converter
 
 
 def write8(file, value):
@@ -24,9 +24,9 @@ def write_magic(states_file, labels_file):
     items = 60  # dummy
     write32(states_file, magic)
     write32(states_file, items)
-    write32(states_file, convert.ROWS)
-    write32(states_file, convert.COLUMNS)
-    write32(states_file, convert.CHANNEL)
+    write32(states_file, converter.ROWS)
+    write32(states_file, converter.COLUMNS)
+    write32(states_file, converter.CHANNEL)
     
     magic = 0x0801
     write32(labels_file, magic)
@@ -41,9 +41,9 @@ def write_items(states_file, labels_file, total):
 
 
 def write_data(states_file, labels_file, state, value):
-    for channel in range(0, convert.CHANNEL):
-        for y in range(0, convert.COLUMNS):
-            for x in range(0, convert.ROWS):
+    for channel in range(0, converter.CHANNEL):
+        for y in range(0, converter.COLUMNS):
+            for x in range(0, converter.ROWS):
                 write8(states_file, state[channel, y, x])
     # Convert from [-1.0, 0.0, 1.0] -> [1, 255].
     value = int(round(value * 127)) + 128
@@ -57,15 +57,15 @@ def write_records(states_file, labels_file, move_record, eval_record):
     reversi.init()
     
     count = 0
-    for index, actual_move in enumerate(convert.convert_moves(move_record)):
-        evals = convert.convert_evals(eval_record[index])
+    for index, actual_move in enumerate(converter.convert_moves(move_record)):
+        evals = converter.convert_evals(eval_record[index])
         for entry in evals:
             move = entry['move']
             value = entry['value']
-            state = convert.convert_state(reversi, move)
+            state = converter.convert_state(reversi, move)
             write_data(states_file, labels_file, state, value)
             count += 1
-        coord = convert.move_to_coord(actual_move)
+        coord = converter.move_to_coord(actual_move)
         reversi.make_a_move(coord)
         reversi.next_turn()
     
@@ -120,7 +120,7 @@ def main(args):
     path = "../resources/records/"
     with zipfile.ZipFile(os.path.join(path, "kifu102245.zip")) as records_zip:
 
-        for i, pos in enumerate(range(0, 100000, 5000)):
+        for i, pos in enumerate(range(0, 5000, 5000)):
             filenames = records_zip.namelist()[pos: pos + 5000]
             records_zip.extractall(path, filenames)
 
