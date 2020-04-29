@@ -23,7 +23,7 @@ turn_count = 0
 #
 def init():
     global board, reverse, number_of_stones, current_turn, turn_count
-    
+
     for y in range(10):
         for x in range(10):
             if 1 <= x <= 8 and 1 <= y <= 8:
@@ -43,6 +43,7 @@ def init():
     number_of_stones[WHITE] = 2
     current_turn = BLACK
     turn_count = 1
+
 
 #
 # 相手の手番を返す
@@ -89,8 +90,8 @@ def available_moves():
 
 def available_moves(turn):
     coords = []
-    for y in range(1, 8+1):
-        for x in range(1, 8+1):
+    for y in range(1, 8 + 1):
+        for x in range(1, 8 + 1):
             coord = (x, y)
             if can_move(turn, coord):
                 coords.append(coord)
@@ -102,11 +103,11 @@ def available_moves(turn):
 #
 def make_move(coord):
     global board, temp_board, reverse, temp_reverse, number_of_stones, temp_number_of_stones
-    
+
     temp_board = copy.deepcopy(board)
     temp_reverse = copy.deepcopy(reverse)
     temp_number_of_stones = copy.deepcopy(number_of_stones)
-    
+
     turn = current_turn
     x, y = coord
 
@@ -116,7 +117,7 @@ def make_move(coord):
     number_of_stones[EMPTY] -= 1  # 空白を減らす
 
     for dir in DIRECTIONS:
-        if not can_move_direction(turn, coord,  dir):
+        if not can_move_direction(turn, coord, dir):
             continue
         x, y = coord
         dx, dy = dir
@@ -129,7 +130,7 @@ def make_move(coord):
             number_of_stones[opponent_turn(turn)] -= 1  # 相手石を減らす
             x += dx
             y += dy
-    
+
     return temp_board, board, temp_reverse, reverse, turn
 
 
@@ -152,7 +153,7 @@ def has_completed():
 #
 def next_turn():
     global current_turn, turn_count
-    
+
     current_turn = opponent_turn(current_turn)  # 手番を変更
     turn_count += 1
 
@@ -162,7 +163,7 @@ def next_turn():
 #
 def undo_board():
     global board, reverse, number_of_stones
-    
+
     board = copy.deepcopy(temp_board)
     reverse = copy.deepcopy(temp_reverse)
     number_of_stones = copy.deepcopy(temp_number_of_stones)
@@ -174,9 +175,9 @@ def undo_board():
 def print_board():
     print
     print("  A B C D E F G H")
-    for y in range(1, 8+1):
+    for y in range(1, 8 + 1):
         print(y, end='')
-        for x in range(1, 8+1):
+        for x in range(1, 8 + 1):
             print(" " + STONES[board[y][x]], end='')
         print()
 

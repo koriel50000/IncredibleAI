@@ -2,7 +2,8 @@
 
 import sys
 from datetime import datetime
-import reversi_model
+
+import cnn_model
 
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
@@ -21,7 +22,7 @@ def main(args):
     saver = tf.train.Saver(max_to_keep=None)
     
     for i in range(1, 2):
-        reversi_model.training_model(sess, 'train5k{:02}'.format(i))
+        cnn_model.training_model(sess, 'train1k{:02}'.format(i))
         saver.save(sess, "../resources/checkpoint/model.ckpt", global_step=i)
         print(datetime.now())
     

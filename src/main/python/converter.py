@@ -16,14 +16,14 @@ AREA_EVEN = 2;
 AREA_UNKNOWN = 3;
 AREA_NOT_EMPTY = 4;
 
-REGION = (( 8, 0, 0, 0, 1, 1, 1,10),
-          ( 4, 8, 0, 0, 1, 1,10, 5),
-          ( 4, 4, 8, 0, 1,10, 5, 5),
-          ( 4, 4, 4, 8,10, 5, 5, 5),
-          ( 6, 6, 6,12,14, 7, 7, 7),
-          ( 6, 6,12, 2, 3,14, 7, 7),
-          ( 6,12, 2, 2, 3, 3,14, 7),
-          (12, 2, 2, 2, 3, 3, 3,14))
+REGION = ((8, 0, 0, 0, 1, 1, 1, 10),
+          (4, 8, 0, 0, 1, 1, 10, 5),
+          (4, 4, 8, 0, 1, 10, 5, 5),
+          (4, 4, 4, 8, 10, 5, 5, 5),
+          (6, 6, 6, 12, 14, 7, 7, 7),
+          (6, 6, 12, 2, 3, 14, 7, 7),
+          (6, 12, 2, 2, 3, 3, 14, 7),
+          (12, 2, 2, 2, 3, 3, 3, 14))
 
 
 #
@@ -49,7 +49,7 @@ def coord_to_move(coord):
 def convert_moves(move_record):
     moves = []
 
-    for move in [move_record[i:i+2] for i in range(0, len(move_record), 2)]:
+    for move in [move_record[i:i + 2] for i in range(0, len(move_record), 2)]:
         moves.append(move)
 
     return moves
@@ -62,11 +62,11 @@ def is_symmetric(diagonal, board, turn):
     for y in range(1, 9):
         for x in range(y + 1, 9):
             if diagonal == 8:
-                x_, y_ = x, y          # 変換なし
+                x_, y_ = x, y  # 変換なし
             elif diagonal == 10:
-                x_, y_ = 9 - x, y      # 左右反転
+                x_, y_ = 9 - x, y  # 左右反転
             elif diagonal == 12:
-                x_, y_ = x, 9 - y      # 上下反転
+                x_, y_ = x, 9 - y  # 上下反転
             elif diagonal == 14:
                 x_, y_ = 9 - x, 9 - y  # 上下左右反転
 
@@ -80,11 +80,11 @@ def is_symmetric(diagonal, board, turn):
 #
 def check_region(board, coord, turn):
     x, y = coord
-    region = REGION[y-1][x-1]
-    
+    region = REGION[y - 1][x - 1]
+
     if region >= 8 and is_symmetric(region, board, turn):
         region += 1
-    
+
     return region
 
 
@@ -179,11 +179,11 @@ def put_state(state, region, x, y, channel):
 def convert_state(reversi, move):
     coord = move_to_coord(move)
     board, next_board, reverse, next_reverse, turn = reversi.make_move(coord)
-    
+
     region = check_region(next_board, coord, turn)
 
     oddeven_area, early_stage, empty_count, odd_count, even_count = enumerate_area(board)
-    
+
     state = np.zeros((CHANNEL, ROWS, COLUMNS), dtype=np.uint8)
 
     x_, y_ = coord
@@ -214,7 +214,7 @@ def convert_state(reversi, move):
                 put_state(state, region, x, y, 9 + reverse_count)  # 反転数
 
     reversi.undo_board()
-    
+
     return state
 
 
@@ -226,7 +226,7 @@ def convert_evals(eval_record):
     values = []
     fields = [x.strip() for x in eval_record.split(",")]
 
-    for sets in [fields[i:i+3] for i in range(0, len(fields), 3)]:
+    for sets in [fields[i:i + 3] for i in range(0, len(fields), 3)]:
         move = sets[0]
         if sets[1] == "Win":
             value = 1.0

@@ -27,17 +27,17 @@ def extract_images(f):
     print('Extracting', f.name)
     with gzip.GzipFile(fileobj=f) as bytestream:
         magic = _read32(bytestream)
-    if magic != 2051:
-        raise ValueError('Invalid magic number %d in REVERSI image file: %s' %
-                         (magic, f.name))
-    num_images = _read32(bytestream)
-    rows = _read32(bytestream)
-    cols = _read32(bytestream)
-    depth = _read32(bytestream)
-    buf = bytestream.read(rows * cols * depth * num_images)
-    data = numpy.frombuffer(buf, dtype=numpy.uint8)
-    data = data.reshape(num_images, rows, cols, depth)
-    return data
+        if magic != 2051:
+            raise ValueError('Invalid magic number %d in REVERSI image file: %s' %
+                             (magic, f.name))
+        num_images = _read32(bytestream)
+        rows = _read32(bytestream)
+        cols = _read32(bytestream)
+        depth = _read32(bytestream)
+        buf = bytestream.read(rows * cols * depth * num_images)
+        data = numpy.frombuffer(buf, dtype=numpy.uint8)
+        data = data.reshape(num_images, rows, cols, depth)
+        return data
 
 
 def extract_labels(f):
@@ -141,10 +141,8 @@ class DataSet(object):
 
 def read_data_sets(train_dir,
                    train_prefix,
-                   one_hot=True,
                    dtype=tf.dtypes.float32,
-                   reshape=True,
-                   num_classes=10):
+                   reshape=True):
     TRAIN_IMAGES = train_prefix + '-states-idx4-ubyte.gz'
     TRAIN_LABELS = train_prefix + '-labels-idx1-ubyte.gz'
 
@@ -154,7 +152,7 @@ def read_data_sets(train_dir,
 
     local_file = train_dir + TRAIN_LABELS
     with open(local_file, 'rb') as f:
-        train_labels = extract_labels(f, one_hot=one_hot, num_classes=num_classes)
+        train_labels = extract_labels(f)
 
     options = dict(dtype=dtype, reshape=reshape)
 

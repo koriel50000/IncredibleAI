@@ -121,11 +121,11 @@ def main(args):
     path = "../resources/records/"
     with zipfile.ZipFile(os.path.join(path, "kifu102245.zip")) as records_zip:
 
-        for i, pos in enumerate(range(0, 5000, 5000)):
-            filenames = records_zip.namelist()[pos: pos + 5000]
+        for i, pos in enumerate(range(0, 1000, 1000)):
+            filenames = records_zip.namelist()[pos: pos + 1000]
             records_zip.extractall(path, filenames)
 
-            prefix = "../resources/REVERSI_data/train5k{:02d}".format(i + 1)
+            prefix = "../resources/REVERSI_data/train1k{:02d}".format(i + 1)
             save_datafile(prefix, path, filenames)
 
             for file in glob.glob(os.path.join(path, "kifu*.txt")):
