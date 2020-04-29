@@ -23,39 +23,25 @@ public class PreludeFeature implements Feature {
     }
 
     @Override
-    public void init(Reversi reversi) {
+    public void init() {
         model.init();
     }
 
     @Override
-    public void destroy(Reversi reversi) {
+    public void destroy() {
         model.destroy();
     }
 
     @Override
     public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves, Reversi.Turn turn) {
-        List<Eval> evals = clearEvals(moves);
-        for (Eval eval : evals) {
-            Reversi.Coord move = eval.getMove();
-            ByteBuffer state = converter.convertState(reversi, move);
-            float value = model.calculatePredicatedValue(state);
-            eval.setValue(value);
-        }
-
-        if (evals.size() > 0) {
-            Reversi.Coord actualMove = optimumChoice(evals);
-            return actualMove;
-        } else {
-            throw new IllegalArgumentException("not found");
-        }
-    }
-
-    private List<Eval> clearEvals(List<Reversi.Coord> moves) {
         List<Eval> evals = new ArrayList<>();
         for (Reversi.Coord move : moves) {
-            evals.add(new Eval(move, 0.0f)); // valueはダミー
+            ByteBuffer state = converter.convertState(reversi, move);
+            float value = model.calculatePredicatedValue(state);
+            evals.add(new Eval(move, value));
         }
-        return evals;
+
+        return optimumChoice(evals);
     }
 
     private Reversi.Coord optimumChoice(List<Eval> evals) {
@@ -63,7 +49,7 @@ public class PreludeFeature implements Feature {
 
         List<Reversi.Coord> moves = new ArrayList<>();
         float maximumValue = Float.MIN_VALUE;
-        float delta = 0.001f; // 近い値を考慮
+        float delta = 0.001f; // FIXME 近い値を考慮
         for (Eval evel : evals) {
             Reversi.Coord move = evel.getMove();
             float value = evel.getValue();

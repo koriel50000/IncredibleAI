@@ -2,7 +2,7 @@ plugins {
     id 'application'
 }
 
-mainClassName = 'com.github.koriel50000.prelude.PlayMain'
+mainClassName = 'com.github.koriel50000.prelude.AutoPlayMain'
 
 group 'com.github.koriel50000'
 version '1.0-SNAPSHOT'

@@ -86,7 +86,7 @@ public class PreludeConverter {
     private int evenCount;
 
     /**
-     * 空白領域を再帰的にたどって偶数か奇数かを分類する
+     * 空白を再帰的にたどって偶数領域か奇数領域かに分割する
      */
     private int calculateOddEvenRecursive(int x, int y, int count) {
         oddevenArea[y][x] = AREA_UNKNOWN;
@@ -102,7 +102,7 @@ public class PreludeConverter {
     }
 
     /**
-     * 空白領域が偶数か奇数かを分類する
+     * 空白を偶数領域か奇数領域かに分割する
      */
     private int calculateOddEven(int x, int y) {
         if (oddevenArea[y][x] == AREA_ODD || oddevenArea[y][x] == AREA_EVEN) {
@@ -123,7 +123,7 @@ public class PreludeConverter {
     }
 
     /**
-     * 偶数/奇数/空白領域を列挙する
+     * 偶数/奇数/空白の領域を集計する
      */
     private void enumerateArea(int[][] board) {
         earlyStage = true;

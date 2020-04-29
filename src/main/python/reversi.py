@@ -21,7 +21,7 @@ turn_count = 0
 #
 # 盤面を初期化する
 #
-def init():
+def initialize():
     global board, reverse, number_of_stones, current_turn, turn_count
 
     for y in range(10):
@@ -51,6 +51,10 @@ def init():
 #
 def opponent_turn(turn):
     return turn ^ 3
+
+
+def get_current_turn():
+    return current_turn
 
 
 #
@@ -84,10 +88,6 @@ def can_move(turn, coord):
 #
 # 着手可能なリストを返す
 #
-def available_moves():
-    available_moves(current_turn)
-
-
 def available_moves(turn):
     coords = []
     for y in range(1, 8 + 1):
@@ -173,7 +173,7 @@ def undo_board():
 # 盤面を表示する
 #
 def print_board():
-    print
+    print()
     print("  A B C D E F G H")
     for y in range(1, 8 + 1):
         print(y, end='')
@@ -186,11 +186,10 @@ def print_board():
 # 現在の状態を表示する
 #
 def print_status():
-    turn = current_turn()
     print("move count:{0}".format(turn_count), end='')
-    print("move:{0}({1})".format("black" if turn == BLACK else "white", STONES[turn]))
+    print(" move:{0}({1})".format("black" if current_turn == BLACK else "white", STONES[current_turn]))
     print("black:{0} white:{1}".format(number_of_stones[BLACK], number_of_stones[WHITE]))
-    print
+    print()
 
 
 #
@@ -208,4 +207,6 @@ def print_score():
         winner = "draw"
     print("winner:{0}".format(winner))
     print("black:{0} white:{1}".format(number_of_stones[BLACK], number_of_stones[WHITE]))
-    print
+    print()
+
+    return winner, number_of_stones[BLACK], number_of_stones[BLACK]

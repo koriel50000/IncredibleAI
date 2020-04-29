@@ -61,9 +61,9 @@ def write_records(states_file, labels_file, move_record, eval_record):
     for index, actual_move in enumerate(converter.convert_moves(move_record)):
         evals = converter.convert_evals(eval_record[index])
         for entry in evals:
-            move = entry['move']
+            coord = entry['coord']
             value = entry['value']
-            state = converter.convert_state(reversi, move)
+            state = converter.convert_state(reversi, coord)
             write_data(states_file, labels_file, state, value)
             count += 1
         coord = converter.move_to_coord(actual_move)

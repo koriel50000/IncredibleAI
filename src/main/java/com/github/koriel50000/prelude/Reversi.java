@@ -165,24 +165,64 @@ public class Reversi {
         stones = SerializationUtils.clone(tempStones);
     }
 
-    public int getEmptyCount() {
-        return stones[EMPTY];
+    private static final String[] STONES = { ".", "@", "O" };
+
+    /**
+     * 盤面を表示する
+     */
+    public void printBoard() {
+        System.out.println();
+        System.out.println("  A B C D E F G H");
+        for (int y = 1; y <= 8; y++) {
+            System.out.print(y);
+            for (int x = 1; x <= 8; x++) {
+                System.out.print(" " + STONES[board[y][x]]);
+            }
+            System.out.println();
+        }
     }
 
-    public int getBlackCount() {
-        return stones[BLACK];
+    /**
+     * 現在の状態を表示する
+     */
+    public void printStatus() {
+        String turn;
+        String stone;
+        if (currentTurn == Reversi.Turn.Black) {
+            turn = "black";
+            stone = STONES[Reversi.Turn.Black.boardValue()];
+        } else {
+            turn = "white";
+            stone = STONES[Reversi.Turn.White.boardValue()];
+        }
+        System.out.print(String.format("move count:%d ", turnCount));
+        System.out.println(String.format("move:%s(%s)", turn, stone));
+        System.out.println(String.format("black:%d white:%d", stones[BLACK], stones[WHITE]));
+        System.out.println();
     }
 
-    public int getWhiteCount() {
-        return stones[WHITE];
+    /**
+     * スコアを表示する
+     */
+    public void printScore() {
+        System.out.print(String.format("move count:%d ", turnCount));
+        String winner;
+        if (stones[BLACK] > stones[WHITE]) {
+            winner = "black";
+            stones[BLACK] += stones[EMPTY];
+        } else if (stones[BLACK] < stones[WHITE]) {
+            winner = "white";
+            stones[WHITE] += stones[EMPTY];
+        } else {
+            winner = "draw";
+        }
+        System.out.println(String.format("winner:%s", winner));
+        System.out.println(String.format("black:%d white:%d", stones[BLACK], stones[WHITE]));
+        System.out.println();
     }
 
     public Turn getCurrentTurn() {
         return currentTurn;
-    }
-
-    public int getTurnCount() {
-        return turnCount;
     }
 
     public int[][] getBoard() {

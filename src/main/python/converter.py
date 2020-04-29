@@ -38,9 +38,9 @@ def move_to_coord(move):
 #
 # 位置を着手に変換する
 #
-def coord_to_move(coord):
-    x, y = coord
-    return "{0}{1}".format(chr(ord("A") + x - 1), y)
+# def coord_to_move(coord):
+#     x, y = coord
+#     return "{0}{1}".format(chr(ord("A") + x - 1), y)
 
 
 #
@@ -176,8 +176,7 @@ def put_state(state, region, x, y, channel):
 #
 # 石を置いたときの状態を返す
 #
-def convert_state(reversi, move):
-    coord = move_to_coord(move)
+def convert_state(reversi, coord):
     board, next_board, reverse, next_reverse, turn = reversi.make_move(coord)
 
     region = check_region(next_board, coord, turn)
@@ -227,7 +226,7 @@ def convert_evals(eval_record):
     fields = [x.strip() for x in eval_record.split(",")]
 
     for sets in [fields[i:i + 3] for i in range(0, len(fields), 3)]:
-        move = sets[0]
+        coord = move_to_coord(sets[0])
         if sets[1] == "Win":
             value = 1.0
         elif sets[1] == "Draw":
@@ -240,7 +239,7 @@ def convert_evals(eval_record):
             else:
                 value = float(sets[2])
             values.append(value)
-        evals.append({'move': move, 'value': value})
+        evals.append({'coord': coord, 'value': value})
 
     if len(values) > 0:
         # 評価値を標準偏差で補正してtanh関数で-1.0～0.0～1.0範囲に変換

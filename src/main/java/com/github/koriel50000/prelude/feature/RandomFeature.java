@@ -14,11 +14,11 @@ public class RandomFeature implements Feature {
     }
 
     @Override
-    public void init(Reversi reversi) {
+    public void init() {
     }
 
     @Override
-    public void destroy(Reversi reversi) {
+    public void destroy() {
     }
 
     @Override

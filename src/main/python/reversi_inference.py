@@ -3,6 +3,7 @@
 import sys
 import glob
 import os.path
+import zipfile
 
 import reversi
 import converter
@@ -31,9 +32,9 @@ def evaluate_records(sess, move_record, eval_record):
         predicted_values = []
         evals = converter.convert_evals(eval_record[index])
         for entry in evals:
-            move = entry['move']
+            coord = entry['coord']
             value = entry['value']
-            state = converter.convert_state(reversi, move)
+            state = converter.convert_state(reversi, coord)
             predicted_value = cnn_model.calculate_predicted_value(sess, state)
             values.append(value)
             predicted_values.append(predicted_value)
@@ -51,24 +52,24 @@ def evaluate_records(sess, move_record, eval_record):
             num_correct += 1
 
         coord = converter.move_to_coord(actual_move)
-        reversi.make_a_move(coord)
-        reversi.next_turn();
+        reversi.make_move(coord)
+        reversi.next_turn()
 
 
 #
 # 学習モデルを評価する
 #
-def evaluating_model(sess, files, begin, end):
+def evaluating_model(sess, path, filenames, begin, end):
     for i in range(begin, end):
-        filename = files[i]
-        with open(filename, "r") as file:
-            move_record = file.readline().strip()
-            eval_record = [x.strip() for x in file.readlines()]
+        file = os.path.join(path, filenames[i])
+        with open(file, "r") as fin:
+            move_record = fin.readline().strip()
+            eval_record = [x.strip() for x in fin.readlines()]
 
         evaluate_records(sess, move_record, eval_record)
 
         if i % 10 == 0:
-            print("{0}: {1}".format(i, filename))
+            print("{0}: {1}".format(i, file))
             print(float(num_correct) / num_total)
 
 
@@ -76,15 +77,22 @@ def evaluating_model(sess, files, begin, end):
 # メイン
 #
 def main(args):
-    files = glob.glob("./records/kifu*.txt")
-    files.sort(key=os.path.getmtime, reverse=False)
-
     sess = tf.Session()
 
     saver = tf.train.Saver()
-    saver.restore(sess, "./checkpoint/model.ckpt-1")
+    saver.restore(sess, "../resources/checkpoint/model.ckpt-1")
 
-    evaluating_model(sess, files, 0, 1)
+    path = "../resources/records/"
+    with zipfile.ZipFile(os.path.join(path, "kifu102245.zip")) as records_zip:
+        offset = 100000
+        size = 1
+        filenames = records_zip.namelist()[offset: offset + size]
+        records_zip.extractall(path, filenames)
+
+        evaluating_model(sess, path, filenames, 0, size)
+
+        for file in glob.glob(os.path.join(path, "kifu*.txt")):
+            os.remove(file)
 
     sess.close()
 

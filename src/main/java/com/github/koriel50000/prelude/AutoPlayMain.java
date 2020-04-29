@@ -6,17 +6,23 @@ import com.github.koriel50000.prelude.feature.RandomFeature;
 
 import java.util.List;
 
-public class PlayMain {
+public class AutoPlayMain {
 
     public static void main(String[] args) {
-        PlayMain main = new PlayMain();
+        AutoPlayMain main = new AutoPlayMain();
+        main.autoplay();
+    }
 
+    private void autoplay() {
         Feature preludeFeature = new PreludeFeature();
         Feature randomFeature = new RandomFeature();
         preludeFeature.init();
         randomFeature.init();
 
-        main.play(preludeFeature, randomFeature);
+        for (int i = 0; i < 50; i++) {
+            play(preludeFeature, randomFeature);
+            play(randomFeature, preludeFeature);
+        }
 
         preludeFeature.destroy();
         randomFeature.destroy();
@@ -32,9 +38,6 @@ public class PlayMain {
         while (true) {
             Reversi.Turn turn = reversi.getCurrentTurn();
 
-            reversi.printBoard();
-            reversi.printStatus();
-
             List<Reversi.Coord> moves = reversi.availableMoves();
             if (moves.size() > 0) {
                 Reversi.Coord move;
@@ -44,15 +47,12 @@ public class PlayMain {
                     move = whiteFeature.evaluate(reversi, moves, turn);
                 }
                 reversi.makeMove(move);
-            } else{
-                System.out.println("Pass!");
             }
 
             // ゲーム終了を判定
             if (reversi.hasCompleted()) {
                 break;
             }
-
             reversi.nextTurn();
         }
 

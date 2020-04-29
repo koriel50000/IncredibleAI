@@ -6,9 +6,9 @@ import java.util.List;
 
 public interface Feature {
 
-    void init(Reversi reversi);
+    void init();
 
-    void destroy(Reversi reversi);
+    void destroy();
 
     Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves, Reversi.Turn turn);
 }
