@@ -3,10 +3,18 @@
 import numpy as np
 import statistics as stat
 
+import reversi
+
 # 定数宣言
 COLUMNS = 8
 ROWS = 8
 CHANNEL = 16
+
+AREA_EMPTY = 0;
+AREA_ODD = 1;
+AREA_EVEN = 2;
+AREA_UNKNOWN = 3;
+AREA_NOT_EMPTY = 4;
 
 REGION = (( 8, 0, 0, 0, 1, 1, 1,10),
           ( 4, 8, 0, 0, 1, 1,10, 5),
@@ -81,13 +89,13 @@ def check_region(board, coord, turn):
 
 
 def calculate_oddeven_recursive(oddeven_area, x, y, count):
-    oddeven_area[y][x] = 3
+    oddeven_area[y][x] = AREA_UNKNOWN
     count += 1
     for dir in ((-1, 0), (0, -1), (1, 0), (0, 1)):
         dx, dy = dir
         x_ = x + dx
         y_ = y + dy
-        if oddeven_area[y_][x_] == 0:
+        if oddeven_area[y_][x_] == AREA_EMPTY:
             count = calculate_oddeven_recursive(oddeven_area, x_, y_, count)
     return count
 
@@ -96,14 +104,14 @@ def calculate_oddeven_recursive(oddeven_area, x, y, count):
 # 空白領域が偶数か奇数かを分類する
 #
 def calculate_oddeven(oddeven_area, x, y):
-    if oddeven_area[y][x] == 1 or oddeven_area[y][x] == 2:
+    if oddeven_area[y][x] == AREA_ODD or oddeven_area[y][x] == AREA_EVEN:
         return -1  # すでに分類済み
 
     number_of_empty = calculate_oddeven_recursive(oddeven_area, x, y, 0)
-    oddeven = 1 if number_of_empty % 2 == 1 else 2
+    oddeven = AREA_ODD if number_of_empty % 2 == 1 else AREA_EVEN
     for y in range(1, 9):
         for x in range(1, 9):
-            if oddeven_area[y][x] == 3:
+            if oddeven_area[y][x] == AREA_UNKNOWN:
                 oddeven_area[y][x] == oddeven
     return oddeven
 
@@ -113,27 +121,29 @@ def calculate_oddeven(oddeven_area, x, y):
 #
 def enumerate_area(board):
     early_stage = True
-    oddeven_area = [[0 for x_ in range(10)] for y_ in range(10)]
-    for y in range(10):
-        for x in range(10):
-            if board[y][x] == 3:  # reversi.BORDER:
-                oddeven_area[y][x] = 4
-            elif board[y][x] != 0:  # reversi.EMPTY:
-                oddeven_area[y][x] = 4
-                if (x == 1 or x == 8 or y == 1 or y == 8):
-                    early_stage = False
-
     empty_count = 0
     odd_count = 0
     even_count = 0
+    oddeven_area = [[0 for x_ in range(10)] for y_ in range(10)]
+    for y in range(10):
+        for x in range(10):
+            if board[y][x] == reversi.EMPTY:
+                oddeven_area[y][x] = AREA_EMPTY
+            elif board[y][x] == reversi.BORDER:
+                oddeven_area[y][x] = AREA_NOT_EMPTY
+            else:
+                oddeven_area[y][x] = AREA_NOT_EMPTY
+                if x == 1 or x == 8 or y == 1 or y == 8:
+                    early_stage = False
+
     for y in range(1, 9):
         for x in range(1, 9):
-            if oddeven_area[y][x] != 4:
+            if oddeven_area[y][x] != AREA_NOT_EMPTY:
                 empty_count += 1
                 oddeven = calculate_oddeven(oddeven_area, x, y)
-                if oddeven == 1:
+                if oddeven == AREA_ODD:
                     odd_count += 1
-                elif oddeven == 2:
+                elif oddeven == AREA_EVEN:
                     even_count += 1
 
     return oddeven_area, early_stage, empty_count, odd_count, even_count
@@ -168,7 +178,7 @@ def put_state(state, region, x, y, channel):
 #
 def convert_state(reversi, move):
     coord = move_to_coord(move)
-    board, next_board, reverse, next_reverse, turn = reversi.make_a_move(coord)
+    board, next_board, reverse, next_reverse, turn = reversi.make_move(coord)
     
     region = check_region(next_board, coord, turn)
 
@@ -177,7 +187,7 @@ def convert_state(reversi, move):
     state = np.zeros((CHANNEL, ROWS, COLUMNS), dtype=np.uint8)
 
     x_, y_ = coord
-    put_state(state, region, x_, y_, 3) # 着手
+    put_state(state, region, x_, y_, 3)  # 着手
 
     for y in range(1, 9):
         for x in range(1, 9):
@@ -189,9 +199,9 @@ def convert_state(reversi, move):
                 put_state(state, region, x, y, 2)  # 着手前に空白
             if board[y][x] != next_board[y][x]:
                 put_state(state, region, x, y, 4)  # 変化した石
-            if oddeven_area[y][x] == 1:
+            if oddeven_area[y][x] == AREA_ODD:
                 put_state(state, region, x, y, 5)  # 奇数領域
-            elif oddeven_area[y][x] == 2:
+            elif oddeven_area[y][x] == AREA_EVEN:
                 put_state(state, region, x, y, 6)  # 偶数領域
             if not early_stage:
                 put_state(state, region, x, y, 7)  # 序盤でない

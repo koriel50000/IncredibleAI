@@ -17,6 +17,7 @@ temp_number_of_stones = [0, 0, 0]
 current_turn = 0
 turn_count = 0
 
+
 #
 # 盤面を初期化する
 #
@@ -25,7 +26,7 @@ def init():
     
     for y in range(10):
         for x in range(10):
-            if (1 <= x and x <= 8) and (1 <= y and y <= 8):
+            if 1 <= x <= 8 and 1 <= y <= 8:
                 board[y][x] = EMPTY
             else:
                 board[y][x] = BORDER
@@ -50,6 +51,7 @@ def init():
 def opponent_turn(turn):
     return turn ^ 3
 
+
 #
 # 方向を指定して石が打てるかを判定する
 #
@@ -58,12 +60,13 @@ def can_move_direction(turn, coord, dir):
     dx, dy = dir
     x += dx
     y += dy
-    while board[y][x] == opponent_turn(turn): # 相手石ならば継続
+    while board[y][x] == opponent_turn(turn):  # 相手石ならば継続
         x += dx
         y += dy
-        if board[y][x] == turn: #自石ならば終了
+        if board[y][x] == turn:  # 自石ならば終了
             return True
     return False
+
 
 #
 # 指定した位置に石が打てるかを判定する
@@ -76,22 +79,28 @@ def can_move(turn, coord):
                 return True
     return False
 
+
 #
 # 着手可能なリストを返す
 #
+def available_moves():
+    available_moves(current_turn)
+
+
 def available_moves(turn):
-    moves = []
+    coords = []
     for y in range(1, 8+1):
         for x in range(1, 8+1):
             coord = (x, y)
             if can_move(turn, coord):
-                moves.append(coord_to_move(coord))
-    return moves
+                coords.append(coord)
+    return coords
+
 
 #
 # 指定された場所に石を打つ
 #
-def make_a_move(coord):
+def make_move(coord):
     global board, temp_board, reverse, temp_reverse, number_of_stones, temp_number_of_stones
     
     temp_board = copy.deepcopy(board)
@@ -100,10 +109,12 @@ def make_a_move(coord):
     
     turn = current_turn
     x, y = coord
-    board[y][x] = turn
-    reverse[y][x] += 1 # 反転数+1
-    number_of_stones[turn] += 1 # 自石を増やす
-    number_of_stones[EMPTY] -= 1 # 空白を減らす
+
+    board[y][x] = turn  # 石を打つ
+    reverse[y][x] += 1  # 反転数+1
+    number_of_stones[turn] += 1  # 自石を増やす
+    number_of_stones[EMPTY] -= 1  # 空白を減らす
+
     for dir in DIRECTIONS:
         if not can_move_direction(turn, coord,  dir):
             continue
@@ -111,28 +122,30 @@ def make_a_move(coord):
         dx, dy = dir
         x += dx
         y += dy
-        while board[y][x] == opponent_turn(turn): # 相手石ならば継続
-            board[y][x] = turn # 石を反転
-            reverse[y][x] += 1 # 反転数+1
-            number_of_stones[turn] += 1 # 自石を増やす
-            number_of_stones[opponent_turn(turn)] -= 1 # 相手石を減らす
+        while board[y][x] == opponent_turn(turn):  # 相手石ならば継続
+            board[y][x] = turn  # 石を反転
+            reverse[y][x] += 1  # 反転数+1
+            number_of_stones[turn] += 1  # 自石を増やす
+            number_of_stones[opponent_turn(turn)] -= 1  # 相手石を減らす
             x += dx
             y += dy
     
     return temp_board, board, temp_reverse, reverse, turn
 
+
 #
 # ゲームの終了を判定する
 #
 def has_completed():
-    if number_of_stones[EMPTY] == 0: # 空白がなくなったら終了
+    if number_of_stones[EMPTY] == 0:  # 空白がなくなったら終了
         return True
-    elif number_of_stones[BLACK] == 0 or number_of_stones[WHITE] == 0: # 先手・後手どちらかが完勝したら終了
+    elif number_of_stones[BLACK] == 0 or number_of_stones[WHITE] == 0:  # 先手・後手どちらかが完勝したら終了
         return True
-    elif len(available_moves(BLACK)) == 0 and len(available_moves(WHITE)) == 0: # 先手・後手両方パスで終了
+    elif len(available_moves(BLACK)) == 0 and len(available_moves(WHITE)) == 0:  # 先手・後手両方パスで終了
         return True
     else:
-        return False # 上記以外はゲーム続行
+        return False  # 上記以外はゲーム続行
+
 
 #
 # 手番を進める
@@ -140,8 +153,9 @@ def has_completed():
 def next_turn():
     global current_turn, turn_count
     
-    current_turn = opponent_turn(current_turn) # 手番を変更
+    current_turn = opponent_turn(current_turn)  # 手番を変更
     turn_count += 1
+
 
 #
 # 盤面を戻す
@@ -152,6 +166,7 @@ def undo_board():
     board = copy.deepcopy(temp_board)
     reverse = copy.deepcopy(temp_reverse)
     number_of_stones = copy.deepcopy(temp_number_of_stones)
+
 
 #
 # 盤面を表示する
@@ -165,6 +180,7 @@ def print_board():
             print(" " + STONES[board[y][x]], end='')
         print()
 
+
 #
 # 現在の状態を表示する
 #
@@ -174,6 +190,7 @@ def print_status():
     print("move:{0}({1})".format("black" if turn == BLACK else "white", STONES[turn]))
     print("black:{0} white:{1}".format(number_of_stones[BLACK], number_of_stones[WHITE]))
     print
+
 
 #
 # スコアを表示する
@@ -191,4 +208,3 @@ def print_score():
     print("winner:{0}".format(winner))
     print("black:{0} white:{1}".format(number_of_stones[BLACK], number_of_stones[WHITE]))
     print
-

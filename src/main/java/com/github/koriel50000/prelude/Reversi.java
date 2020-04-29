@@ -28,7 +28,7 @@ public class Reversi {
     public void initialize() {
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
-                if ((1 <= x && x <= 8) && (1 <= y && y <= 8)) {
+                if (1 <= x && x <= 8 && 1 <= y && y <= 8) {
                     board[y][x] = EMPTY;
                 } else {
                     board[y][x] = BORDER;
@@ -53,9 +53,9 @@ public class Reversi {
     /**
      * 方向を指定して石が打てるかを判定する
      */
-    private boolean canMoveDirection(Turn turn, Move move, Direction dir) {
-        int x = move.x + dir.dx;
-        int y = move.y + dir.dy;
+    private boolean canMoveDirection(Turn turn, Coord coord, Direction dir) {
+        int x = coord.x + dir.dx;
+        int y = coord.y + dir.dy;
         while (board[y][x] == turn.opponentBoardValue()) { // 相手石ならば継続
             x += dir.dx;
             y += dir.dy;
@@ -69,10 +69,10 @@ public class Reversi {
     /**
      * 指定した位置に石が打てるかを判定する
      */
-    private boolean canMove(Turn turn, Move move) {
-        if (board[move.y][move.x] == EMPTY) {
+    private boolean canMove(Turn turn, Coord coord) {
+        if (board[coord.y][coord.x] == EMPTY) {
             for (Direction dir : Direction.values()) {
-                if (canMoveDirection(turn, move, dir)) {
+                if (canMoveDirection(turn, coord, dir)) {
                     return true;
                 }
             }
@@ -83,31 +83,31 @@ public class Reversi {
     /**
      * 着手可能なリストを返す
      */
-    public List<Move> availableMoves() {
+    public List<Coord> availableMoves() {
         return availableMoves(currentTurn);
     }
 
-    private List<Move> availableMoves(Turn turn) {
-        List<Move> moves = new ArrayList<>();
-        for (Move move : Move.values()) {
-            if (canMove(turn, move)) {
-                moves.add(move);
+    private List<Coord> availableMoves(Turn turn) {
+        List<Coord> coords = new ArrayList<>();
+        for (Coord coord : Coord.values()) {
+            if (canMove(turn, coord)) {
+                coords.add(coord);
             }
         }
-        return moves;
+        return coords;
     }
 
     /**
      * 指定された場所に石を打つ
      */
-    public void makeMove(Move move) {
+    public void makeMove(Coord coord) {
         tempBoard = SerializationUtils.clone(board);
         tempReverse = SerializationUtils.clone(reverse);
         tempStones = SerializationUtils.clone(stones);
 
         Turn turn = currentTurn;
-        int x = move.x;
-        int y = move.y;
+        int x = coord.x;
+        int y = coord.y;
 
         board[y][x] = turn.boardValue(); // 石を打つ
         reverse[y][x] += 1; // 反転数+1
@@ -115,11 +115,11 @@ public class Reversi {
         stones[EMPTY] -= 1; // 空白を減らす
 
         for (Direction dir : Direction.values()) {
-            if (!canMoveDirection(turn, move, dir)) {
+            if (!canMoveDirection(turn, coord, dir)) {
                 continue;
             }
-            x = move.x + dir.dx;
-            y = move.y + dir.dy;
+            x = coord.x + dir.dx;
+            y = coord.y + dir.dy;
             while (board[y][x] == turn.opponentBoardValue()) { // 相手石ならば継続
                 board[y][x] = turn.boardValue(); // 石を反転
                 reverse[y][x] += 1; // 反転数+1
@@ -223,39 +223,39 @@ public class Reversi {
         }
     }
 
-    public static class Move {
+    public static class Coord {
 
         public final int x;
         public final int y;
         public final String symbol;
 
-        private Move(int x, int y, String symbol) {
+        private Coord(int x, int y, String symbol) {
             this.x = x;
             this.y = y;
             this.symbol = symbol;
         }
 
-        private static Move[] values;
+        private static Coord[] values;
 
         static {
-            values = new Move[8 * 8];
+            values = new Coord[8 * 8];
             int i = 0;
             for (int y = 1; y <= 8; y++) {
                 for (int x = 1; x <= 8; x++) {
                     String symbol = String.format("%c%d", 'A' + (x - 1), y);
-                    values[i++] = new Move(x, y, symbol);
+                    values[i++] = new Coord(x, y, symbol);
                 }
             }
         }
 
-        public static Move[] values() {
+        public static Coord[] values() {
             return values;
         }
-        public static Move valueOf(int x, int y) {
+        public static Coord valueOf(int x, int y) {
             return values[(y - 1) * 8 + (x - 1)];
         }
 
-        public static Move valueOf(String symbol) {
+        public static Coord valueOf(String symbol) {
             return null; // TODO
         }
     }

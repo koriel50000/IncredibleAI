@@ -112,7 +112,7 @@ public class PreludeConverter {
         int count = calculateOddEvenRecursive(x, y, 0);
         int oddeven = (count % 2 == 1) ? AREA_ODD : AREA_EVEN;
 
-        for (Reversi.Move move : Reversi.Move.values()) {
+        for (Reversi.Coord move : Reversi.Coord.values()) {
             int x_ = move.x;
             int y_ = move.y;
             if (oddevenArea[y_][x_] == AREA_UNKNOWN) {
@@ -145,7 +145,7 @@ public class PreludeConverter {
             }
         }
 
-        for (Reversi.Move move : Reversi.Move.values()) {
+        for (Reversi.Coord move : Reversi.Coord.values()) {
             int x = move.x;
             int y = move.y;
             if (oddevenArea[y][x] != AREA_NOT_EMPTY) {
@@ -160,7 +160,7 @@ public class PreludeConverter {
         }
     }
 
-    private ByteBuffer state = ByteBuffer.allocate(COLUMS * ROWS * CHANNEL);
+    private ByteBuffer state = ByteBuffer.allocate(ROWS * COLUMS * CHANNEL);
 
     /**
      * 着手をプロットする
@@ -219,16 +219,16 @@ public class PreludeConverter {
     /**
      * 石を置いたときの状態を返す
      */
-    public ByteBuffer convertState(Reversi reversi, Reversi.Move newMove) {
-        reversi.makeMove(newMove);
+    public ByteBuffer convertState(Reversi reversi, Reversi.Coord newCoord) {
+        reversi.makeMove(newCoord);
 
         int[][] board = reversi.getTempBoard();
         int[][] nextBoard = reversi.getBoard();
         int[][] reverse = reversi.getTempReverse();
         Reversi.Turn turn = reversi.getCurrentTurn();
 
-        int x = newMove.x;
-        int y = newMove.y;
+        int x = newCoord.x;
+        int y = newCoord.y;
         int region = checkRegion(nextBoard, x, y, turn);
 
         enumerateArea(board);
@@ -237,7 +237,7 @@ public class PreludeConverter {
 
         putState(state, region, x, y, 3); // 着手
 
-        for (Reversi.Move move : Reversi.Move.values()) {
+        for (Reversi.Coord move : Reversi.Coord.values()) {
             int x_ = move.x;
             int y_ = move.y;
             if (board[y_][x_] == turn.boardValue()) {

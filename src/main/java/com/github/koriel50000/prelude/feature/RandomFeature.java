@@ -22,8 +22,8 @@ public class RandomFeature implements Feature {
     }
 
     @Override
-    public Reversi.Move evaluate(Reversi reversi, List<Reversi.Move> moves, Reversi.Turn turn) {
-        Reversi.Move move = moves.get(random.nextInt(moves.size()));
+    public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves, Reversi.Turn turn) {
+        Reversi.Coord move = moves.get(random.nextInt(moves.size()));
         return move;
     }
 }

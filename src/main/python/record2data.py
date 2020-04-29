@@ -7,6 +7,7 @@ import struct
 import zipfile
 import gzip
 import shutil
+
 import reversi
 import converter
 
@@ -42,8 +43,8 @@ def write_items(states_file, labels_file, total):
 
 def write_data(states_file, labels_file, state, value):
     for channel in range(0, converter.CHANNEL):
-        for y in range(0, converter.COLUMNS):
-            for x in range(0, converter.ROWS):
+        for y in range(0, converter.ROWS):
+            for x in range(0, converter.COLUMNS):
                 write8(states_file, state[channel, y, x])
     # Convert from [-1.0, 0.0, 1.0] -> [1, 255].
     value = int(round(value * 127)) + 128
@@ -66,7 +67,7 @@ def write_records(states_file, labels_file, move_record, eval_record):
             write_data(states_file, labels_file, state, value)
             count += 1
         coord = converter.move_to_coord(actual_move)
-        reversi.make_a_move(coord)
+        reversi.make_move(coord)
         reversi.next_turn()
     
     return count

@@ -36,9 +36,9 @@ public class PlayMain {
                     reversi.getWhiteCount(),
                     turn);
 
-            List<Reversi.Move> moves = reversi.availableMoves();
+            List<Reversi.Coord> moves = reversi.availableMoves();
             if (moves.size() > 0) {
-                Reversi.Move move;
+                Reversi.Coord move;
                 if (turn == Reversi.Turn.Black) {
                     move = blackFeature.evaluate(reversi, moves, turn);
                 } else {

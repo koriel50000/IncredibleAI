@@ -13,8 +13,8 @@ import java.nio.ByteBuffer;
 
 public class CNNModel {
 
-    private static final int COLUMNS = 8;
     private static final int ROWS = 8;
+    private static final int COLUMNS = 8;
     private static final int CHANNEL = 16;
 
     private Graph graph;

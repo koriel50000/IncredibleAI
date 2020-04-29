@@ -33,39 +33,39 @@ public class PreludeFeature implements Feature {
     }
 
     @Override
-    public Reversi.Move evaluate(Reversi reversi, List<Reversi.Move> moves, Reversi.Turn turn) {
+    public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves, Reversi.Turn turn) {
         List<Eval> evals = clearEvals(moves);
         for (Eval eval : evals) {
-            Reversi.Move move = eval.getMove();
+            Reversi.Coord move = eval.getMove();
             ByteBuffer state = converter.convertState(reversi, move);
             float value = model.calculatePredicatedValue(state);
             eval.setValue(value);
         }
 
         if (evals.size() > 0) {
-            Reversi.Move actualMove = optimumChoice(evals);
+            Reversi.Coord actualMove = optimumChoice(evals);
             return actualMove;
         } else {
             throw new IllegalArgumentException("not found");
         }
     }
 
-    private List<Eval> clearEvals(List<Reversi.Move> moves) {
+    private List<Eval> clearEvals(List<Reversi.Coord> moves) {
         List<Eval> evals = new ArrayList<>();
-        for (Reversi.Move move : moves) {
+        for (Reversi.Coord move : moves) {
             evals.add(new Eval(move, 0.0f)); // valueはダミー
         }
         return evals;
     }
 
-    private Reversi.Move optimumChoice(List<Eval> evals) {
+    private Reversi.Coord optimumChoice(List<Eval> evals) {
         Collections.sort(evals, Collections.reverseOrder()); // 評価値で降順
 
-        List<Reversi.Move> moves = new ArrayList<>();
+        List<Reversi.Coord> moves = new ArrayList<>();
         float maximumValue = Float.MIN_VALUE;
         float delta = 0.001f; // 近い値を考慮
         for (Eval evel : evals) {
-            Reversi.Move move = evel.getMove();
+            Reversi.Coord move = evel.getMove();
             float value = evel.getValue();
             if (value + delta < maximumValue) {
                 break;
@@ -79,15 +79,15 @@ public class PreludeFeature implements Feature {
 
     private static class Eval implements Comparable<Eval> {
 
-        private Reversi.Move move;
+        private Reversi.Coord move;
         private float value;
 
-        Eval(Reversi.Move move, float value) {
+        Eval(Reversi.Coord move, float value) {
             this.move = move;
             this.value = value;
         }
 
-        Reversi.Move getMove() {
+        Reversi.Coord getMove() {
             return move;
         }
 
