@@ -98,5 +98,5 @@ def training_model(sess, datasets):
 #
 def calculate_predicted_value(sess, state):
     state_ = state.reshape(1, -1)
-    y_ = sess.run(y_conv, feed_dict={x: state_, keep_prob: 1.0})
-    return y_[0][0]
+    y = sess.run(y_conv, feed_dict={x: state_, keep_prob: 1.0})
+    return y[0][0]
