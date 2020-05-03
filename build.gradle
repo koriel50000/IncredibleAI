@@ -25,3 +25,9 @@ compileJava {
 compileTestJava {
     options.encoding = defaultEncoding
 }
+
+sourceSets {
+    main.java {
+        srcDir 'src/main/python'
+    }
+}
