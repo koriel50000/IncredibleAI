@@ -42,6 +42,7 @@ def write_items(states_file, labels_file, total):
 
 
 def write_data(states_file, labels_file, state, value):
+    # FIXME NHWC or NCHWとは？NHWC(channels_last)になっていないのになぜこれで結果が出る？
     for channel in range(0, converter.CHANNEL):
         for y in range(0, converter.ROWS):
             for x in range(0, converter.COLUMNS):
