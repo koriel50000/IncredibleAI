@@ -27,7 +27,7 @@ def conv2d(x, W):
 
 # 変数宣言
 x = tf.placeholder(tf.float32, [None, input_rows * input_cols * input_channel])
-y = tf.placeholder(tf.float32, [None])
+y_ = tf.placeholder(tf.float32, [None])
 x_image = tf.reshape(x, [-1, input_rows, input_cols, input_channel])
 
 k_filter = 64
@@ -72,7 +72,7 @@ b_fc2 = bias_variable([1])
 
 y_conv = tf.nn.tanh(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
-loss = 0.5 * tf.reduce_sum((y_conv - y) ** 2)
+loss = 0.5 * tf.reduce_sum((y_conv - y_) ** 2)
 
 train_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
 
