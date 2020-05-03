@@ -13,13 +13,13 @@ def _read32(bytestream):
 
 
 def extract_images(f):
-    """Extract the images into a 4D uint8 numpy array [index, x, y, depth].
+    """Extract the images into a 4D uint8 numpy array [index, y, x, depth].
 
     Args:
       f: A file object that can be passed into a gzip reader.
 
     Returns:
-      data: A 4D uint8 numpy array [index, x, y, depth].
+      data: A 4D uint8 numpy array [index, y, x, depth].
 
     Raises:
       ValueError: If the bytestream does not start with 2051.
@@ -34,7 +34,7 @@ def extract_images(f):
         rows = _read32(bytestream)
         cols = _read32(bytestream)
         depth = _read32(bytestream)
-        buf = bytestream.read(rows * cols * depth * num_images)
+        buf = bytestream.read(num_images * rows * cols * depth)
         data = numpy.frombuffer(buf, dtype=numpy.uint8)
         data = data.reshape(num_images, rows, cols, depth)
         return data

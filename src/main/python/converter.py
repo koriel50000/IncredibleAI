@@ -10,11 +10,11 @@ COLUMNS = 8
 ROWS = 8
 CHANNEL = 16
 
-AREA_EMPTY = 0;
-AREA_ODD = 1;
-AREA_EVEN = 2;
-AREA_UNKNOWN = 3;
-AREA_NOT_EMPTY = 4;
+AREA_EMPTY = 0
+AREA_ODD = 1
+AREA_EVEN = 2
+AREA_UNKNOWN = 3
+AREA_NOT_EMPTY = 4
 
 REGION = ((8, 0, 0, 0, 1, 1, 1, 10),
           (4, 8, 0, 0, 1, 1, 10, 5),
@@ -61,6 +61,7 @@ def convert_moves(move_record):
 def is_symmetric(diagonal, board, turn):
     for y in range(1, 9):
         for x in range(y + 1, 9):
+            x_, y_ = x, y
             if diagonal == 8:
                 x_, y_ = x, y  # 変換なし
             elif diagonal == 10:
@@ -107,12 +108,14 @@ def calculate_oddeven(oddeven_area, x, y):
     if oddeven_area[y][x] == AREA_ODD or oddeven_area[y][x] == AREA_EVEN:
         return -1  # すでに分類済み
 
-    number_of_empty = calculate_oddeven_recursive(oddeven_area, x, y, 0)
-    oddeven = AREA_ODD if number_of_empty % 2 == 1 else AREA_EVEN
-    for y in range(1, 9):
-        for x in range(1, 9):
-            if oddeven_area[y][x] == AREA_UNKNOWN:
-                oddeven_area[y][x] = oddeven
+    count = calculate_oddeven_recursive(oddeven_area, x, y, 0)
+    oddeven = AREA_ODD if count % 2 == 1 else AREA_EVEN
+
+    for y_ in range(1, 9):
+        for x_ in range(1, 9):
+            if oddeven_area[y_][x_] == AREA_UNKNOWN:
+                oddeven_area[y_][x_] = oddeven
+
     return oddeven
 
 
@@ -176,14 +179,14 @@ def put_state(state, region, x, y, channel):
 #
 # 石を置いたときの状態を返す
 #
-def convert_state(reversi, coord):
+def convert_state(reversi, coord, dtype=np.uint8):
     board, next_board, reverse, next_reverse, turn = reversi.make_move(coord)
 
     region = check_region(next_board, coord, turn)
 
     oddeven_area, early_stage, empty_count, odd_count, even_count = enumerate_area(board)
 
-    state = np.zeros((CHANNEL, ROWS, COLUMNS), dtype=np.uint8)
+    state = np.zeros((CHANNEL, ROWS, COLUMNS), dtype=dtype)
 
     x_, y_ = coord
     put_state(state, region, x_, y_, 3)  # 着手

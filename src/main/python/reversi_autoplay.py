@@ -2,6 +2,7 @@
 
 import sys
 import random
+import numpy as np
 import tensorflow.compat.v1 as tf
 
 import converter
@@ -34,7 +35,7 @@ def optimum_choice(evals):
 def prelude_feature(sess, coords):
     evals = []
     for coord in coords:
-        state = converter.convert_state(reversi, coord)
+        state = converter.convert_state(reversi, coord, dtype=np.float32)
         value = cnn_model.calculate_predicted_value(sess, state)
         evals.append({'coord': coord, 'value': value})
 

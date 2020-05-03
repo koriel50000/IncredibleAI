@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import datasets
-
 import tensorflow.compat.v1 as tf
 
 tf.disable_v2_behavior()
@@ -29,7 +27,7 @@ def conv2d(x, W):
 
 # 変数宣言
 x = tf.placeholder(tf.float32, [None, input_rows * input_cols * input_channel])
-y_ = tf.placeholder(tf.float32, [None])
+y = tf.placeholder(tf.float32, [None])
 x_image = tf.reshape(x, [-1, input_rows, input_cols, input_channel])
 
 k_filter = 64
@@ -74,7 +72,7 @@ b_fc2 = bias_variable([1])
 
 y_conv = tf.nn.tanh(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
-loss = 0.5 * tf.reduce_sum((y_conv - y_) ** 2)
+loss = 0.5 * tf.reduce_sum((y_conv - y) ** 2)
 
 train_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
 
@@ -82,15 +80,14 @@ train_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
 #
 # モデルを学習する
 #
-def training_model(sess, prefix):
-    reversi_data = datasets.read_data_sets('../resources/REVERSI_data/', prefix)
-    print("images;", reversi_data.train.images.shape)
-    print("labels:", reversi_data.train.labels.shape)
+def training_model(sess, datasets):
+    print("images;", datasets.train.images.shape)
+    print("labels:", datasets.train.labels.shape)
+
     i = 0
-    while reversi_data.train.epochs_completed < 10:
-        batch_xs, batch_ys = reversi_data.train.next_batch(1)
+    while datasets.train.epochs_completed < 10:
+        batch_xs, batch_ys = datasets.train.next_batch(1)
         sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.99})
-        # index, loss = sess.run(loop, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.99})
         i += 1
         if i % 10000 == 0:
             print(str(i) + ":", str(sess.run(loss, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 1.0})))
