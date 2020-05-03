@@ -112,7 +112,7 @@ def calculate_oddeven(oddeven_area, x, y):
     for y in range(1, 9):
         for x in range(1, 9):
             if oddeven_area[y][x] == AREA_UNKNOWN:
-                oddeven_area[y][x] == oddeven
+                oddeven_area[y][x] = oddeven
     return oddeven
 
 

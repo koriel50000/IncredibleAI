@@ -2,10 +2,10 @@
 
 import sys
 from datetime import datetime
+import tensorflow.compat.v1 as tf
 
 import cnn_model
 
-import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
 
 

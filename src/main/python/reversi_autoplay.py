@@ -2,7 +2,7 @@
 
 import sys
 import random
-import tensorflow as tf
+import tensorflow.compat.v1 as tf
 
 import converter
 import reversi

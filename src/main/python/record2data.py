@@ -55,7 +55,7 @@ def write_data(states_file, labels_file, state, value):
 # 棋譜を学習データに変換する
 #
 def write_records(states_file, labels_file, move_record, eval_record):
-    reversi.init()
+    reversi.initialize()
     
     count = 0
     for index, actual_move in enumerate(converter.convert_moves(move_record)):

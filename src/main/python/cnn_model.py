@@ -72,21 +72,12 @@ h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)
 W_fc2 = weight_variable([256, 1])
 b_fc2 = bias_variable([1])
 
-y_conv = tf.nn.tanh(tf.matmul(h_fc1, W_fc2) + b_fc2)
+y_conv = tf.nn.tanh(tf.matmul(h_fc1_drop, W_fc2) + b_fc2)
 
 loss = 0.5 * tf.reduce_sum((y_conv - y_) ** 2)
 
 train_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
 
-
-# def minimize(i, dummy):
-#    # 二乗和誤差
-#    loss = 0.5 * tf.reduce_sum((y_conv-y_) **2)
-#    
-#    train_step = tf.train.AdamOptimizer(1e-5).minimize(loss)
-#    return i + 1, loss
-#
-# loop = tf.while_loop(lambda i, dummy: i < 16, minimize, [0, 0.0])
 
 #
 # モデルを学習する
@@ -96,7 +87,7 @@ def training_model(sess, prefix):
     print("images;", reversi_data.train.images.shape)
     print("labels:", reversi_data.train.labels.shape)
     i = 0
-    while reversi_data.train.epochs_completed < 1:  # 10:
+    while reversi_data.train.epochs_completed < 10:
         batch_xs, batch_ys = reversi_data.train.next_batch(1)
         sess.run(train_step, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.99})
         # index, loss = sess.run(loop, feed_dict={x: batch_xs, y_: batch_ys, keep_prob: 0.99})
