@@ -3,14 +3,12 @@
 import sys
 import random
 import numpy as np
-import tensorflow.compat.v1 as tf
 
 import converter
 import reversi
 import cnn_model
 
 random.seed()
-tf.disable_v2_behavior()
 
 
 def optimum_choice(evals):
@@ -32,24 +30,24 @@ def optimum_choice(evals):
 #
 # 差し手を評価する
 #
-def prelude_feature(sess, coords):
+def prelude_feature(coords):
     evals = []
     for coord in coords:
         state = converter.convert_state(reversi, coord, dtype=np.float32)
-        value = cnn_model.calculate_predicted_value(sess, state)
+        value = cnn_model.calculate_predicted_value(state)
         evals.append({'coord': coord, 'value': value})
 
     return optimum_choice(evals)
 
 
-def random_feature(sess, coords):
+def random_feature(coords):
     return random.choice(coords)
 
 
 #
 # ゲームを実行する
 #
-def play(sess, black_feature, white_feature):
+def play(black_feature, white_feature):
     reversi.initialize()
 
     while True:
@@ -58,9 +56,9 @@ def play(sess, black_feature, white_feature):
         coords = reversi.available_moves(turn)
         if len(coords) > 0:
             if turn == reversi.BLACK:
-                coord = black_feature(sess, coords)
+                coord = black_feature(coords)
             else:
-                coord = white_feature(sess, coords)
+                coord = white_feature(coords)
             reversi.make_move(coord)
 
         # ゲーム終了を判定
@@ -78,23 +76,21 @@ def play(sess, black_feature, white_feature):
 # メイン
 #
 def main(args):
-    sess = tf.Session()
-
-    saver = tf.train.Saver()
-    saver.restore(sess, "../resources/checkpoint/model.ckpt-1")
+    step = 2
+    cnn_model.load_checkpoint("../resources/checkpoint/cnn_model", step)
 
     win = 0
     loss = 0
     draw = 0
     for i in range(50):
-        winner, black, white = play(sess, prelude_feature, random_feature)
+        winner, black, white = play(prelude_feature, random_feature)
         if winner == "black":
             win += 1
         elif winner == "white":
             loss += 1
         else:
             draw += 1
-        winner, black, white = play(sess, random_feature, prelude_feature)
+        winner, black, white = play(random_feature, prelude_feature)
         if winner == "black":
             loss += 1
         elif winner == "white":
@@ -103,8 +99,6 @@ def main(args):
             draw += 1
 
     print("win:{0} loss:{1} draw:{2}".format(win, loss, draw))
-
-    sess.close()
 
     return 0
 

@@ -2,18 +2,29 @@
 
 import sys
 import random
-import tensorflow as tf
+import numpy as np
+from tensorflow import keras
 
 import converter
 import reversi
-import cnn_model
 
 random.seed()
-tf.disable_v2_behavior()
+
+model = keras.models.load_model("../resources/model/")
+
+
+#
+# 予測値を計算する
+#
+def calculate_predicted_value(state):
+    state_ = state.reshape(1, -1)
+    predictions_ = model.predict(state_)
+    return predictions_[0][0]
 
 
 def optimum_choice(evals):
     evals.sort(key=lambda x: x['value'], reverse=True)
+    print(evals)
 
     coords = []
     maximum_value = float("-inf")
@@ -31,34 +42,21 @@ def optimum_choice(evals):
 #
 # 差し手を評価する
 #
-def evaluate_moves(sess, coords):
-    for coord in coords:
-        move = reversi.coord2move(coord)
-        state = converter.convert_state(reversi, move)
-        predicted_value, probs = cnn_model.calculate_predicted_value(sess, state)
-        #probs = np.r_[pprobs, nprobs]
-        view_probs = ["{0:.2f}".format(x) for x in probs]
-        print("move:{0} predicted:{1} {2}".format(move, predicted_value, view_probs))
-
-
-#
-# 差し手を評価する
-#
-def prelude_feature(sess, coords):
+def prelude_feature(coords):
     evals = []
     for coord in coords:
-        state = converter.convert_state(reversi, coord)
-        value = cnn_model.calculate_predicted_value(sess, state)
+        state = converter.convert_state(reversi, coord, dtype=np.float32)
+        value = calculate_predicted_value(state)
         evals.append({'coord': coord, 'value': value})
 
     return optimum_choice(evals)
 
 
-def random_feature(sess, coords):
+def random_feature(coords):
     return random.choice(coords)
 
 
-def manual_feature(sess, coords):
+def manual_feature(coords):
     move = input("move> ")
     return converter.move_to_coord(move.upper())
 
@@ -66,7 +64,7 @@ def manual_feature(sess, coords):
 #
 # ゲームを実行する
 #
-def play(sess, black_feature, white_feature):
+def play(black_feature, white_feature):
     reversi.initialize()
     
     while True:
@@ -78,9 +76,9 @@ def play(sess, black_feature, white_feature):
         coords = reversi.available_moves(turn)
         if len(coords) > 0:
             if turn == reversi.BLACK:
-                coord = black_feature(sess, coords)
+                coord = black_feature(coords)
             else:
-                coord = white_feature(sess, coords)
+                coord = white_feature(coords)
             reversi.make_move(coord)
         else:
             print("Pass!")
@@ -98,15 +96,10 @@ def play(sess, black_feature, white_feature):
 # メイン
 #
 def main(args):
-    sess = tf.Session()
-    
-    saver = tf.train.Saver()
-    saver.restore(sess, "../resources/checkpoint/model.ckpt-1")
-    
-    play(sess, prelude_feature, manual_feature)
-    
-    sess.close()
-    
+    # TODO 先手・後手を選択
+
+    play(prelude_feature, manual_feature)
+
     return 0
 
 
