@@ -6,8 +6,8 @@ import statistics as stat
 import reversi
 
 # 定数宣言
-COLUMNS = 8
 ROWS = 8
+COLUMNS = 8
 CHANNEL = 16
 
 AREA_EMPTY = 0

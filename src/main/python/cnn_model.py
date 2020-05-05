@@ -9,7 +9,7 @@ input_channel = 16
 
 
 # モデル定義
-inputs = keras.layers.Input(shape=(input_rows * input_cols * input_channel))
+inputs = keras.Input(name='inputs', shape=(input_rows * input_cols * input_channel))
 x = keras.layers.Reshape((input_rows, input_cols, input_channel))(inputs)
 x = keras.layers.Conv2D(64, 5, padding='SAME', activation='relu', use_bias=False)(x)
 x = keras.layers.Conv2D(64, 3, padding='SAME', activation='relu', use_bias=False)(x)
@@ -20,8 +20,8 @@ x = keras.layers.Conv2D(1, 1, padding='SAME', activation='relu', use_bias=False)
 x = keras.layers.Flatten()(x)
 x = keras.layers.Dense(256, activation='relu')(x)
 x = keras.layers.Dropout(0.01)(x)
-predictions = keras.layers.Dense(1, activation='tanh')(x)
-model = keras.Model(inputs=inputs, outputs=predictions)
+outputs = keras.layers.Dense(1, activation='tanh')(x)
+model = keras.Model(inputs=inputs, outputs=outputs)
 
 model.compile(optimizer=keras.optimizers.Adam(1e-5),
               loss=keras.losses.MeanSquaredError(),
@@ -38,7 +38,7 @@ def training_model(datasets):
     print("labels:", y_train.shape)
     model.summary()
 
-    model.fit(x_train, y_train, batch_size=1, epochs=1)
+    #model.fit(x_train, y_train, batch_size=1, epochs=10)
 
 
 #

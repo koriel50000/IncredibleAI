@@ -122,9 +122,10 @@ def main(args):
     path = "../resources/records/"
     with zipfile.ZipFile(os.path.join(path, "kifu102245.zip")) as records_zip:
 
+        namelist = records_zip.namelist()
         step = 1000
         for i, pos in enumerate(range(0, 2000, step)):
-            filenames = records_zip.namelist()[pos: pos + step]
+            filenames = namelist[pos: pos + step]
             records_zip.extractall(path, filenames)
 
             prefix = "../resources/REVERSI_data/train1k{:02d}".format(i + 1)
