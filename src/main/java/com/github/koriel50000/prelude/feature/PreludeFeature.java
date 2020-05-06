@@ -4,7 +4,7 @@ import com.github.koriel50000.prelude.Reversi;
 import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
 
-import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +36,7 @@ public class PreludeFeature implements Feature {
     public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves, Reversi.Turn turn) {
         List<Eval> evals = new ArrayList<>();
         for (Reversi.Coord move : moves) {
-            ByteBuffer state = converter.convertState(reversi, move);
+            FloatBuffer state = converter.convertState(reversi, move);
             float value = model.calculatePredicatedValue(state);
             evals.add(new Eval(move, value));
         }

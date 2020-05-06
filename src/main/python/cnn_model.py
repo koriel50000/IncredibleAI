@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import datasets
 from tensorflow import keras
 
 # 定数宣言
@@ -9,7 +10,7 @@ input_channel = 16
 
 
 # モデル定義
-inputs = keras.Input(name='inputs', shape=(input_rows * input_cols * input_channel))
+inputs = keras.Input(shape=(input_rows * input_cols * input_channel,), name='inputs')
 x = keras.layers.Reshape((input_rows, input_cols, input_channel))(inputs)
 x = keras.layers.Conv2D(64, 5, padding='SAME', activation='relu', use_bias=False)(x)
 x = keras.layers.Conv2D(64, 3, padding='SAME', activation='relu', use_bias=False)(x)
@@ -20,8 +21,8 @@ x = keras.layers.Conv2D(1, 1, padding='SAME', activation='relu', use_bias=False)
 x = keras.layers.Flatten()(x)
 x = keras.layers.Dense(256, activation='relu')(x)
 x = keras.layers.Dropout(0.01)(x)
-outputs = keras.layers.Dense(1, activation='tanh')(x)
-model = keras.Model(inputs=inputs, outputs=outputs)
+outputs = keras.layers.Dense(1, activation='tanh', name='outputs')(x)
+model = keras.Model(inputs=inputs, outputs=outputs, name='cnn_model')
 
 model.compile(optimizer=keras.optimizers.Adam(1e-5),
               loss=keras.losses.MeanSquaredError(),
@@ -31,14 +32,19 @@ model.compile(optimizer=keras.optimizers.Adam(1e-5),
 #
 # モデルを学習する
 #
-def training_model(datasets):
-    x_train = datasets.train.images
-    y_train = datasets.train.labels
+def training_model(datasets_dir, checkpoint_dir, prefix):
+    reversi_data = datasets.read_data_sets(datasets_dir, prefix)
+    x_train = reversi_data.train.images
+    y_train = reversi_data.train.labels
     print("images;", x_train.shape)
     print("labels:", y_train.shape)
     model.summary()
 
-    #model.fit(x_train, y_train, batch_size=1, epochs=10)
+    checkpoint_path = checkpoint_dir + prefix + '_{epoch:02d}'
+    checkpoint = keras.callbacks.ModelCheckpoint(checkpoint_path,
+                                                 save_weights_only=True)
+
+    model.fit(x_train, y_train, batch_size=1, epochs=10, callbacks=[checkpoint])
 
 
 #
@@ -50,13 +56,5 @@ def calculate_predicted_value(state):
     return predictions_[0][0]
 
 
-def save_checkpoint(file, step):
-    model.save_weights(file + '-' + str(step))
-
-
-def load_checkpoint(file, step):
-    model.load_weights(file + '-' + str(step))
-
-
-def save_model(file):
-    model.save(file)
+def save_model(export_path):
+    keras.models.save_model(model, export_path)

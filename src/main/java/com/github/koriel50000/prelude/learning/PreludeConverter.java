@@ -2,12 +2,12 @@ package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.Reversi;
 
-import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 public class PreludeConverter {
 
-    private static final int COLUMS = 8;
     private static final int ROWS = 8;
+    private static final int COLUMS = 8;
     private static final int CHANNEL = 16;
 
     private static final int AREA_EMPTY = 0;
@@ -16,15 +16,15 @@ public class PreludeConverter {
     private static final int AREA_UNKNOWN = 3;
     private static final int AREA_NOT_EMPTY = 4;
 
-    private static final int[][] REGION = new int[][] {
-            new int[] { 8, 0, 0, 0, 1, 1, 1,10 },
-            new int[] { 4, 8, 0, 0, 1, 1,10, 5 },
-            new int[] { 4, 4, 8, 0, 1,10, 5, 5 },
-            new int[] { 4, 4, 4, 8,10, 5, 5, 5 },
-            new int[] { 6, 6, 6,12,14, 7, 7, 7 },
-            new int[] { 6, 6,12, 2, 3,14, 7, 7 },
-            new int[] { 6,12, 2, 2, 3, 3,14, 7 },
-            new int[] {12, 2, 2, 2, 3, 3, 3,14 }
+    private static final int[][] REGION = new int[][]{
+            new int[]{8, 0, 0, 0, 1, 1, 1, 10},
+            new int[]{4, 8, 0, 0, 1, 1, 10, 5},
+            new int[]{4, 4, 8, 0, 1, 10, 5, 5},
+            new int[]{4, 4, 4, 8, 10, 5, 5, 5},
+            new int[]{6, 6, 6, 12, 14, 7, 7, 7},
+            new int[]{6, 6, 12, 2, 3, 14, 7, 7},
+            new int[]{6, 12, 2, 2, 3, 3, 14, 7},
+            new int[]{12, 2, 2, 2, 3, 3, 3, 14}
     };
 
     /**
@@ -160,51 +160,59 @@ public class PreludeConverter {
         }
     }
 
-    private ByteBuffer state = ByteBuffer.allocate(ROWS * COLUMS * CHANNEL);
+    private FloatBuffer state = FloatBuffer.allocate(ROWS * COLUMS * CHANNEL);
 
     /**
      * 着手をプロットする
      */
-    private void putState(ByteBuffer state, int region, int x, int y, int channel) {
+    private void putState(FloatBuffer state, int region, int x, int y, int channel) {
         int x_;
         int y_;
         switch (region) {
-            case 0: case 8:
+            case 0:
+            case 8:
                 // 変換なし
                 x_ = x - 1;
                 y_ = y - 1;
                 break;
-            case 1: case 10:
+            case 1:
+            case 10:
                 // 左右反転
                 x_ = 8 - x;
                 y_ = y - 1;
                 break;
-            case 2: case 12:
+            case 2:
+            case 12:
                 // 上下反転
                 x_ = x - 1;
                 y_ = 8 - y;
                 break;
-            case 3: case 14:
+            case 3:
+            case 14:
                 // 上下左右反転
                 x_ = 8 - x;
                 y_ = 8 - y;
                 break;
-            case 4: case 9:
+            case 4:
+            case 9:
                 // 対称反転
                 x_ = y - 1;
                 y_ = x - 1;
                 break;
-            case 5: case 11:
+            case 5:
+            case 11:
                 // 左右対称反転
                 x_ = y - 1;
                 y_ = 8 - x;
                 break;
-            case 6: case 13:
+            case 6:
+            case 13:
                 // 上下対称反転
                 x_ = 8 - y;
                 y_ = x - 1;
                 break;
-            case 7: case 15:
+            case 7:
+            case 15:
                 // 上下左右対称反転
                 x_ = 8 - y;
                 y_ = 8 - x;
@@ -213,13 +221,13 @@ public class PreludeConverter {
                 throw new IllegalArgumentException("no match: " + region);
         }
         int index = channel * ROWS * COLUMS + y_ * COLUMS + x_;
-        state.put(index, (byte)1);
+        state.put(index, 1);
     }
 
     /**
      * 石を置いたときの状態を返す
      */
-    public ByteBuffer convertState(Reversi reversi, Reversi.Coord newCoord) {
+    public FloatBuffer convertState(Reversi reversi, Reversi.Coord newCoord) {
         reversi.makeMove(newCoord);
 
         int[][] board = reversi.getTempBoard();

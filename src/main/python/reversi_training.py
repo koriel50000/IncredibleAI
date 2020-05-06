@@ -3,7 +3,6 @@
 import sys
 from datetime import datetime
 
-import datasets
 import cnn_model
 
 
@@ -13,16 +12,15 @@ import cnn_model
 def main(args):
     print('start:', datetime.now())
 
-    for i in range(1, 2):
-        prefix = 'train1k{:02}'.format(i)
-        reversi_data = datasets.read_data_sets('../resources/REVERSI_data/', prefix)
-
-        cnn_model.training_model(reversi_data)
-
-        #cnn_model.save_checkpoint('../resources/checkpoint/cnn_model', i)
+    for i in range(1, 3):
+        prefix = 'train1k{:02d}'.format(i)
+        cnn_model.training_model('../resources/REVERSI_data/',
+                                 '../resources/checkpoint/',
+                                 prefix)
         print(datetime.now())
 
-    #cnn_model.save_model("../resources/model/")
+    cnn_model.save_model('../resources/model/')
+
     print('end:', datetime.now())
     
     return 0
