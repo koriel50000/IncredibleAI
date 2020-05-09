@@ -209,4 +209,4 @@ def print_score():
     print("black:{0} white:{1}".format(number_of_stones[BLACK], number_of_stones[WHITE]))
     print()
 
-    return winner, number_of_stones[BLACK], number_of_stones[BLACK]
+    return winner, number_of_stones[BLACK], number_of_stones[WHITE]

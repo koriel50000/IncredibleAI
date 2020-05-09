@@ -66,7 +66,6 @@ def play(black_feature, white_feature):
             break
         reversi.next_turn()
 
-    reversi.print_board()
     winner, black, white = reversi.print_score()
 
     return winner, black, white
@@ -77,28 +76,44 @@ def play(black_feature, white_feature):
 #
 def main(args):
     step = 2
-    cnn_model.load_checkpoint("../resources/checkpoint/cnn_model", step)
+    epoch = 10
+    cnn_model.load_checkpoint("../resources/checkpoint/", step, epoch)
 
     win = 0
     loss = 0
     draw = 0
+    win_stone = 0
+    loss_stone = 0
     for i in range(50):
         winner, black, white = play(prelude_feature, random_feature)
         if winner == "black":
             win += 1
+            win_stone += black
+            loss_stone += white
         elif winner == "white":
             loss += 1
+            win_stone += white
+            loss_stone += black
         else:
             draw += 1
+            win_stone += black
+            loss_stone += white
         winner, black, white = play(random_feature, prelude_feature)
         if winner == "black":
             loss += 1
+            win_stone += black
+            loss_stone += white
         elif winner == "white":
             win += 1
+            win_stone += white
+            loss_stone += black
         else:
             draw += 1
+            win_stone += white
+            loss_stone += black
 
     print("win:{0} loss:{1} draw:{2}".format(win, loss, draw))
+    print("win_stone:{0} loss_stone:{1}".format(win_stone, loss_stone))
 
     return 0
 

@@ -32,7 +32,8 @@ model.compile(optimizer=keras.optimizers.Adam(1e-5),
 #
 # モデルを学習する
 #
-def training_model(datasets_dir, checkpoint_dir, prefix):
+def training_model(datasets_dir, checkpoint_dir, step):
+    prefix = 'train1k{:02d}'.format(step)
     reversi_data = datasets.read_data_sets(datasets_dir, prefix)
     x_train = reversi_data.train.images
     y_train = reversi_data.train.labels
@@ -56,5 +57,10 @@ def calculate_predicted_value(state):
     return predictions_[0][0]
 
 
-def save_model(export_path):
-    keras.models.save_model(model, export_path)
+def save_model(export_dir):
+    keras.models.save_model(model, export_dir)
+
+
+def load_checkpoint(checkpoint_dir, step, epoch):
+    filename = 'train1k{:02d}_{:02d}'.format(step, epoch)
+    model.load_weights(checkpoint_dir + filename)
