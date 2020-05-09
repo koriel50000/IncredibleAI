@@ -57,8 +57,11 @@ def random_feature(coords):
 
 
 def manual_feature(coords):
-    move = input("move> ")
-    return converter.move_to_coord(move.upper())
+    while True:
+        move = input("move> ")
+        coord = converter.move_to_coord(move.upper())
+        if coord in coords:
+            return coord
 
 
 #

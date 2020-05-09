@@ -12,11 +12,10 @@ import cnn_model
 def main(args):
     print('start:', datetime.now())
 
-    for i in range(1, 3):
-        prefix = 'train1k{:02d}'.format(i)
+    for step in range(0, 5):
         cnn_model.training_model('../resources/REVERSI_data/',
                                  '../resources/checkpoint/',
-                                 prefix)
+                                 step)
         print(datetime.now())
 
     cnn_model.save_model('../resources/model/')
