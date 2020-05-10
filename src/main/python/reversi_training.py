@@ -12,10 +12,26 @@ import cnn_model
 def main(args):
     print('start:', datetime.now())
 
-    for step in range(0, 5):
+    start_step = 0
+    end_step = 100
+    initial_epoch = 0
+    epoch_size = 10
+
+    if start_step != 0 or initial_epoch != 0:
+        cnn_model.load_checkpoint("../resources/checkpoint/",
+                                  start_step,
+                                  initial_epoch)
+    if initial_epoch == 10:
+        start_step += 1
+        initial_epoch = 0
+
+    for step in range(start_step, end_step):
         cnn_model.training_model('../resources/REVERSI_data/',
                                  '../resources/checkpoint/',
-                                 step)
+                                 step,
+                                 initial_epoch,
+                                 epoch_size)
+        initial_epoch = 0
         print(datetime.now())
 
     cnn_model.save_model('../resources/model/')

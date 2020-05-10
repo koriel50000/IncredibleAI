@@ -32,7 +32,7 @@ model.compile(optimizer=keras.optimizers.Adam(1e-5),
 #
 # モデルを学習する
 #
-def training_model(datasets_dir, checkpoint_dir, step):
+def training_model(datasets_dir, checkpoint_dir, step, epoch, epoch_size):
     prefix = 'train1k{:02d}'.format(step)
     reversi_data = datasets.read_data_sets(datasets_dir, prefix)
     x_train = reversi_data.train.images
@@ -45,7 +45,7 @@ def training_model(datasets_dir, checkpoint_dir, step):
     checkpoint = keras.callbacks.ModelCheckpoint(checkpoint_path,
                                                  save_weights_only=True)
 
-    model.fit(x_train, y_train, batch_size=1, epochs=10, callbacks=[checkpoint])
+    model.fit(x_train, y_train, batch_size=1, initial_epoch=epoch, epochs=epoch_size, callbacks=[checkpoint])
 
 
 #
