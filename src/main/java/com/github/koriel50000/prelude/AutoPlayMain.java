@@ -25,37 +25,46 @@ public class AutoPlayMain {
         int winStones = 0;
         int lossStones = 0;
         Reversi.Score score;
+
         for (int i = 0; i < 50; i++) {
             score = play(preludeFeature, randomFeature);
 
-            if (score.getWinner().equals("black")) {
-                win += 1;
-                winStones += score.getBlackStones();
-                lossStones += score.getWhiteStones();
-            } else if (score.getWinner().equals("white")) {
-                loss += 1;
-                winStones += score.getWhiteStones();
-                lossStones += score.getBlackStones();
-            } else {
-                draw += 1;
-                winStones += score.getBlackStones();
-                lossStones += score.getWhiteStones();
+            switch (score.getWinner()) {
+                case Black:
+                    win += 1;
+                    winStones += score.getBlackStones();
+                    lossStones += score.getWhiteStones();
+                    break;
+                case White:
+                    loss += 1;
+                    winStones += score.getWhiteStones();
+                    lossStones += score.getBlackStones();
+                    break;
+                case Draw:
+                    draw += 1;
+                    winStones += score.getBlackStones();
+                    lossStones += score.getWhiteStones();
+                    break;
             }
 
             score = play(randomFeature, preludeFeature);
 
-            if (score.getWinner().equals("black")) {
-                loss += 1;
-                winStones += score.getBlackStones();
-                lossStones += score.getWhiteStones();
-            } else if (score.getWinner().equals("white")) {
-                win += 1;
-                winStones += score.getWhiteStones();
-                lossStones += score.getBlackStones();
-            } else {
-                draw += 1;
-                winStones += score.getWhiteStones();
-                lossStones += score.getBlackStones();
+            switch (score.getWinner()) {
+                case Black:
+                    loss += 1;
+                    winStones += score.getBlackStones();
+                    lossStones += score.getWhiteStones();
+                    break;
+                case White:
+                    win += 1;
+                    winStones += score.getWhiteStones();
+                    lossStones += score.getBlackStones();
+                    break;
+                case Draw:
+                    draw += 1;
+                    winStones += score.getWhiteStones();
+                    lossStones += score.getBlackStones();
+                    break;
             }
         }
 

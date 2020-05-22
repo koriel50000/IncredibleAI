@@ -206,15 +206,15 @@ public class Reversi {
      */
     public Score printScore() {
         System.out.print(String.format("move count:%d ", turnCount));
-        String winner;
+        Winner winner;
         if (stones[BLACK] > stones[WHITE]) {
-            winner = "black";
+            winner = Winner.Black;
             stones[BLACK] += stones[EMPTY];
         } else if (stones[BLACK] < stones[WHITE]) {
-            winner = "white";
+            winner = Winner.White;
             stones[WHITE] += stones[EMPTY];
         } else {
-            winner = "draw";
+            winner = Winner.Draw;
         }
         System.out.println(String.format("winner:%s", winner));
         System.out.println(String.format("black:%d white:%d", stones[BLACK], stones[WHITE]));
@@ -240,7 +240,8 @@ public class Reversi {
     }
 
     public enum Turn {
-        Black(BLACK), White(WHITE);
+        Black(BLACK),
+        White(WHITE);
 
         private int boardValue;
 
@@ -343,19 +344,36 @@ public class Reversi {
         }
     }
 
+    public enum Winner {
+        Black("black"),
+        White("white"),
+        Draw("draw");
+
+        private String display;
+
+        Winner(String display) {
+            this.display = display;
+        }
+
+        @Override
+        public String toString() {
+            return display;
+        }
+    }
+
     public static class Score {
 
-        private String winner;
+        private Winner winner;
         private int blackStones;
         private int whiteStones;
 
-        private Score(String winner, int blackStones, int whiteStones) {
+        private Score(Winner winner, int blackStones, int whiteStones) {
             this.winner = winner;
             this.blackStones = blackStones;
             this.whiteStones = whiteStones;
         }
 
-        public String getWinner() {
+        public Winner getWinner() {
             return winner;
         }
 
