@@ -204,7 +204,7 @@ public class Reversi {
     /**
      * スコアを表示する
      */
-    public void printScore() {
+    public Score printScore() {
         System.out.print(String.format("move count:%d ", turnCount));
         String winner;
         if (stones[BLACK] > stones[WHITE]) {
@@ -219,6 +219,8 @@ public class Reversi {
         System.out.println(String.format("winner:%s", winner));
         System.out.println(String.format("black:%d white:%d", stones[BLACK], stones[WHITE]));
         System.out.println();
+
+        return new Score(winner, stones[BLACK], stones[WHITE]);
     }
 
     public Turn getCurrentTurn() {
@@ -338,6 +340,31 @@ public class Reversi {
 
         public static Direction[] corssValues() {
             return crossValues;
+        }
+    }
+
+    public static class Score {
+
+        private String winner;
+        private int blackStones;
+        private int whiteStones;
+
+        private Score(String winner, int blackStones, int whiteStones) {
+            this.winner = winner;
+            this.blackStones = blackStones;
+            this.whiteStones = whiteStones;
+        }
+
+        public String getWinner() {
+            return winner;
+        }
+
+        public int getBlackStones() {
+            return blackStones;
+        }
+
+        public int getWhiteStones() {
+            return whiteStones;
         }
     }
 }

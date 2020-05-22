@@ -19,10 +19,48 @@ public class AutoPlayMain {
         preludeFeature.init();
         randomFeature.init();
 
+        int win = 0;
+        int loss = 0;
+        int draw = 0;
+        int winStones = 0;
+        int lossStones = 0;
+        Reversi.Score score;
         for (int i = 0; i < 50; i++) {
-            play(preludeFeature, randomFeature);
-            play(randomFeature, preludeFeature);
+            score = play(preludeFeature, randomFeature);
+
+            if (score.getWinner().equals("black")) {
+                win += 1;
+                winStones += score.getBlackStones();
+                lossStones += score.getWhiteStones();
+            } else if (score.getWinner().equals("white")) {
+                loss += 1;
+                winStones += score.getWhiteStones();
+                lossStones += score.getBlackStones();
+            } else {
+                draw += 1;
+                winStones += score.getBlackStones();
+                lossStones += score.getWhiteStones();
+            }
+
+            score = play(randomFeature, preludeFeature);
+
+            if (score.getWinner().equals("black")) {
+                loss += 1;
+                winStones += score.getBlackStones();
+                lossStones += score.getWhiteStones();
+            } else if (score.getWinner().equals("white")) {
+                win += 1;
+                winStones += score.getWhiteStones();
+                lossStones += score.getBlackStones();
+            } else {
+                draw += 1;
+                winStones += score.getWhiteStones();
+                lossStones += score.getBlackStones();
+            }
         }
+
+        System.out.println(String.format("win:%d loss:%d draw:%d", win, loss, draw));
+        System.out.println(String.format("win_stone:%d loss_stone:%d", winStones, lossStones));
 
         preludeFeature.destroy();
         randomFeature.destroy();
@@ -31,7 +69,7 @@ public class AutoPlayMain {
     /**
      * ゲームを開始する
      */
-    private void play(Feature blackFeature, Feature whiteFeature) {
+    private Reversi.Score play(Feature blackFeature, Feature whiteFeature) {
         Reversi reversi = new Reversi();
         reversi.initialize();
 
@@ -56,7 +94,8 @@ public class AutoPlayMain {
             reversi.nextTurn();
         }
 
-        reversi.printBoard();
-        reversi.printScore();
+        Reversi.Score score = reversi.printScore();
+
+        return score;
     }
 }

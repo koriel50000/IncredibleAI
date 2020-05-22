@@ -160,8 +160,6 @@ public class PreludeConverter {
         }
     }
 
-    private FloatBuffer state = FloatBuffer.allocate(ROWS * COLUMS * CHANNEL);
-
     /**
      * 着手をプロットする
      */
@@ -241,6 +239,7 @@ public class PreludeConverter {
 
         enumerateArea(board);
 
+        FloatBuffer state = FloatBuffer.allocate(ROWS * COLUMS * CHANNEL);
         state.clear();
 
         putState(state, region, x, y, 3); // 着手

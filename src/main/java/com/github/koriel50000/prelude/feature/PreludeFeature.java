@@ -48,7 +48,7 @@ public class PreludeFeature implements Feature {
         Collections.sort(evals, Collections.reverseOrder()); // 評価値で降順
 
         List<Reversi.Coord> moves = new ArrayList<>();
-        float maximumValue = Float.MIN_VALUE;
+        float maximumValue = Float.NEGATIVE_INFINITY;
         float delta = 0.001f; // FIXME 近い値を考慮
         for (Eval evel : evals) {
             Reversi.Coord move = evel.getMove();
