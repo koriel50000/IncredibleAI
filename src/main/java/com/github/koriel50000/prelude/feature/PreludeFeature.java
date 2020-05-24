@@ -33,7 +33,7 @@ public class PreludeFeature implements Feature {
     }
 
     @Override
-    public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves, Reversi.Turn turn) {
+    public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves) {
         List<Eval> evals = new ArrayList<>();
         for (Reversi.Coord move : moves) {
             FloatBuffer state = converter.convertState(reversi, move);

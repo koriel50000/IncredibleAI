@@ -39,9 +39,9 @@ public class PlayMain {
             if (moves.size() > 0) {
                 Reversi.Coord move;
                 if (turn == Reversi.Turn.Black) {
-                    move = blackFeature.evaluate(reversi, moves, turn);
+                    move = blackFeature.evaluate(reversi, moves);
                 } else {
-                    move = whiteFeature.evaluate(reversi, moves, turn);
+                    move = whiteFeature.evaluate(reversi, moves);
                 }
                 reversi.makeMove(move);
             } else{

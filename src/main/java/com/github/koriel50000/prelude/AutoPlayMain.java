@@ -1,8 +1,8 @@
 package com.github.koriel50000.prelude;
 
 import com.github.koriel50000.prelude.feature.Feature;
-import com.github.koriel50000.prelude.feature.PreludeFeature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
+import com.github.koriel50000.prelude.feature.ReferenceFeature;
 
 import java.util.List;
 
@@ -14,9 +14,9 @@ public class AutoPlayMain {
     }
 
     private void autoplay() {
-        Feature preludeFeature = new PreludeFeature();
+        Feature referenceFeagure = new ReferenceFeature();
         Feature randomFeature = new RandomFeature();
-        preludeFeature.init();
+        referenceFeagure.init();
         randomFeature.init();
 
         int win = 0;
@@ -27,7 +27,7 @@ public class AutoPlayMain {
         Reversi.Score score;
 
         for (int i = 0; i < 50; i++) {
-            score = play(preludeFeature, randomFeature);
+            score = play(referenceFeagure, randomFeature);
 
             switch (score.getWinner()) {
                 case Black:
@@ -47,7 +47,7 @@ public class AutoPlayMain {
                     break;
             }
 
-            score = play(randomFeature, preludeFeature);
+            score = play(randomFeature, referenceFeagure);
 
             switch (score.getWinner()) {
                 case Black:
@@ -71,7 +71,7 @@ public class AutoPlayMain {
         System.out.println(String.format("win:%d loss:%d draw:%d", win, loss, draw));
         System.out.println(String.format("win_stone:%d loss_stone:%d", winStones, lossStones));
 
-        preludeFeature.destroy();
+        referenceFeagure.destroy();
         randomFeature.destroy();
     }
 
@@ -89,9 +89,9 @@ public class AutoPlayMain {
             if (moves.size() > 0) {
                 Reversi.Coord move;
                 if (turn == Reversi.Turn.Black) {
-                    move = blackFeature.evaluate(reversi, moves, turn);
+                    move = blackFeature.evaluate(reversi, moves);
                 } else {
-                    move = whiteFeature.evaluate(reversi, moves, turn);
+                    move = whiteFeature.evaluate(reversi, moves);
                 }
                 reversi.makeMove(move);
             }

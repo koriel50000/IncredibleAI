@@ -10,5 +10,5 @@ public interface Feature {
 
     void destroy();
 
-    Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves, Reversi.Turn turn);
+    Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves);
 }
