@@ -1,6 +1,6 @@
 package com.github.koriel50000.prelude.feature;
 
-import com.github.koriel50000.prelude.Reversi;
+import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.book.BookSearch;
 import com.github.koriel50000.prelude.rollout.RolloutPolicy;
 import com.github.koriel50000.prelude.winloss.WinLossExplorer;
@@ -20,27 +20,27 @@ public class ReferenceFeature implements Feature {
     private ExecutorService executor;
     private List<EvaluateTask> evaluateTasks;
 
-    public ReferenceFeature(Reversi reversi) {
-        bookSearch = new BookSearch(reversi);
-        rolloutPolicy = new RolloutPolicy(reversi);
-        winLossExplorer = new WinLossExplorer(reversi);
+    public ReferenceFeature(Board board) {
+        bookSearch = new BookSearch(board);
+        rolloutPolicy = new RolloutPolicy(board);
+        winLossExplorer = new WinLossExplorer(board);
 
         evaluateTasks = new ArrayList<>();
         evaluateTasks.add(new EvaluateTask() {
             @Override
-            protected Reversi.Coord evaluate(List<Reversi.Coord> moves) throws Exception {
+            protected Board.Coord evaluate(List<Board.Coord> moves) throws Exception {
                 return search(moves);
             }
         });
         evaluateTasks.add(new EvaluateTask() {
             @Override
-            protected Reversi.Coord evaluate(List<Reversi.Coord> moves) throws Exception {
+            protected Board.Coord evaluate(List<Board.Coord> moves) throws Exception {
                 return rollout(moves);
             }
         });
         evaluateTasks.add(new EvaluateTask() {
             @Override
-            protected Reversi.Coord evaluate(List<Reversi.Coord> moves) throws Exception {
+            protected Board.Coord evaluate(List<Board.Coord> moves) throws Exception {
                 return explore(moves);
             }
         });
@@ -61,12 +61,12 @@ public class ReferenceFeature implements Feature {
     }
 
     @Override
-    public Reversi.Coord evaluate(List<Reversi.Coord> moves) {
+    public Board.Coord evaluate(List<Board.Coord> moves) {
         for (EvaluateTask evaluateTask : evaluateTasks) {
             evaluateTask.setMoves(moves);
         }
 
-        Reversi.Coord coord;
+        Board.Coord coord;
         try {
             coord = executor.invokeAny(evaluateTasks, TIME_LIMIT, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
@@ -78,7 +78,7 @@ public class ReferenceFeature implements Feature {
         return coord;
     }
 
-    private Reversi.Coord search(List<Reversi.Coord> moves) {
+    private Board.Coord search(List<Board.Coord> moves) {
         if (bookSearch.notExists()) {
             throw new CancellationException("not exists");
         }
@@ -86,11 +86,11 @@ public class ReferenceFeature implements Feature {
         return bookSearch.search(moves);
     }
 
-    private Reversi.Coord rollout(List<Reversi.Coord> moves) {
+    private Board.Coord rollout(List<Board.Coord> moves) {
         return rolloutPolicy.rollout(moves);
     }
 
-    private Reversi.Coord explore(List<Reversi.Coord> moves) {
+    private Board.Coord explore(List<Board.Coord> moves) {
         if (winLossExplorer.notPossible()) {
             throw new CancellationException("not possible");
         }
@@ -98,19 +98,19 @@ public class ReferenceFeature implements Feature {
         return winLossExplorer.explore(moves);
     }
 
-    private static abstract class EvaluateTask implements Callable<Reversi.Coord> {
+    private static abstract class EvaluateTask implements Callable<Board.Coord> {
 
-        private List<Reversi.Coord> moves;
+        private List<Board.Coord> moves;
 
-        private void setMoves(List<Reversi.Coord> moves) {
+        private void setMoves(List<Board.Coord> moves) {
             this.moves = moves;
         }
 
         @Override
-        public Reversi.Coord call() throws Exception {
+        public Board.Coord call() throws Exception {
             return evaluate(moves);
         }
 
-        protected abstract Reversi.Coord evaluate(List<Reversi.Coord> moves) throws Exception;
+        protected abstract Board.Coord evaluate(List<Board.Coord> moves) throws Exception;
     }
 }

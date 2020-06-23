@@ -1,33 +1,33 @@
 package com.github.koriel50000.prelude.winloss;
 
-import com.github.koriel50000.prelude.Reversi;
+import com.github.koriel50000.prelude.reversi.Board;
 
 import java.util.List;
 
 public class WinLossExplorer {
 
-    private Reversi reversi;
+    private Board board;
 
-    public WinLossExplorer(Reversi reversi) {
-        this.reversi = reversi;
+    public WinLossExplorer(Board board) {
+        this.board = board;
     }
 
     public boolean notPossible() {
         // 勝敗探索ができないならばtrue
         // falseの場合も、制限時間内に勝敗が判定するかは未確定
         // FIXME
-        return reversi.getTurnCount() < 50;
+        return board.getTurnCount() < 50;
     }
 
-    private Reversi.Turn currentTurn;
+    private Board.Color currentColor;
 
-    public Reversi.Coord explore(List<Reversi.Coord> moves) {
-        currentTurn = reversi.getCurrentTurn();
-        Reversi.Coord optimumMove = null;
+    public Board.Coord explore(List<Board.Coord> moves) {
+        currentColor = board.getCurrentColor();
+        Board.Coord optimumMove = null;
 
         int maxValue = Integer.MIN_VALUE;
-        for (Reversi.Coord move : moves) {
-            Reversi nextBoard = reversi.tryMove(move);
+        for (Board.Coord move : moves) {
+            Board nextBoard = board.tryMove(move);
             int value = negamax(nextBoard, 1);
             if (value > maxValue) {
                 maxValue = value;
@@ -37,9 +37,9 @@ public class WinLossExplorer {
         return optimumMove;
     }
 
-    private int negamax(Reversi board, int color) {
+    private int negamax(Board board, int color) {
         if (board.hasCompleted()) {
-            Reversi.Score score = board.getScore();
+            Board.Score score = board.getScore();
             if (color > 0) {
                 return score.getBlackStones() - score.getWhiteStones();
             } else {
@@ -48,15 +48,15 @@ public class WinLossExplorer {
         }
         board.nextTurn();
 
-        List<Reversi.Coord> moves = board.availableMoves();
+        List<Board.Coord> moves = board.availableMoves();
         if (moves.size() == 0) {
             board.nextTurn();
             return -negamax(board, -color);
         }
 
         int maxValue = Integer.MIN_VALUE;
-        for (Reversi.Coord move : moves) {
-            Reversi nextBoard = board.tryMove(move);
+        for (Board.Coord move : moves) {
+            Board nextBoard = board.tryMove(move);
             int value = -negamax(nextBoard, -color);
             if (value > maxValue) {
                 maxValue = value;

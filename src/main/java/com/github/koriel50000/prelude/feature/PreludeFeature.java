@@ -1,6 +1,6 @@
 package com.github.koriel50000.prelude.feature;
 
-import com.github.koriel50000.prelude.Reversi;
+import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
 
@@ -12,13 +12,13 @@ import java.util.Random;
 
 public class PreludeFeature implements Feature {
 
-    private Reversi reversi;
+    private Board board;
     private PreludeConverter converter;
     private CNNModel model;
     private Random random;
 
-    public PreludeFeature(Reversi reversi) {
-        this.reversi = reversi;
+    public PreludeFeature(Board board) {
+        this.board = board;
         converter = new PreludeConverter();
         model = new CNNModel();
         random = new Random(System.currentTimeMillis());
@@ -35,10 +35,10 @@ public class PreludeFeature implements Feature {
     }
 
     @Override
-    public Reversi.Coord evaluate(List<Reversi.Coord> moves) {
+    public Board.Coord evaluate(List<Board.Coord> moves) {
         List<Eval> evals = new ArrayList<>();
-        for (Reversi.Coord move : moves) {
-            FloatBuffer state = converter.convertState(reversi, move);
+        for (Board.Coord move : moves) {
+            FloatBuffer state = converter.convertState(board, move);
             float value = model.calculatePredicatedValue(state);
             evals.add(new Eval(move, value));
         }
@@ -46,14 +46,14 @@ public class PreludeFeature implements Feature {
         return optimumChoice(evals);
     }
 
-    private Reversi.Coord optimumChoice(List<Eval> evals) {
+    private Board.Coord optimumChoice(List<Eval> evals) {
         Collections.sort(evals, Collections.reverseOrder()); // 評価値で降順
 
-        List<Reversi.Coord> moves = new ArrayList<>();
+        List<Board.Coord> moves = new ArrayList<>();
         float maximumValue = Float.NEGATIVE_INFINITY;
         float delta = 0.001f; // FIXME 近い値を考慮
         for (Eval evel : evals) {
-            Reversi.Coord move = evel.getMove();
+            Board.Coord move = evel.getMove();
             float value = evel.getValue();
             if (value + delta < maximumValue) {
                 break;
@@ -67,15 +67,15 @@ public class PreludeFeature implements Feature {
 
     private static class Eval implements Comparable<Eval> {
 
-        private Reversi.Coord move;
+        private Board.Coord move;
         private float value;
 
-        Eval(Reversi.Coord move, float value) {
+        Eval(Board.Coord move, float value) {
             this.move = move;
             this.value = value;
         }
 
-        Reversi.Coord getMove() {
+        Board.Coord getMove() {
             return move;
         }
 

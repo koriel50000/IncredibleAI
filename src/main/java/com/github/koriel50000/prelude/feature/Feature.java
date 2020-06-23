@@ -1,6 +1,6 @@
 package com.github.koriel50000.prelude.feature;
 
-import com.github.koriel50000.prelude.Reversi;
+import com.github.koriel50000.prelude.reversi.Board;
 
 import java.util.List;
 
@@ -10,5 +10,5 @@ public interface Feature {
 
     void destroy();
 
-    Reversi.Coord evaluate(List<Reversi.Coord> moves);
+    Board.Coord evaluate(List<Board.Coord> moves);
 }

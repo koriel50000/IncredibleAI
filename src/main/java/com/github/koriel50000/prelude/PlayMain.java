@@ -3,6 +3,7 @@ package com.github.koriel50000.prelude;
 import com.github.koriel50000.prelude.feature.Feature;
 import com.github.koriel50000.prelude.feature.PreludeFeature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
+import com.github.koriel50000.prelude.reversi.Board;
 
 import java.util.List;
 
@@ -14,14 +15,14 @@ public class PlayMain {
     }
 
     private void oneplay() {
-        Reversi reversi = new Reversi();
+        Board board = new Board();
 
-        Feature preludeFeature = new PreludeFeature(reversi);
+        Feature preludeFeature = new PreludeFeature(board);
         Feature randomFeature = new RandomFeature();
         preludeFeature.init();
         randomFeature.init();
 
-        play(reversi, preludeFeature, randomFeature);
+        play(board, preludeFeature, randomFeature);
 
         preludeFeature.destroy();
         randomFeature.destroy();
@@ -30,37 +31,37 @@ public class PlayMain {
     /**
      * ゲームを開始する
      */
-    private void play(Reversi reversi, Feature blackFeature, Feature whiteFeature) {
-        reversi.initialize();
+    private void play(Board board, Feature blackFeature, Feature whiteFeature) {
+        board.initialize();
 
         while (true) {
-            Reversi.Turn turn = reversi.getCurrentTurn();
+            Board.Color color = board.getCurrentColor();
 
-            reversi.printBoard();
-            reversi.printStatus();
+            board.printBoard();
+            board.printStatus();
 
-            List<Reversi.Coord> moves = reversi.availableMoves();
+            List<Board.Coord> moves = board.availableMoves();
             if (moves.size() > 0) {
-                Reversi.Coord move;
-                if (turn == Reversi.Turn.Black) {
+                Board.Coord move;
+                if (color == Board.Color.Black) {
                     move = blackFeature.evaluate(moves);
                 } else {
                     move = whiteFeature.evaluate(moves);
                 }
-                reversi.makeMove(move);
+                board.makeMove(move);
             } else{
                 System.out.println("Pass!");
             }
 
             // ゲーム終了を判定
-            if (reversi.hasCompleted()) {
+            if (board.hasCompleted()) {
                 break;
             }
 
-            reversi.nextTurn();
+            board.nextTurn();
         }
 
-        reversi.printBoard();
-        reversi.printScore();
+        board.printBoard();
+        board.printScore();
     }
 }

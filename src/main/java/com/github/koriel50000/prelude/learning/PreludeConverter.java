@@ -1,6 +1,6 @@
 package com.github.koriel50000.prelude.learning;
 
-import com.github.koriel50000.prelude.Reversi;
+import com.github.koriel50000.prelude.reversi.Board;
 
 import java.nio.FloatBuffer;
 
@@ -30,7 +30,7 @@ public class PreludeConverter {
     /**
      * 対角位置の対称変換が必要か
      */
-    private boolean isSymmetric(int diagonal, int[][] board, Reversi.Turn turn) {
+    private boolean isSymmetric(int diagonal, int[][] board, Board.Color color) {
         for (int y = 1; y <= 8; y++) {
             for (int x = y + 1; x <= 8; x++) {
                 int x_;
@@ -61,7 +61,7 @@ public class PreludeConverter {
                 }
                 // FIXME 説明を記載
                 if (board[y_][x_] != board[x_][y_]) {
-                    return board[y_][x_] != turn.boardValue();
+                    return board[y_][x_] != color.boardValue();
                 }
             }
         }
@@ -71,9 +71,9 @@ public class PreludeConverter {
     /**
      * 領域を判定する
      */
-    private int checkRegion(int[][] board, int x, int y, Reversi.Turn turn) {
+    private int checkRegion(int[][] board, int x, int y, Board.Color color) {
         int region = REGION[y - 1][x - 1];
-        if (region >= 8 && isSymmetric(region, board, turn)) {
+        if (region >= 8 && isSymmetric(region, board, color)) {
             region += 1;
         }
         return region;
@@ -91,7 +91,7 @@ public class PreludeConverter {
     private int calculateOddEvenRecursive(int x, int y, int count) {
         oddevenArea[y][x] = AREA_UNKNOWN;
         count += 1;
-        for (Reversi.Direction dir : Reversi.Direction.corssValues()) {
+        for (Board.Direction dir : Board.Direction.corssValues()) {
             int x_ = x + dir.dx;
             int y_ = y + dir.dy;
             if (oddevenArea[y_][x_] == AREA_EMPTY) {
@@ -112,7 +112,7 @@ public class PreludeConverter {
         int count = calculateOddEvenRecursive(x, y, 0);
         int oddeven = (count % 2 == 1) ? AREA_ODD : AREA_EVEN;
 
-        for (Reversi.Coord move : Reversi.Coord.values()) {
+        for (Board.Coord move : Board.Coord.values()) {
             int x_ = move.x;
             int y_ = move.y;
             if (oddevenArea[y_][x_] == AREA_UNKNOWN) {
@@ -132,9 +132,9 @@ public class PreludeConverter {
         evenCount = 0;
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
-                if (board[y][x] == Reversi.EMPTY) {
+                if (board[y][x] == Board.EMPTY) {
                     oddevenArea[y][x] = AREA_EMPTY;
-                } else if (board[y][x] == Reversi.BORDER) {
+                } else if (board[y][x] == Board.BORDER) {
                     oddevenArea[y][x] = AREA_NOT_EMPTY;
                 } else {
                     oddevenArea[y][x] = AREA_NOT_EMPTY;
@@ -145,7 +145,7 @@ public class PreludeConverter {
             }
         }
 
-        for (Reversi.Coord move : Reversi.Coord.values()) {
+        for (Board.Coord move : Board.Coord.values()) {
             int x = move.x;
             int y = move.y;
             if (oddevenArea[y][x] != AREA_NOT_EMPTY) {
@@ -225,17 +225,17 @@ public class PreludeConverter {
     /**
      * 石を置いたときの状態を返す
      */
-    public FloatBuffer convertState(Reversi reversi, Reversi.Coord newCoord) {
-        Reversi nextReversi = reversi.tryMove(newCoord);
+    public FloatBuffer convertState(Board reversi, Board.Coord newCoord) {
+        Board nextReversi = reversi.tryMove(newCoord);
 
         int[][] board = reversi.getBoard();
         int[][] nextBoard = nextReversi.getBoard();
         int[][] reverse = reversi.getReverse();
-        Reversi.Turn turn = reversi.getCurrentTurn();
+        Board.Color color = reversi.getCurrentColor();
 
         int x = newCoord.x;
         int y = newCoord.y;
-        int region = checkRegion(nextBoard, x, y, turn);
+        int region = checkRegion(nextBoard, x, y, color);
 
         enumerateArea(board);
 
@@ -244,12 +244,12 @@ public class PreludeConverter {
 
         putState(state, region, x, y, 3); // 着手
 
-        for (Reversi.Coord move : Reversi.Coord.values()) {
+        for (Board.Coord move : Board.Coord.values()) {
             int x_ = move.x;
             int y_ = move.y;
-            if (board[y_][x_] == turn.boardValue()) {
+            if (board[y_][x_] == color.boardValue()) {
                 putState(state, region, x_, y_, 0); // 着手前に自石
-            } else if (board[y_][x_] == turn.opponentBoardValue()) {
+            } else if (board[y_][x_] == color.opponentBoardValue()) {
                 putState(state, region, x_, y_, 1); // 着手前に相手石
             } else {
                 putState(state, region, x_, y_, 2); // 着手前に空白

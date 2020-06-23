@@ -1,11 +1,11 @@
-package com.github.koriel50000.prelude;
+package com.github.koriel50000.prelude.reversi;
 
 import org.apache.commons.lang3.SerializationUtils;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Reversi {
+public class Board {
 
     public static final int EMPTY = 0;
     public static final int BLACK = 1;
@@ -16,21 +16,21 @@ public class Reversi {
     private int[][] reverse;
     private int[] stones;
 
-    private Turn currentTurn;
+    private Color currentColor;
     private int turnCount;
     private Score score;
 
-    public Reversi() {
+    public Board() {
         board = new int[10][10];
         reverse = new int[10][10];
         stones = new int[3];
     }
 
-    private Reversi(int[][] board, int[][] reverse, int[] stones, Turn currentTurn, int turnCount) {
+    private Board(int[][] board, int[][] reverse, int[] stones, Color currentColor, int turnCount) {
         this.board = board;
         this.reverse = reverse;
         this.stones = stones;
-        this.currentTurn = currentTurn;
+        this.currentColor = currentColor;
         this.turnCount = turnCount;
     }
 
@@ -58,7 +58,7 @@ public class Reversi {
         stones[EMPTY] = 60;
         stones[BLACK] = 2;
         stones[WHITE] = 2;
-        currentTurn = Turn.Black;
+        currentColor = Color.Black;
         turnCount = 1;
         score = null;
     }
@@ -66,13 +66,13 @@ public class Reversi {
     /**
      * 方向を指定して石が打てるかを判定する
      */
-    private boolean canMoveDirection(Turn turn, Coord coord, Direction dir) {
+    private boolean canMoveDirection(Color color, Coord coord, Direction dir) {
         int x = coord.x + dir.dx;
         int y = coord.y + dir.dy;
-        while (board[y][x] == turn.opponentBoardValue()) { // 相手石ならば継続
+        while (board[y][x] == color.opponentBoardValue()) { // 相手石ならば継続
             x += dir.dx;
             y += dir.dy;
-            if (board[y][x] == turn.boardValue()) { // 自石ならば終了
+            if (board[y][x] == color.boardValue()) { // 自石ならば終了
                 return true;
             }
         }
@@ -82,10 +82,10 @@ public class Reversi {
     /**
      * 指定した位置に石が打てるかを判定する
      */
-    private boolean canMove(Turn turn, Coord coord) {
+    private boolean canMove(Color color, Coord coord) {
         if (board[coord.y][coord.x] == EMPTY) {
             for (Direction dir : Direction.values()) {
-                if (canMoveDirection(turn, coord, dir)) {
+                if (canMoveDirection(color, coord, dir)) {
                     return true;
                 }
             }
@@ -97,13 +97,13 @@ public class Reversi {
      * 着手可能なリストを返す
      */
     public List<Coord> availableMoves() {
-        return availableMoves(currentTurn);
+        return availableMoves(currentColor);
     }
 
-    private List<Coord> availableMoves(Turn turn) {
+    private List<Coord> availableMoves(Color color) {
         List<Coord> coords = new ArrayList<>();
         for (Coord coord : Coord.values()) {
-            if (canMove(turn, coord)) {
+            if (canMove(color, coord)) {
                 coords.add(coord);
             }
         }
@@ -114,46 +114,46 @@ public class Reversi {
      * 指定された場所に石を打つ
      */
     public void makeMove(Coord coord) {
-        Turn turn = currentTurn;
+        Color color = currentColor;
         int x = coord.x;
         int y = coord.y;
 
-        board[y][x] = turn.boardValue(); // 石を打つ
+        board[y][x] = color.boardValue(); // 石を打つ
         reverse[y][x] += 1; // 反転数+1
-        stones[turn.boardValue()] += 1; // 自石を増やす
+        stones[color.boardValue()] += 1; // 自石を増やす
         stones[EMPTY] -= 1; // 空白を減らす
 
         for (Direction dir : Direction.values()) {
-            if (!canMoveDirection(turn, coord, dir)) {
+            if (!canMoveDirection(color, coord, dir)) {
                 continue;
             }
             x = coord.x + dir.dx;
             y = coord.y + dir.dy;
-            while (board[y][x] == turn.opponentBoardValue()) { // 相手石ならば継続
-                board[y][x] = turn.boardValue(); // 石を反転
+            while (board[y][x] == color.opponentBoardValue()) { // 相手石ならば継続
+                board[y][x] = color.boardValue(); // 石を反転
                 reverse[y][x] += 1; // 反転数+1
-                stones[turn.boardValue()] += 1; // 自石を増やす
-                stones[turn.opponentBoardValue()] -= 1; // 相手石を減らす
+                stones[color.boardValue()] += 1; // 自石を増やす
+                stones[color.opponentBoardValue()] -= 1; // 相手石を減らす
                 x += dir.dx;
                 y += dir.dy;
             }
         }
     }
 
-    public Reversi tryMove(Coord coord) {
+    public Board tryMove(Coord coord) {
         int[][] tempBoard = SerializationUtils.clone(board);
         int[][] tempReverse = SerializationUtils.clone(reverse);
         int[] tempStones = SerializationUtils.clone(stones);
-        Turn tempCurrentTurn = currentTurn;
+        Color tempCurrentColor = currentColor;
         int tempTurnCount = turnCount;
 
         makeMove(coord);
-        Reversi nextBoard = new Reversi(board, reverse, stones, currentTurn, turnCount);
+        Board nextBoard = new Board(board, reverse, stones, currentColor, turnCount);
 
         board = SerializationUtils.clone(tempBoard);
         reverse = SerializationUtils.clone(tempReverse);
         stones = SerializationUtils.clone(tempStones);
-        currentTurn = tempCurrentTurn;
+        currentColor = tempCurrentColor;
         turnCount = tempTurnCount;
 
         return nextBoard;
@@ -167,7 +167,7 @@ public class Reversi {
         // 先手・後手どちらかが完勝したら終了
         // 先手・後手両方パスで終了
         if (stones[EMPTY] == 0 || stones[BLACK] == 0 || stones[WHITE] == 0 ||
-                (availableMoves(Turn.Black).size() == 0 && availableMoves(Turn.White).size() == 0))
+                (availableMoves(Color.Black).size() == 0 && availableMoves(Color.White).size() == 0))
         {
             Winner winner;
             if (stones[BLACK] > stones[WHITE]) {
@@ -190,7 +190,7 @@ public class Reversi {
      * 手番を進める
      */
     public void nextTurn() {
-        currentTurn = currentTurn.opponentTurn(); // 手番を変更
+        currentColor = currentColor.opponentColor(); // 手番を変更
         turnCount += 1;
     }
 
@@ -217,12 +217,12 @@ public class Reversi {
     public void printStatus() {
         String turn;
         String stone;
-        if (currentTurn == Reversi.Turn.Black) {
+        if (currentColor == Color.Black) {
             turn = "black";
-            stone = STONES[Reversi.Turn.Black.boardValue()];
+            stone = STONES[Color.Black.boardValue()];
         } else {
             turn = "white";
-            stone = STONES[Reversi.Turn.White.boardValue()];
+            stone = STONES[Color.White.boardValue()];
         }
         System.out.print(String.format("move count:%d ", turnCount));
         System.out.println(String.format("move:%s(%s)", turn, stone));
@@ -240,8 +240,8 @@ public class Reversi {
         System.out.println();
     }
 
-    public Turn getCurrentTurn() {
-        return currentTurn;
+    public Color getCurrentColor() {
+        return currentColor;
     }
 
     public int getTurnCount() {
@@ -260,21 +260,23 @@ public class Reversi {
         return reverse;
     }
 
-    public enum Turn {
-        Black(BLACK),
-        White(WHITE);
+    public enum Color {
+        Black(BLACK, "black"),
+        White(WHITE, "white");
 
         private int boardValue;
+        private String display;
 
-        Turn(int boardValue) {
+        Color(int boardValue, String display) {
             this.boardValue = boardValue;
+            this.display = display;
         }
 
         /**
          * 相手の手番を返す
          * Black->White、White->Black
          */
-        Turn opponentTurn() {
+        Color opponentColor() {
             return this == Black ? White : Black;
         }
 
@@ -283,7 +285,12 @@ public class Reversi {
         }
 
         public int opponentBoardValue() {
-            return opponentTurn().boardValue();
+            return opponentColor().boardValue();
+        }
+
+        @Override
+        public String toString() {
+            return display;
         }
     }
 

@@ -1,6 +1,6 @@
 package com.github.koriel50000.prelude.feature;
 
-import com.github.koriel50000.prelude.Reversi;
+import com.github.koriel50000.prelude.reversi.Board;
 
 import java.util.List;
 import java.util.Random;
@@ -22,8 +22,8 @@ public class RandomFeature implements Feature {
     }
 
     @Override
-    public Reversi.Coord evaluate(List<Reversi.Coord> moves) {
-        Reversi.Coord coord = moves.get(random.nextInt(moves.size()));
+    public Board.Coord evaluate(List<Board.Coord> moves) {
+        Board.Coord coord = moves.get(random.nextInt(moves.size()));
         return coord;
     }
 }

@@ -3,6 +3,7 @@ package com.github.koriel50000.prelude;
 import com.github.koriel50000.prelude.feature.Feature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
 import com.github.koriel50000.prelude.feature.ReferenceFeature;
+import com.github.koriel50000.prelude.reversi.Board;
 
 import java.util.List;
 
@@ -14,9 +15,9 @@ public class AutoPlayMain {
     }
 
     private void autoplay() {
-        Reversi reversi = new Reversi();
+        Board board = new Board();
 
-        Feature referenceFeagure = new ReferenceFeature(reversi);
+        Feature referenceFeagure = new ReferenceFeature(board);
         Feature randomFeature = new RandomFeature();
         referenceFeagure.init();
         randomFeature.init();
@@ -26,10 +27,10 @@ public class AutoPlayMain {
         int draw = 0;
         int winStones = 0;
         int lossStones = 0;
-        Reversi.Score score;
+        Board.Score score;
 
         for (int i = 0; i < 50; i++) {
-            score = play(reversi, referenceFeagure, randomFeature);
+            score = play(board, referenceFeagure, randomFeature);
 
             switch (score.getWinner()) {
                 case Black:
@@ -49,7 +50,7 @@ public class AutoPlayMain {
                     break;
             }
 
-            score = play(reversi, randomFeature, referenceFeagure);
+            score = play(board, randomFeature, referenceFeagure);
 
             switch (score.getWinner()) {
                 case Black:
@@ -80,30 +81,30 @@ public class AutoPlayMain {
     /**
      * ゲームを開始する
      */
-    private Reversi.Score play(Reversi reversi, Feature blackFeature, Feature whiteFeature) {
-        reversi.initialize();
+    private Board.Score play(Board board, Feature blackFeature, Feature whiteFeature) {
+        board.initialize();
 
         while (true) {
-            Reversi.Turn turn = reversi.getCurrentTurn();
+            Board.Color color = board.getCurrentColor();
 
-            List<Reversi.Coord> moves = reversi.availableMoves();
+            List<Board.Coord> moves = board.availableMoves();
             if (moves.size() > 0) {
-                Reversi.Coord move;
-                if (turn == Reversi.Turn.Black) {
+                Board.Coord move;
+                if (color == Board.Color.Black) {
                     move = blackFeature.evaluate(moves);
                 } else {
                     move = whiteFeature.evaluate(moves);
                 }
-                reversi.makeMove(move);
+                board.makeMove(move);
             }
 
             // ゲーム終了を判定
-            if (reversi.hasCompleted()) {
+            if (board.hasCompleted()) {
                 break;
             }
-            reversi.nextTurn();
+            board.nextTurn();
         }
 
-        return reversi.getScore();
+        return board.getScore();
     }
 }

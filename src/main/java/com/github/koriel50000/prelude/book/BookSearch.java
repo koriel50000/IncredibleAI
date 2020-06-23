@@ -1,15 +1,15 @@
 package com.github.koriel50000.prelude.book;
 
-import com.github.koriel50000.prelude.Reversi;
+import com.github.koriel50000.prelude.reversi.Board;
 
 import java.util.List;
 
 public class BookSearch {
 
-    private Reversi reversi;
+    private Board board;
 
-    public BookSearch(Reversi reversi) {
-        this.reversi = reversi;
+    public BookSearch(Board board) {
+        this.board = board;
     }
 
     public boolean notExists() {
@@ -19,7 +19,7 @@ public class BookSearch {
         return true;
     }
 
-    public Reversi.Coord search(List<Reversi.Coord> moves) {
+    public Board.Coord search(List<Board.Coord> moves) {
         // TODO
         // ブックから着手を検索
         return null;
