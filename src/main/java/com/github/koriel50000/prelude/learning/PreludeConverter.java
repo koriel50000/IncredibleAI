@@ -226,11 +226,11 @@ public class PreludeConverter {
      * 石を置いたときの状態を返す
      */
     public FloatBuffer convertState(Reversi reversi, Reversi.Coord newCoord) {
-        reversi.makeMove(newCoord);
+        Reversi nextReversi = reversi.tryMove(newCoord);
 
-        int[][] board = reversi.getTempBoard();
-        int[][] nextBoard = reversi.getBoard();
-        int[][] reverse = reversi.getTempReverse();
+        int[][] board = reversi.getBoard();
+        int[][] nextBoard = nextReversi.getBoard();
+        int[][] reverse = reversi.getReverse();
         Reversi.Turn turn = reversi.getCurrentTurn();
 
         int x = newCoord.x;
@@ -276,8 +276,6 @@ public class PreludeConverter {
                 putState(state, region, x_, y_, 9 + reverseCount); // 反転数
             }
         }
-
-        reversi.undoBoard();
 
         return state;
     }

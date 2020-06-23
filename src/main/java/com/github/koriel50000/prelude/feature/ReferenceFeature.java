@@ -13,138 +13,104 @@ public class ReferenceFeature implements Feature {
 
     private static final long TIME_LIMIT = 1000; // 制限時間 1000(ms)
 
+    private BookSearch bookSearch;
+    private RolloutPolicy rolloutPolicy;
+    private WinLossExplorer winLossExplorer;
+
     private ExecutorService executor;
     private List<EvaluateTask> evaluateTasks;
 
-    private SearchTask searchTask;
-    private RolloutTask rolloutTask;
-    private WinLossTask winLossTask;
-
-    @Override
-    public void init() {
-        searchTask = new SearchTask();
-        rolloutTask = new RolloutTask();
-        winLossTask = new WinLossTask();
-        rolloutTask.init();
+    public ReferenceFeature(Reversi reversi) {
+        bookSearch = new BookSearch(reversi);
+        rolloutPolicy = new RolloutPolicy(reversi);
+        winLossExplorer = new WinLossExplorer(reversi);
 
         evaluateTasks = new ArrayList<>();
-        evaluateTasks.add(searchTask);
-        evaluateTasks.add(rolloutTask);
-        evaluateTasks.add(winLossTask);
+        evaluateTasks.add(new EvaluateTask() {
+            @Override
+            protected Reversi.Coord evaluate(List<Reversi.Coord> moves) throws Exception {
+                return search(moves);
+            }
+        });
+        evaluateTasks.add(new EvaluateTask() {
+            @Override
+            protected Reversi.Coord evaluate(List<Reversi.Coord> moves) throws Exception {
+                return rollout(moves);
+            }
+        });
+        evaluateTasks.add(new EvaluateTask() {
+            @Override
+            protected Reversi.Coord evaluate(List<Reversi.Coord> moves) throws Exception {
+                return explore(moves);
+            }
+        });
 
         executor = Executors.newFixedThreadPool(evaluateTasks.size());
     }
 
     @Override
-    public void destroy() {
-        executor.shutdown();
-        
-        rolloutTask.destroy();
+    public void init() {
+        rolloutPolicy.init();
     }
 
     @Override
-    public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves) {
+    public void destroy() {
+        executor.shutdown();
+
+        rolloutPolicy.destroy();
+    }
+
+    @Override
+    public Reversi.Coord evaluate(List<Reversi.Coord> moves) {
         for (EvaluateTask evaluateTask : evaluateTasks) {
-            evaluateTask.set(reversi, moves);
+            evaluateTask.setMoves(moves);
         }
 
-        Reversi.Coord coord = null;
+        Reversi.Coord coord;
         try {
             coord = executor.invokeAny(evaluateTasks, TIME_LIMIT, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             // 時間切れの場合は、ロールアウトから最後の着手を取得
-            coord = rolloutTask.getLastCoord();
+            coord = rolloutPolicy.getLastCoord();
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e.getMessage(), e);
         }
         return coord;
     }
 
+    private Reversi.Coord search(List<Reversi.Coord> moves) {
+        if (bookSearch.notExists()) {
+            throw new CancellationException("not exists");
+        }
+
+        return bookSearch.search(moves);
+    }
+
+    private Reversi.Coord rollout(List<Reversi.Coord> moves) {
+        return rolloutPolicy.rollout(moves);
+    }
+
+    private Reversi.Coord explore(List<Reversi.Coord> moves) {
+        if (winLossExplorer.notPossible()) {
+            throw new CancellationException("not possible");
+        }
+
+        return winLossExplorer.explore(moves);
+    }
+
     private static abstract class EvaluateTask implements Callable<Reversi.Coord> {
 
-        private Reversi reversi;
         private List<Reversi.Coord> moves;
 
-        private void set(Reversi reversi, List<Reversi.Coord> moves) {
-            this.reversi = reversi;
+        private void setMoves(List<Reversi.Coord> moves) {
             this.moves = moves;
         }
 
         @Override
         public Reversi.Coord call() throws Exception {
-            return evaluate(reversi, moves);
+            return evaluate(moves);
         }
 
-        protected abstract Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves) throws Exception;
-    }
-
-    private static class SearchTask extends EvaluateTask {
-
-        private BookSearch bookSearch;
-
-        private SearchTask() {
-            bookSearch = new BookSearch();
-        }
-
-        @Override
-        protected Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves) {
-            if (bookSearch.notExists()) {
-                throw new CancellationException("not exists");
-            }
-
-            return bookSearch.search();
-        }
-    }
-
-    private static class RolloutTask extends EvaluateTask {
-
-        private RolloutPolicy rolloutPolicy;
-
-        private volatile Reversi.Coord lastCoord;
-
-        private RolloutTask() {
-            rolloutPolicy = new RolloutPolicy();
-        }
-
-        public void init() {
-            rolloutPolicy.init();
-        }
-
-        public void destroy() {
-            rolloutPolicy.destroy();
-        }
-
-        @Override
-        protected Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves) {
-            // FIXME
-            Reversi.Coord coord = rolloutPolicy.evaluate(reversi, moves); // この処理は制限時間内で終了すると仮定
-            lastCoord = coord;
-
-            // TODO ロールアウトでより良い着手を探す
-
-            return coord;
-        }
-
-        public Reversi.Coord getLastCoord() {
-            return lastCoord;
-        }
-    }
-
-    private static class WinLossTask extends EvaluateTask {
-
-        private WinLossExplorer winLossExplorer;
-
-        private WinLossTask() {
-            winLossExplorer = new WinLossExplorer();
-        }
-
-        @Override
-        protected Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves) {
-            if (winLossExplorer.notPossible()) {
-                throw new CancellationException("not possible");
-            }
-
-            return winLossExplorer.explore();
-        }
+        protected abstract Reversi.Coord evaluate(List<Reversi.Coord> moves) throws Exception;
     }
 }

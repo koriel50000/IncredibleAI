@@ -10,13 +10,18 @@ public class PlayMain {
 
     public static void main(String[] args) {
         PlayMain main = new PlayMain();
+        main.oneplay();
+    }
 
-        Feature preludeFeature = new PreludeFeature();
+    private void oneplay() {
+        Reversi reversi = new Reversi();
+
+        Feature preludeFeature = new PreludeFeature(reversi);
         Feature randomFeature = new RandomFeature();
         preludeFeature.init();
         randomFeature.init();
 
-        main.play(preludeFeature, randomFeature);
+        play(reversi, preludeFeature, randomFeature);
 
         preludeFeature.destroy();
         randomFeature.destroy();
@@ -25,8 +30,7 @@ public class PlayMain {
     /**
      * ゲームを開始する
      */
-    private void play(Feature blackFeature, Feature whiteFeature) {
-        Reversi reversi = new Reversi();
+    private void play(Reversi reversi, Feature blackFeature, Feature whiteFeature) {
         reversi.initialize();
 
         while (true) {
@@ -39,9 +43,9 @@ public class PlayMain {
             if (moves.size() > 0) {
                 Reversi.Coord move;
                 if (turn == Reversi.Turn.Black) {
-                    move = blackFeature.evaluate(reversi, moves);
+                    move = blackFeature.evaluate(moves);
                 } else {
-                    move = whiteFeature.evaluate(reversi, moves);
+                    move = whiteFeature.evaluate(moves);
                 }
                 reversi.makeMove(move);
             } else{

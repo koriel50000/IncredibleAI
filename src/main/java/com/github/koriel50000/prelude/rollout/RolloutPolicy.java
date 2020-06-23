@@ -12,11 +12,15 @@ import java.util.Random;
 
 public class RolloutPolicy {
 
+    private Reversi reversi;
     private PreludeConverter converter;
     private CNNModel model;
     private Random random;
 
-    public RolloutPolicy() {
+    private volatile Reversi.Coord lastCoord;
+
+    public RolloutPolicy(Reversi reversi) {
+        this.reversi = reversi;
         converter = new PreludeConverter();
         model = new CNNModel();
         random = new Random(System.currentTimeMillis());
@@ -30,7 +34,11 @@ public class RolloutPolicy {
         model.destroy();
     }
 
-    public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves) {
+    public Reversi.Coord getLastCoord() {
+        return lastCoord;
+    }
+
+    public Reversi.Coord rollout(List<Reversi.Coord> moves) {
         // FIXME 仮にPreludeの実装を流用する
         List<RolloutPolicy.Eval> evals = new ArrayList<>();
         for (Reversi.Coord move : moves) {
@@ -39,7 +47,10 @@ public class RolloutPolicy {
             evals.add(new RolloutPolicy.Eval(move, value));
         }
 
-        return optimumChoice(evals);
+        // FIXME 制限時間に返せる着手を１つは用意する
+        Reversi.Coord coord = optimumChoice(evals);
+        lastCoord = coord;
+        return coord;
     }
 
     private Reversi.Coord optimumChoice(List<RolloutPolicy.Eval> evals) {

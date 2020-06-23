@@ -12,11 +12,13 @@ import java.util.Random;
 
 public class PreludeFeature implements Feature {
 
+    private Reversi reversi;
     private PreludeConverter converter;
     private CNNModel model;
     private Random random;
 
-    public PreludeFeature() {
+    public PreludeFeature(Reversi reversi) {
+        this.reversi = reversi;
         converter = new PreludeConverter();
         model = new CNNModel();
         random = new Random(System.currentTimeMillis());
@@ -33,7 +35,7 @@ public class PreludeFeature implements Feature {
     }
 
     @Override
-    public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves) {
+    public Reversi.Coord evaluate(List<Reversi.Coord> moves) {
         List<Eval> evals = new ArrayList<>();
         for (Reversi.Coord move : moves) {
             FloatBuffer state = converter.convertState(reversi, move);

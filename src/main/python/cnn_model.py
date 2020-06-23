@@ -20,7 +20,6 @@ x = keras.layers.Conv2D(64, 3, padding='SAME', activation='relu', use_bias=False
 x = keras.layers.Conv2D(1, 1, padding='SAME', activation='relu', use_bias=False)(x)
 x = keras.layers.Flatten()(x)
 x = keras.layers.Dense(256, activation='relu')(x)
-x = keras.layers.Dropout(0.01)(x)
 outputs = keras.layers.Dense(1, activation='tanh', name='outputs')(x)
 model = keras.Model(inputs=inputs, outputs=outputs, name='cnn_model')
 

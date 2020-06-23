@@ -22,7 +22,7 @@ public class RandomFeature implements Feature {
     }
 
     @Override
-    public Reversi.Coord evaluate(Reversi reversi, List<Reversi.Coord> moves) {
+    public Reversi.Coord evaluate(List<Reversi.Coord> moves) {
         Reversi.Coord coord = moves.get(random.nextInt(moves.size()));
         return coord;
     }

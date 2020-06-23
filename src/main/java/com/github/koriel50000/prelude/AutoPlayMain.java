@@ -14,7 +14,9 @@ public class AutoPlayMain {
     }
 
     private void autoplay() {
-        Feature referenceFeagure = new ReferenceFeature();
+        Reversi reversi = new Reversi();
+
+        Feature referenceFeagure = new ReferenceFeature(reversi);
         Feature randomFeature = new RandomFeature();
         referenceFeagure.init();
         randomFeature.init();
@@ -27,7 +29,7 @@ public class AutoPlayMain {
         Reversi.Score score;
 
         for (int i = 0; i < 50; i++) {
-            score = play(referenceFeagure, randomFeature);
+            score = play(reversi, referenceFeagure, randomFeature);
 
             switch (score.getWinner()) {
                 case Black:
@@ -47,7 +49,7 @@ public class AutoPlayMain {
                     break;
             }
 
-            score = play(randomFeature, referenceFeagure);
+            score = play(reversi, randomFeature, referenceFeagure);
 
             switch (score.getWinner()) {
                 case Black:
@@ -78,8 +80,7 @@ public class AutoPlayMain {
     /**
      * ゲームを開始する
      */
-    private Reversi.Score play(Feature blackFeature, Feature whiteFeature) {
-        Reversi reversi = new Reversi();
+    private Reversi.Score play(Reversi reversi, Feature blackFeature, Feature whiteFeature) {
         reversi.initialize();
 
         while (true) {
@@ -89,9 +90,9 @@ public class AutoPlayMain {
             if (moves.size() > 0) {
                 Reversi.Coord move;
                 if (turn == Reversi.Turn.Black) {
-                    move = blackFeature.evaluate(reversi, moves);
+                    move = blackFeature.evaluate(moves);
                 } else {
-                    move = whiteFeature.evaluate(reversi, moves);
+                    move = whiteFeature.evaluate(moves);
                 }
                 reversi.makeMove(move);
             }
@@ -103,8 +104,6 @@ public class AutoPlayMain {
             reversi.nextTurn();
         }
 
-        Reversi.Score score = reversi.printScore();
-
-        return score;
+        return reversi.getScore();
     }
 }

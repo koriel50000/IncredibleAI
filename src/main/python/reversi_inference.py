@@ -1,17 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import glob
 import os.path
-import zipfile
 
 import reversi
 import converter
-import cnn_model
 
-import tensorflow.compat.v1 as tf
+from tensorflow import keras
 
-tf.disable_v2_behavior()
+model = keras.models.load_model("../resources/model/")
 
 # global変数宣言
 num_total = 0
@@ -24,7 +21,7 @@ num_correct = 0
 def evaluate_records(sess, move_record, eval_record):
     global num_total, num_correct
 
-    reversi.init()
+    reversi.initialize()
 
     for index, actual_move in enumerate(converter.convert_moves(move_record)):
         # print "count:{0} move:{1}".format(index + 1, actual_move)
@@ -77,24 +74,6 @@ def evaluating_model(sess, path, filenames, begin, end):
 # メイン
 #
 def main(args):
-    sess = tf.Session()
-
-    saver = tf.train.Saver()
-    saver.restore(sess, "../resources/checkpoint/model.ckpt-1")
-
-    path = "../resources/records/"
-    with zipfile.ZipFile(os.path.join(path, "kifu102245.zip")) as records_zip:
-        offset = 100000
-        size = 1
-        filenames = records_zip.namelist()[offset: offset + size]
-        records_zip.extractall(path, filenames)
-
-        evaluating_model(sess, path, filenames, 0, size)
-
-        for file in glob.glob(os.path.join(path, "kifu*.txt")):
-            os.remove(file)
-
-    sess.close()
 
     return 0
 

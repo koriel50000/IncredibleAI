@@ -12,15 +12,27 @@ public class Reversi {
     public static final int WHITE = 2;
     public static final int BORDER = 3;
 
-    private int[][] board = new int[10][10];
-    private int[][] reverse = new int[10][10];
-    private int[] stones = new int[3];
-    private int[][] tempBoard;
-    private int[][] tempReverse;
-    private int[] tempStones;
+    private int[][] board;
+    private int[][] reverse;
+    private int[] stones;
 
     private Turn currentTurn;
     private int turnCount;
+    private Score score;
+
+    public Reversi() {
+        board = new int[10][10];
+        reverse = new int[10][10];
+        stones = new int[3];
+    }
+
+    private Reversi(int[][] board, int[][] reverse, int[] stones, Turn currentTurn, int turnCount) {
+        this.board = board;
+        this.reverse = reverse;
+        this.stones = stones;
+        this.currentTurn = currentTurn;
+        this.turnCount = turnCount;
+    }
 
     /**
      * 盤面を初期化する
@@ -48,6 +60,7 @@ public class Reversi {
         stones[WHITE] = 2;
         currentTurn = Turn.Black;
         turnCount = 1;
+        score = null;
     }
 
     /**
@@ -101,10 +114,6 @@ public class Reversi {
      * 指定された場所に石を打つ
      */
     public void makeMove(Coord coord) {
-        tempBoard = SerializationUtils.clone(board);
-        tempReverse = SerializationUtils.clone(reverse);
-        tempStones = SerializationUtils.clone(stones);
-
         Turn turn = currentTurn;
         int x = coord.x;
         int y = coord.y;
@@ -131,20 +140,49 @@ public class Reversi {
         }
     }
 
-    /**
-     * ゲームの終了を判定する
-     */
+    public Reversi tryMove(Coord coord) {
+        int[][] tempBoard = SerializationUtils.clone(board);
+        int[][] tempReverse = SerializationUtils.clone(reverse);
+        int[] tempStones = SerializationUtils.clone(stones);
+        Turn tempCurrentTurn = currentTurn;
+        int tempTurnCount = turnCount;
+
+        makeMove(coord);
+        Reversi nextBoard = new Reversi(board, reverse, stones, currentTurn, turnCount);
+
+        board = SerializationUtils.clone(tempBoard);
+        reverse = SerializationUtils.clone(tempReverse);
+        stones = SerializationUtils.clone(tempStones);
+        currentTurn = tempCurrentTurn;
+        turnCount = tempTurnCount;
+
+        return nextBoard;
+    }
+
+        /**
+         * ゲームの終了を判定する
+         */
     public boolean hasCompleted() {
-        if (stones[EMPTY] == 0) {
-            // 空白がなくなったら終了
-            return true;
-        } else if (stones[BLACK] == 0 || stones[WHITE] == 0) {
-            // 先手・後手どちらかが完勝したら終了
-            return true;
-        } else if (availableMoves(Turn.Black).size() == 0 && availableMoves(Turn.White).size() == 0) {
-            // 先手・後手両方パスで終了
+        // 空白がなくなったら終了
+        // 先手・後手どちらかが完勝したら終了
+        // 先手・後手両方パスで終了
+        if (stones[EMPTY] == 0 || stones[BLACK] == 0 || stones[WHITE] == 0 ||
+                (availableMoves(Turn.Black).size() == 0 && availableMoves(Turn.White).size() == 0))
+        {
+            Winner winner;
+            if (stones[BLACK] > stones[WHITE]) {
+                winner = Winner.Black;
+                stones[BLACK] += stones[EMPTY];
+            } else if (stones[BLACK] < stones[WHITE]) {
+                winner = Winner.White;
+                stones[WHITE] += stones[EMPTY];
+            } else {
+                winner = Winner.Draw;
+            }
+            score = new Score(winner, stones[BLACK], stones[WHITE]);
             return true;
         }
+
         return false; // 上記以外はゲーム続行
     }
 
@@ -154,15 +192,6 @@ public class Reversi {
     public void nextTurn() {
         currentTurn = currentTurn.opponentTurn(); // 手番を変更
         turnCount += 1;
-    }
-
-    /**
-     * 盤面を戻す
-     */
-    public void undoBoard() {
-        board = SerializationUtils.clone(tempBoard);
-        reverse = SerializationUtils.clone(tempReverse);
-        stones = SerializationUtils.clone(tempStones);
     }
 
     private static final String[] STONES = { ".", "@", "O" };
@@ -204,39 +233,31 @@ public class Reversi {
     /**
      * スコアを表示する
      */
-    public Score printScore() {
+    public void printScore() {
         System.out.print(String.format("move count:%d ", turnCount));
-        Winner winner;
-        if (stones[BLACK] > stones[WHITE]) {
-            winner = Winner.Black;
-            stones[BLACK] += stones[EMPTY];
-        } else if (stones[BLACK] < stones[WHITE]) {
-            winner = Winner.White;
-            stones[WHITE] += stones[EMPTY];
-        } else {
-            winner = Winner.Draw;
-        }
-        System.out.println(String.format("winner:%s", winner));
-        System.out.println(String.format("black:%d white:%d", stones[BLACK], stones[WHITE]));
+        System.out.println(String.format("winner:%s", score.getWinner()));
+        System.out.println(String.format("black:%d white:%d", score.getBlackStones(), score.getWhiteStones()));
         System.out.println();
-
-        return new Score(winner, stones[BLACK], stones[WHITE]);
     }
 
     public Turn getCurrentTurn() {
         return currentTurn;
     }
 
+    public int getTurnCount() {
+        return turnCount;
+    }
+
+    public Score getScore() {
+        return score;
+    }
+
     public int[][] getBoard() {
         return board;
     }
 
-    public int[][] getTempBoard() {
-        return tempBoard;
-    }
-
-    public int[][] getTempReverse() {
-        return tempReverse;
+    public int[][] getReverse() {
+        return reverse;
     }
 
     public enum Turn {
