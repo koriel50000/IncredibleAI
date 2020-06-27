@@ -40,7 +40,7 @@ public class WinLossExplorer {
     private int negamax(Board board, int color) {
         if (board.hasCompleted()) {
             Board.Score score = board.getScore();
-            if (color > 0) {
+            if (color > 0) { // FIXME 手番の判定
                 return score.getBlackStones() - score.getWhiteStones();
             } else {
                 return score.getWhiteStones() - score.getBlackStones();
@@ -50,7 +50,7 @@ public class WinLossExplorer {
 
         List<Board.Coord> moves = board.availableMoves();
         if (moves.size() == 0) {
-            board.nextTurn();
+            board.nextTurn(); // FIXME 終了判定は？
             return -negamax(board, -color);
         }
 

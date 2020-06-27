@@ -3,9 +3,11 @@ package com.github.koriel50000.prelude;
 import com.github.koriel50000.prelude.feature.Feature;
 import com.github.koriel50000.prelude.feature.PreludeFeature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
+import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Board;
 
 import java.util.List;
+import java.util.Random;
 
 public class PlayMain {
 
@@ -15,50 +17,49 @@ public class PlayMain {
     }
 
     private void oneplay() {
-        Board board = new Board();
+        BitBoard board = new BitBoard();
 
-        Feature preludeFeature = new PreludeFeature(board);
         Feature randomFeature = new RandomFeature();
-        preludeFeature.init();
         randomFeature.init();
 
-        play(board, preludeFeature, randomFeature);
+        play(board, randomFeature, randomFeature);
 
-        preludeFeature.destroy();
         randomFeature.destroy();
     }
 
     /**
      * ゲームを開始する
      */
-    private void play(Board board, Feature blackFeature, Feature whiteFeature) {
+    private void play(BitBoard board, Feature blackFeature, Feature whiteFeature) {
+        Random random = new Random(System.currentTimeMillis());
+
         board.initialize();
 
         while (true) {
-            Board.Color color = board.getCurrentColor();
-
             board.printBoard();
             board.printStatus();
 
-            List<Board.Coord> moves = board.availableMoves();
-            if (moves.size() > 0) {
-                Board.Coord move;
-                if (color == Board.Color.Black) {
-                    move = blackFeature.evaluate(moves);
+            long[] moves = board.availableMoves();
+            boolean passed = false;
+            if (moves.length > 0) {
+                long move;
+                if (board.currentColor == BitBoard.BLACK) {
+                    move = moves[random.nextInt(moves.length)]; //blackFeature.evaluate(moves);
                 } else {
-                    move = whiteFeature.evaluate(moves);
+                    move = moves[random.nextInt(moves.length)]; //whiteFeature.evaluate(moves);
                 }
                 board.makeMove(move);
             } else{
                 System.out.println("Pass!");
+                passed = true;
             }
 
             // ゲーム終了を判定
-            if (board.hasCompleted()) {
+            if (board.hasCompleted(passed)) {
                 break;
             }
 
-            board.nextTurn();
+            board.nextTurn(passed);
         }
 
         board.printBoard();

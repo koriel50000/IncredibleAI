@@ -141,20 +141,12 @@ public class Board {
     }
 
     public Board tryMove(Coord coord) {
-        int[][] tempBoard = SerializationUtils.clone(board);
-        int[][] tempReverse = SerializationUtils.clone(reverse);
-        int[] tempStones = SerializationUtils.clone(stones);
-        Color tempCurrentColor = currentColor;
-        int tempTurnCount = turnCount;
+        int[][] board = SerializationUtils.clone(this.board);
+        int[][] reverse = SerializationUtils.clone(this.reverse);
+        int[] stones = SerializationUtils.clone(this.stones);
 
-        makeMove(coord);
         Board nextBoard = new Board(board, reverse, stones, currentColor, turnCount);
-
-        board = SerializationUtils.clone(tempBoard);
-        reverse = SerializationUtils.clone(tempReverse);
-        stones = SerializationUtils.clone(tempStones);
-        currentColor = tempCurrentColor;
-        turnCount = tempTurnCount;
+        nextBoard.makeMove(coord);
 
         return nextBoard;
     }
