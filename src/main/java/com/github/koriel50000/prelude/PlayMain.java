@@ -6,6 +6,7 @@ import com.github.koriel50000.prelude.feature.RandomFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Board;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
@@ -16,7 +17,11 @@ public class PlayMain {
         main.oneplay();
     }
 
+    private Random random;
+
     private void oneplay() {
+        random = new Random(System.currentTimeMillis());
+
         BitBoard board = new BitBoard();
 
         Feature randomFeature = new RandomFeature();
@@ -27,26 +32,35 @@ public class PlayMain {
         randomFeature.destroy();
     }
 
+    private long evaluate(long moves) {
+        List<Long> moveList = new ArrayList<>();
+        while (moves != 0) {
+            long coord = moves & -moves;  // 一番右のビットのみ取り出す
+            moveList.add(coord);
+            moves ^= coord;  // 一番右のビットを0にする
+        }
+        long move = moveList.get(random.nextInt(moveList.size()));
+        return move;
+    }
+
     /**
      * ゲームを開始する
      */
     private void play(BitBoard board, Feature blackFeature, Feature whiteFeature) {
-        Random random = new Random(System.currentTimeMillis());
-
         board.initialize();
 
         while (true) {
             board.printBoard();
             board.printStatus();
 
-            long[] moves = board.availableMoves();
+            long moves = board.availableMoves();
             boolean passed = false;
-            if (moves.length > 0) {
+            if (moves != 0) {
                 long move;
                 if (board.currentColor == BitBoard.BLACK) {
-                    move = moves[random.nextInt(moves.length)]; //blackFeature.evaluate(moves);
+                    move = evaluate(moves); //blackFeature.evaluate(moves);
                 } else {
-                    move = moves[random.nextInt(moves.length)]; //whiteFeature.evaluate(moves);
+                    move = evaluate(moves); //whiteFeature.evaluate(moves);
                 }
                 board.makeMove(move);
             } else{

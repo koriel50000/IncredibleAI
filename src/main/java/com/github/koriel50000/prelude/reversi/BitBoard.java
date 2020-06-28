@@ -66,12 +66,12 @@ public class BitBoard {
     /**
      * 着手可能なリストを返す
      */
-    public long[] availableMoves() {
+    public long availableMoves() {
         if (first) {
             first = false;
-            return new long[] { 0x0000000004000000L };
+            return 0x0000102004080000L;
         } else {
-            return new long[0];
+            return 0L;
         }
     }
 
