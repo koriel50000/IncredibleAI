@@ -61,6 +61,26 @@ public class BitBoard {
         return 0L;
     }
 
+    /**
+     * 一番右端の立っているビット位置を返す
+     */
+    private int getRightmostBit(long coord) {
+        return getStoneCount(coord - 1);
+    }
+
+    /**
+     * 最上位ビットから連続する 0 のビットの数を返す
+     */
+    private int clz(long board) {
+        board = board | ( board >>>  1 );
+        board = board | ( board >>>  2 );
+        board = board | ( board >>>  4 );
+        board = board | ( board >>>  8 );
+        board = board | ( board >>> 16 );
+        board = board | ( board >>> 32 );
+        return getStoneCount(~board);
+    }
+
     private boolean first = true;
 
     /**
@@ -78,11 +98,60 @@ public class BitBoard {
     /**
      * 指定された場所に石を打つ
      */
-    public void makeMove(long coord) {
-        long reverseBoard = 0x0000000008000000L;
+    public void makeMove(long playerBoard, long opponentBoard, long coord) {
+        long reverseBoard = 0;
+        int pos = getRightmostBit(coord);
 
-        blackBoard ^= coord | reverseBoard;
-        whiteBoard ^= reverseBoard;
+        long outflankx, outflanky, outflankz, outflankw;
+
+        long opponentBoardMasked = opponentBoard & 0x7e7e7e7e7e7e7e7eL;
+
+        // 下
+        long downMask = 0x0080808080808080L >>> (63 - pos);
+        int clz1 = clz(~opponentBoard & downMask);
+        outflankx = (0x8000000000000000L >> clz1) & playerBoard;
+        reverseBoard |= (-outflankx << 1) & downMask;
+
+        // 右
+        long rightMask = 0x7f00000000000000L >>> (63 - pos);
+        int clz2 = clz(~opponentBoardMasked & rightMask);
+        outflanky = (0x8000000000000000L >> clz2) & playerBoard;
+        reverseBoard |= (-outflanky << 1) & rightMask;
+
+        // 左下
+        long leftDownMask = 0x0102040810204000L >>> (63 - pos);
+        int clz3 = clz(~opponentBoardMasked & leftDownMask);
+        outflankz = (0x8000000000000000L >> clz3) & playerBoard;
+        reverseBoard |= (-outflankz << 1) & leftDownMask;
+
+        // 右下
+        long rightDownMask = 0x0040201008040201L >>> (63 - pos);
+        int clz4 = clz(~opponentBoardMasked & rightDownMask);
+        outflankw = (0x8000000000000000L >> clz4) & playerBoard;
+        reverseBoard |= (-outflankw << 1) & rightDownMask;
+
+        // 上
+        long upMask = 0x0101010101010100L << pos;
+        outflankx = upMask & ((opponentBoard | ~upMask) + 1) & playerBoard;
+        reverseBoard |= (outflankx - (outflankx != 0)) & upMask;
+
+        // 左
+        long leftMask = 0x00000000000000feL << pos;
+        outflanky = leftMask & ((opponentBoardMasked | ~leftMask) + 1) & playerBoard;
+        reverseBoard |= (outflanky - (outflanky != 0)) & leftMask;
+
+        // 右上
+        long rightUpMask = 0x0002040810204080L << pos;
+        outflankz = rightUpMask & ((opponentBoardMasked | ~rightUpMask) + 1) & playerBoard;
+        reverseBoard |= (outflankz - (outflankz != 0)) & rightUpMask;
+
+        // 左上
+        long leftUpMask = 0x8040201008040200L << pos;
+        outflankw = leftUpMask & ((opponentBoardMasked | ~leftUpMask) + 1) & playerBoard;
+        reverseBoard |= (outflankw - (outflankw != 0)) & leftUpMask;
+
+        blackBoard ^= (coord * (currentColor & 0x01)) | reverseBoard;
+        whiteBoard ^= (coord * (currentColor >> 1)) | reverseBoard;
         --depth;
     }
 
