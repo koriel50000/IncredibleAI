@@ -32,17 +32,6 @@ public class PlayMain {
         randomFeature.destroy();
     }
 
-    private long evaluate(long moves) {
-        List<Long> moveList = new ArrayList<>();
-        while (moves != 0) {
-            long coord = moves & -moves;  // 一番右のビットのみ取り出す
-            moveList.add(coord);
-            moves ^= coord;  // 一番右のビットを0にする
-        }
-        long move = moveList.get(random.nextInt(moveList.size()));
-        return move;
-    }
-
     /**
      * ゲームを開始する
      */
@@ -57,7 +46,7 @@ public class PlayMain {
             if (board.currentColor == BitBoard.BLACK) {
                 long moves = board.availableMoves(board.blackBoard, board.whiteBoard);
                 if (moves != 0) {
-                    long move = evaluate(moves); //blackFeature.evaluate(moves);
+                    long move = blackFeature.evaluate(board.blackBoard, board.whiteBoard, moves);
                     board.makeMove(board.blackBoard, board.whiteBoard, move);
                 } else {
                     System.out.println("Pass!");
@@ -66,7 +55,7 @@ public class PlayMain {
             } else {
                 long moves = board.availableMoves(board.whiteBoard, board.blackBoard);
                 if (moves != 0) {
-                    long move = evaluate(moves); //whiteFeature.evaluate(moves);
+                    long move = whiteFeature.evaluate(board.whiteBoard, board.blackBoard, moves);
                     board.makeMove(board.whiteBoard, board.blackBoard, move);
                 } else {
                     System.out.println("Pass!");

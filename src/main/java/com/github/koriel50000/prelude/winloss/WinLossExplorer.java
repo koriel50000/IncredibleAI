@@ -21,18 +21,22 @@ public class WinLossExplorer {
 
     private Board.Color currentColor;
 
-    public Board.Coord explore(List<Board.Coord> moves) {
+    public long explore(long playerBoard, long opponentBoard, long moves) {
         currentColor = board.getCurrentColor();
-        Board.Coord optimumMove = null;
+        long optimumMove = 0;
 
         int maxValue = Integer.MIN_VALUE;
-        for (Board.Coord move : moves) {
-            Board nextBoard = board.tryMove(move);
+        while (moves != 0) {
+            long coord = moves & -moves;  // 一番右のビットのみ取り出す
+
+            Board nextBoard = board.tryMove(coord);
             int value = negamax(nextBoard, 1);
             if (value > maxValue) {
                 maxValue = value;
-                optimumMove = move;
+                optimumMove = coord;
             }
+
+            moves ^= coord;  // 一番右のビットを0にする
         }
         return optimumMove;
     }
@@ -56,7 +60,7 @@ public class WinLossExplorer {
 
         int maxValue = Integer.MIN_VALUE;
         for (Board.Coord move : moves) {
-            Board nextBoard = board.tryMove(move);
+            Board nextBoard = board.tryMove(0); // FIXME
             int value = -negamax(nextBoard, -color);
             if (value > maxValue) {
                 maxValue = value;

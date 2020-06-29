@@ -17,7 +17,7 @@ public class RolloutPolicy {
     private CNNModel model;
     private Random random;
 
-    private volatile Board.Coord lastCoord;
+    private volatile long lastCoord;
 
     public RolloutPolicy(Board board) {
         this.board = board;
@@ -34,33 +34,37 @@ public class RolloutPolicy {
         model.destroy();
     }
 
-    public Board.Coord getLastCoord() {
+    public long getLastCoord() {
         return lastCoord;
     }
 
-    public Board.Coord rollout(List<Board.Coord> moves) {
+    public long rollout(long playerBoard, long opponentBoard, long moves) {
         // FIXME 仮にPreludeの実装を流用する
         List<RolloutPolicy.Eval> evals = new ArrayList<>();
-        for (Board.Coord move : moves) {
-            FloatBuffer state = converter.convertState(board, move);
+        while (moves != 0) {
+            long coord = moves & -moves;  // 一番右のビットのみ取り出す
+
+            FloatBuffer state = converter.convertState(board, coord);
             float value = model.calculatePredicatedValue(state);
-            evals.add(new RolloutPolicy.Eval(move, value));
+            evals.add(new RolloutPolicy.Eval(coord, value));
+
+            moves ^= coord;  // 一番右のビットを0にする
         }
 
         // FIXME 制限時間に返せる着手を１つは用意する
-        Board.Coord coord = optimumChoice(evals);
+        long coord = optimumChoice(evals);
         lastCoord = coord;
         return coord;
     }
 
-    private Board.Coord optimumChoice(List<RolloutPolicy.Eval> evals) {
+    private long optimumChoice(List<RolloutPolicy.Eval> evals) {
         Collections.sort(evals, Collections.reverseOrder()); // 評価値で降順
 
-        List<Board.Coord> moves = new ArrayList<>();
+        List<Long> moves = new ArrayList<>();
         float maximumValue = Float.NEGATIVE_INFINITY;
         float delta = 0.001f; // FIXME 近い値を考慮
         for (RolloutPolicy.Eval evel : evals) {
-            Board.Coord move = evel.getMove();
+            long move = evel.getMove();
             float value = evel.getValue();
             if (value + delta < maximumValue) {
                 break;
@@ -74,15 +78,15 @@ public class RolloutPolicy {
 
     private static class Eval implements Comparable<RolloutPolicy.Eval> {
 
-        private Board.Coord move;
+        private long move;
         private float value;
 
-        Eval(Board.Coord move, float value) {
+        Eval(long move, float value) {
             this.move = move;
             this.value = value;
         }
 
-        Board.Coord getMove() {
+        long getMove() {
             return move;
         }
 

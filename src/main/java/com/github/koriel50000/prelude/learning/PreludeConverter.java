@@ -225,8 +225,9 @@ public class PreludeConverter {
     /**
      * 石を置いたときの状態を返す
      */
-    public FloatBuffer convertState(Board reversi, Board.Coord newCoord) {
-        Board nextReversi = reversi.tryMove(newCoord);
+    public FloatBuffer convertState(Board reversi, long newCoordLong) {
+        Board.Coord newCoord = null; // FIXME
+        Board nextReversi = reversi.tryMove(0); // FIXME
 
         int[][] board = reversi.getBoard();
         int[][] nextBoard = nextReversi.getBoard();

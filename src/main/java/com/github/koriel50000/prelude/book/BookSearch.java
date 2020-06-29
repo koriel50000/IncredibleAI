@@ -19,9 +19,9 @@ public class BookSearch {
         return true;
     }
 
-    public Board.Coord search(List<Board.Coord> moves) {
+    public long search(long playerBoard, long opponentBoard, long moves) {
         // TODO
         // ブックから着手を検索
-        return null;
+        return 0;
     }
 }

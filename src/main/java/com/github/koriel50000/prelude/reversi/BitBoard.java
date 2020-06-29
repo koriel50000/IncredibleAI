@@ -294,6 +294,10 @@ public class BitBoard {
         System.out.println();
     }
 
+    public Score getScore() {
+        return score;
+    }
+
     public static class Score {
 
         private String winner;

@@ -140,13 +140,13 @@ public class Board {
         }
     }
 
-    public Board tryMove(Coord coord) {
+    public Board tryMove(long coord) {
         int[][] board = SerializationUtils.clone(this.board);
         int[][] reverse = SerializationUtils.clone(this.reverse);
         int[] stones = SerializationUtils.clone(this.stones);
 
         Board nextBoard = new Board(board, reverse, stones, currentColor, turnCount);
-        nextBoard.makeMove(coord);
+        nextBoard.makeMove(null); // FIXME
 
         return nextBoard;
     }

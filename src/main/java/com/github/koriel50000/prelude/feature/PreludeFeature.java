@@ -35,25 +35,26 @@ public class PreludeFeature implements Feature {
     }
 
     @Override
-    public Board.Coord evaluate(List<Board.Coord> moves) {
+    public long evaluate(long playerBoard, long opponentBoard, long moves) {
         List<Eval> evals = new ArrayList<>();
-        for (Board.Coord move : moves) {
-            FloatBuffer state = converter.convertState(board, move);
+        while (moves != 0) {
+            long coord = moves & -moves;  // 一番右のビットのみ取り出す
+            FloatBuffer state = converter.convertState(board, coord);
             float value = model.calculatePredicatedValue(state);
-            evals.add(new Eval(move, value));
+            evals.add(new Eval(coord, value));
         }
 
         return optimumChoice(evals);
     }
 
-    private Board.Coord optimumChoice(List<Eval> evals) {
+    private long optimumChoice(List<Eval> evals) {
         Collections.sort(evals, Collections.reverseOrder()); // 評価値で降順
 
-        List<Board.Coord> moves = new ArrayList<>();
+        List<Long> moves = new ArrayList<>();
         float maximumValue = Float.NEGATIVE_INFINITY;
         float delta = 0.001f; // FIXME 近い値を考慮
         for (Eval evel : evals) {
-            Board.Coord move = evel.getMove();
+            long move = evel.getMove();
             float value = evel.getValue();
             if (value + delta < maximumValue) {
                 break;
@@ -67,15 +68,15 @@ public class PreludeFeature implements Feature {
 
     private static class Eval implements Comparable<Eval> {
 
-        private Board.Coord move;
+        private long move;
         private float value;
 
-        Eval(Board.Coord move, float value) {
+        Eval(long move, float value) {
             this.move = move;
             this.value = value;
         }
 
-        Board.Coord getMove() {
+        long getMove() {
             return move;
         }
 

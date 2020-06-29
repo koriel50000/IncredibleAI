@@ -28,20 +28,20 @@ public class ReferenceFeature implements Feature {
         evaluateTasks = new ArrayList<>();
         evaluateTasks.add(new EvaluateTask() {
             @Override
-            protected Board.Coord evaluate(List<Board.Coord> moves) throws Exception {
-                return search(moves);
+            protected long evaluate(long playerBoard, long opponentBoard, long moves) throws Exception {
+                return search(playerBoard, opponentBoard, moves);
             }
         });
         evaluateTasks.add(new EvaluateTask() {
             @Override
-            protected Board.Coord evaluate(List<Board.Coord> moves) throws Exception {
-                return rollout(moves);
+            protected long evaluate(long playerBoard, long opponentBoard, long moves) throws Exception {
+                return rollout(playerBoard, opponentBoard, moves);
             }
         });
         evaluateTasks.add(new EvaluateTask() {
             @Override
-            protected Board.Coord evaluate(List<Board.Coord> moves) throws Exception {
-                return explore(moves);
+            protected long evaluate(long playerBoard, long opponentBoard, long moves) throws Exception {
+                return explore(playerBoard, opponentBoard, moves);
             }
         });
 
@@ -61,12 +61,12 @@ public class ReferenceFeature implements Feature {
     }
 
     @Override
-    public Board.Coord evaluate(List<Board.Coord> moves) {
+    public long evaluate(long playerBoard, long opponentBoard, long moves) {
         for (EvaluateTask evaluateTask : evaluateTasks) {
-            evaluateTask.setMoves(moves);
+            evaluateTask.setMoves(playerBoard, opponentBoard, moves);
         }
 
-        Board.Coord coord;
+        Long coord;
         try {
             coord = executor.invokeAny(evaluateTasks, TIME_LIMIT, TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
@@ -78,39 +78,43 @@ public class ReferenceFeature implements Feature {
         return coord;
     }
 
-    private Board.Coord search(List<Board.Coord> moves) {
+    private long search(long playerBoard, long opponentBoard, long moves) {
         if (bookSearch.notExists()) {
             throw new CancellationException("not exists");
         }
 
-        return bookSearch.search(moves);
+        return bookSearch.search(playerBoard, opponentBoard, moves);
     }
 
-    private Board.Coord rollout(List<Board.Coord> moves) {
-        return rolloutPolicy.rollout(moves);
+    private long rollout(long playerBoard, long opponentBoard, long moves) {
+        return rolloutPolicy.rollout(playerBoard, opponentBoard, moves);
     }
 
-    private Board.Coord explore(List<Board.Coord> moves) {
+    private long explore(long playerBoard, long opponentBoard, long moves) {
         if (winLossExplorer.notPossible()) {
             throw new CancellationException("not possible");
         }
 
-        return winLossExplorer.explore(moves);
+        return winLossExplorer.explore(playerBoard, opponentBoard, moves);
     }
 
-    private static abstract class EvaluateTask implements Callable<Board.Coord> {
+    private static abstract class EvaluateTask implements Callable<Long> {
 
-        private List<Board.Coord> moves;
+        private long playerBoard;
+        private long opponentBoard;
+        private long moves;
 
-        private void setMoves(List<Board.Coord> moves) {
+        private void setMoves(long playerBoard, long opponentBoard, long moves) {
+            this.playerBoard = playerBoard;
+            this.opponentBoard = opponentBoard;
             this.moves = moves;
         }
 
         @Override
-        public Board.Coord call() throws Exception {
-            return evaluate(moves);
+        public Long call() throws Exception {
+            return evaluate(playerBoard, opponentBoard, moves);
         }
 
-        protected abstract Board.Coord evaluate(List<Board.Coord> moves) throws Exception;
+        protected abstract long evaluate(long playerBoard, long opponentBoard, long moves) throws Exception;
     }
 }
