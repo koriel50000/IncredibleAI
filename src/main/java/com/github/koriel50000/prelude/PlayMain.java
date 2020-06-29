@@ -53,19 +53,25 @@ public class PlayMain {
             board.printBoard();
             board.printStatus();
 
-            long moves = board.availableMoves();
             boolean passed = false;
-            if (moves != 0) {
-                long move;
-                if (board.currentColor == BitBoard.BLACK) {
-                    move = evaluate(moves); //blackFeature.evaluate(moves);
+            if (board.currentColor == BitBoard.BLACK) {
+                long moves = board.availableMoves(board.blackBoard, board.whiteBoard);
+                if (moves != 0) {
+                    long move = evaluate(moves); //blackFeature.evaluate(moves);
+                    board.makeMove(board.blackBoard, board.whiteBoard, move);
                 } else {
-                    move = evaluate(moves); //whiteFeature.evaluate(moves);
+                    System.out.println("Pass!");
+                    passed = true;
                 }
-                board.makeMove(move);
-            } else{
-                System.out.println("Pass!");
-                passed = true;
+            } else {
+                long moves = board.availableMoves(board.whiteBoard, board.blackBoard);
+                if (moves != 0) {
+                    long move = evaluate(moves); //whiteFeature.evaluate(moves);
+                    board.makeMove(board.whiteBoard, board.blackBoard, move);
+                } else {
+                    System.out.println("Pass!");
+                    passed = true;
+                }
             }
 
             // ゲーム終了を判定

@@ -9,19 +9,17 @@ public class BitBoard {
     public long blackBoard;
     public long whiteBoard;
     public int currentColor;
+    public int depth;
 
-    private int turnCount;
     private boolean passedBefore;
-    private int depth;
     private Score score;
 
     public void initialize() {
         blackBoard = 0x0000000810000000L;
         whiteBoard = 0x0000001008000000L;
         currentColor = BLACK;
-        turnCount = 1;
-        passedBefore = false;
         depth = 60;
+        passedBefore = false;
         score = null;
     }
 
@@ -36,122 +34,176 @@ public class BitBoard {
         }
     }
 
-    private int getStoneCount(long board) {
-        board = (board & 0x5555555555555555L) + ((board >>> 1) & 0x5555555555555555L);
-        board = (board & 0x3333333333333333L) + ((board >>> 2) & 0x3333333333333333L);
-        board = (board & 0x0f0f0f0f0f0f0f0fL) + ((board >>> 4) & 0x0f0f0f0f0f0f0f0fL);
-        board = (board & 0x00ff00ff00ff00ffL) + ((board >>> 8) & 0x00ff00ff00ff00ffL);
-        board = (board & 0x0000ffff0000ffffL) + ((board >>> 16) & 0x0000ffff0000ffffL);
-        board = (board & 0x00000000ffffffffL) + ((board >>> 32) & 0x00000000ffffffffL);
-        return (int)board;
+    /**
+     * 立っているビットの数を返す
+     */
+    private int populationCount(long bits) {
+        bits = (bits & 0x5555555555555555L) + ((bits >>> 1) & 0x5555555555555555L);
+        bits = (bits & 0x3333333333333333L) + ((bits >>> 2) & 0x3333333333333333L);
+        bits = (bits & 0x0f0f0f0f0f0f0f0fL) + ((bits >>> 4) & 0x0f0f0f0f0f0f0f0fL);
+        bits = (bits & 0x00ff00ff00ff00ffL) + ((bits >>> 8) & 0x00ff00ff00ff00ffL);
+        bits = (bits & 0x0000ffff0000ffffL) + ((bits >>> 16) & 0x0000ffff0000ffffL);
+        bits = (bits & 0x00000000ffffffffL) + ((bits >>> 32) & 0x00000000ffffffffL);
+        return (int)bits;
+    }
+
+    /**
+     * 最上位ビットから連続する 0 のビットの数を返す
+     */
+    private int countLeadingZero(long bits) {
+        bits |= bits >>> 1;
+        bits |= bits >>> 2;
+        bits |= bits >>> 4;
+        bits |= bits >>> 8;
+        bits |= bits >>> 16;
+        bits |= bits >>> 32;
+        return populationCount(~bits);
     }
 
     private int getEmptyCount() {
         long board = ~(blackBoard | whiteBoard);
-        return getStoneCount(board);
-    }
-
-    private long getReverseBoard() {
-        long emptyBoard = ~(blackBoard | whiteBoard);
-        while (emptyBoard != 0) {
-            long coord = emptyBoard & -emptyBoard;  // 一番右のビットのみ取り出す
-
-            emptyBoard ^= coord;  // 一番右のビットを0にする
-        }
-        return 0L;
+        return populationCount(board);
     }
 
     /**
      * 一番右端の立っているビット位置を返す
      */
     private int getRightmostBit(long coord) {
-        return getStoneCount(coord - 1);
+        return populationCount(coord - 1);
     }
-
-    /**
-     * 最上位ビットから連続する 0 のビットの数を返す
-     */
-    private int clz(long board) {
-        board = board | ( board >>>  1 );
-        board = board | ( board >>>  2 );
-        board = board | ( board >>>  4 );
-        board = board | ( board >>>  8 );
-        board = board | ( board >>> 16 );
-        board = board | ( board >>> 32 );
-        return getStoneCount(~board);
-    }
-
-    private boolean first = true;
 
     /**
      * 着手可能なリストを返す
      */
-    public long availableMoves() {
-        if (first) {
-            first = false;
-            return 0x0000102004080000L;
-        } else {
-            return 0L;
-        }
+    public long availableMoves(long playerBoard, long opponentBoard) {
+        long emptyBoard = ~(playerBoard | opponentBoard);
+        long maskLtRt = opponentBoard & 0x7e7e7e7e7e7e7e7eL;
+        long maskUpDn = opponentBoard & 0x00ffffffffffff00L;
+        long maskDiag = opponentBoard & 0x007e7e7e7e7e7e00L;
+
+        // 右
+        long tmpRt = playerBoard << 1;
+        long mobility = (maskLtRt + tmpRt) & emptyBoard & ~tmpRt;
+
+        // 左
+        long tmpLt = playerBoard >>> 1 & maskLtRt;
+        tmpLt |= tmpLt >>> 1 & maskLtRt;
+        tmpLt |= tmpLt >>> 1 & maskLtRt;
+        tmpLt |= tmpLt >>> 1 & maskLtRt;
+        tmpLt |= tmpLt >>> 1 & maskLtRt;
+        tmpLt |= tmpLt >>> 1 & maskLtRt;
+        mobility |= tmpLt >>> 1 & emptyBoard;
+
+        // 下
+        long tmpDn = playerBoard << 8 & maskUpDn;
+        tmpDn |= tmpDn << 8 & maskUpDn;
+        tmpDn |= tmpDn << 8 & maskUpDn;
+        tmpDn |= tmpDn << 8 & maskUpDn;
+        tmpDn |= tmpDn << 8 & maskUpDn;
+        tmpDn |= tmpDn << 8 & maskUpDn;
+        mobility |= tmpDn << 8 & emptyBoard;
+
+        // 上
+        long tmpUp = playerBoard >>> 8 & maskUpDn;
+        tmpUp |= tmpUp >>> 8 & maskUpDn;
+        tmpUp |= tmpUp >>> 8 & maskUpDn;
+        tmpUp |= tmpUp >>> 8 & maskUpDn;
+        tmpUp |= tmpUp >>> 8 & maskUpDn;
+        tmpUp |= tmpUp >>> 8 & maskUpDn;
+        mobility |= tmpUp >>> 8 & emptyBoard;
+
+        // 右下
+        long tmpRtDn = playerBoard << 9 & maskDiag;
+        tmpRtDn |= tmpRtDn << 9 & maskDiag;
+        tmpRtDn |= tmpRtDn << 9 & maskDiag;
+        tmpRtDn |= tmpRtDn << 9 & maskDiag;
+        tmpRtDn |= tmpRtDn << 9 & maskDiag;
+        tmpRtDn |= tmpRtDn << 9 & maskDiag;
+        mobility |= tmpRtDn << 9 & emptyBoard;
+
+        // 左上
+        long tmpLtUp = playerBoard >>> 9 & maskDiag;
+        tmpLtUp |= tmpLtUp >>> 9 & maskDiag;
+        tmpLtUp |= tmpLtUp >>> 9 & maskDiag;
+        tmpLtUp |= tmpLtUp >>> 9 & maskDiag;
+        tmpLtUp |= tmpLtUp >>> 9 & maskDiag;
+        tmpLtUp |= tmpLtUp >>> 9 & maskDiag;
+        mobility |= tmpLtUp >>> 9 & emptyBoard;
+
+        // 左下
+        long tmpLtDn = playerBoard << 7 & maskDiag;
+        tmpLtDn |= tmpLtDn << 7 & maskDiag;
+        tmpLtDn |= tmpLtDn << 7 & maskDiag;
+        tmpLtDn |= tmpLtDn << 7 & maskDiag;
+        tmpLtDn |= tmpLtDn << 7 & maskDiag;
+        tmpLtDn |= tmpLtDn << 7 & maskDiag;
+        mobility |= tmpLtDn << 7 & emptyBoard;
+
+        // 右上
+        long tmpRtUp = playerBoard >>> 7 & maskDiag;
+        tmpRtUp |= tmpRtUp >>> 7 & maskDiag;
+        tmpRtUp |= tmpRtUp >>> 7 & maskDiag;
+        tmpRtUp |= tmpRtUp >>> 7 & maskDiag;
+        tmpRtUp |= tmpRtUp >>> 7 & maskDiag;
+        tmpRtUp |= tmpRtUp >>> 7 & maskDiag;
+        mobility |= tmpRtUp >>> 7 & emptyBoard;
+
+        return mobility;
     }
 
     /**
      * 指定された場所に石を打つ
      */
     public void makeMove(long playerBoard, long opponentBoard, long coord) {
-        long reverseBoard = 0;
         int pos = getRightmostBit(coord);
-
-        long outflankx, outflanky, outflankz, outflankw;
-
         long opponentBoardMasked = opponentBoard & 0x7e7e7e7e7e7e7e7eL;
 
         // 下
-        long downMask = 0x0080808080808080L >>> (63 - pos);
-        int clz1 = clz(~opponentBoard & downMask);
-        outflankx = (0x8000000000000000L >> clz1) & playerBoard;
-        reverseBoard |= (-outflankx << 1) & downMask;
+        long maskDn = 0x0080808080808080L >>> (63 - pos);
+        int clzDn = countLeadingZero(~opponentBoard & maskDn);
+        long outflankDn = (0x8000000000000000L >> clzDn) & playerBoard;
+        long flipped = (-outflankDn * 2) & maskDn;
 
         // 右
-        long rightMask = 0x7f00000000000000L >>> (63 - pos);
-        int clz2 = clz(~opponentBoardMasked & rightMask);
-        outflanky = (0x8000000000000000L >> clz2) & playerBoard;
-        reverseBoard |= (-outflanky << 1) & rightMask;
+        long maskRt = 0x7f00000000000000L >>> (63 - pos);
+        int clzRt = countLeadingZero(~opponentBoardMasked & maskRt);
+        long outflankRt = (0x8000000000000000L >> clzRt) & playerBoard;
+        flipped |= (-outflankRt * 2) & maskRt;
 
         // 左下
-        long leftDownMask = 0x0102040810204000L >>> (63 - pos);
-        int clz3 = clz(~opponentBoardMasked & leftDownMask);
-        outflankz = (0x8000000000000000L >> clz3) & playerBoard;
-        reverseBoard |= (-outflankz << 1) & leftDownMask;
+        long maskLtDn = 0x0102040810204000L >>> (63 - pos);
+        int clzLtDn = countLeadingZero(~opponentBoardMasked & maskLtDn);
+        long outflankLtDn = (0x8000000000000000L >> clzLtDn) & playerBoard;
+        flipped |= (-outflankLtDn * 2) & maskLtDn;
 
         // 右下
-        long rightDownMask = 0x0040201008040201L >>> (63 - pos);
-        int clz4 = clz(~opponentBoardMasked & rightDownMask);
-        outflankw = (0x8000000000000000L >> clz4) & playerBoard;
-        reverseBoard |= (-outflankw << 1) & rightDownMask;
+        long maskRtDn = 0x0040201008040201L >>> (63 - pos);
+        int clzRtDn = countLeadingZero(~opponentBoardMasked & maskRtDn);
+        long outflankRtDn = (0x8000000000000000L >> clzRtDn) & playerBoard;
+        flipped |= (-outflankRtDn * 2) & maskRtDn;
 
         // 上
-        long upMask = 0x0101010101010100L << pos;
-        outflankx = upMask & ((opponentBoard | ~upMask) + 1) & playerBoard;
-        reverseBoard |= (outflankx - (outflankx != 0)) & upMask;
+        long maskUp = 0x0101010101010100L << pos;
+        long outflankUp = maskUp & ((opponentBoard | ~maskUp) + 1) & playerBoard;
+        flipped |= (outflankUp - ((outflankUp | -outflankUp) >>> 63)) & maskUp;
 
         // 左
-        long leftMask = 0x00000000000000feL << pos;
-        outflanky = leftMask & ((opponentBoardMasked | ~leftMask) + 1) & playerBoard;
-        reverseBoard |= (outflanky - (outflanky != 0)) & leftMask;
+        long maskLt = 0x00000000000000feL << pos;
+        long outflankLt = maskLt & ((opponentBoardMasked | ~maskLt) + 1) & playerBoard;
+        flipped |= (outflankLt - ((outflankLt | -outflankLt) >>> 63)) & maskLt;
 
         // 右上
-        long rightUpMask = 0x0002040810204080L << pos;
-        outflankz = rightUpMask & ((opponentBoardMasked | ~rightUpMask) + 1) & playerBoard;
-        reverseBoard |= (outflankz - (outflankz != 0)) & rightUpMask;
+        long maskRtUp = 0x0002040810204080L << pos;
+        long outflankRtUp = maskRtUp & ((opponentBoardMasked | ~maskRtUp) + 1) & playerBoard;
+        flipped |= (outflankRtUp - ((outflankRtUp | -outflankRtUp) >>> 63)) & maskRtUp;
 
         // 左上
-        long leftUpMask = 0x8040201008040200L << pos;
-        outflankw = leftUpMask & ((opponentBoardMasked | ~leftUpMask) + 1) & playerBoard;
-        reverseBoard |= (outflankw - (outflankw != 0)) & leftUpMask;
+        long maskLtUp = 0x8040201008040200L << pos;
+        long outflankLtUp = maskLtUp & ((opponentBoardMasked | ~maskLtUp) + 1) & playerBoard;
+        flipped |= (outflankLtUp - ((outflankLtUp | -outflankLtUp) >>> 63)) & maskLtUp;
 
-        blackBoard ^= (coord * (currentColor & 0x01)) | reverseBoard;
-        whiteBoard ^= (coord * (currentColor >> 1)) | reverseBoard;
+        blackBoard ^= (coord * (currentColor & 1)) | flipped;
+        whiteBoard ^= (coord * (currentColor >> 1)) | flipped;
         --depth;
     }
 
@@ -163,11 +215,11 @@ public class BitBoard {
         // 先手・後手両方パスで終了
         // 先手・後手どちらかが完勝したら終了
         if (depth == 0 || (passed && passedBefore) ||
-                getStoneCount(whiteBoard) == 0 || getStoneCount(blackBoard) == 0)
+                populationCount(whiteBoard) == 0 || populationCount(blackBoard) == 0)
         {
             String winner;
-            int blackCount = getStoneCount(blackBoard);
-            int whiteCount = getStoneCount(whiteBoard);
+            int blackCount = populationCount(blackBoard);
+            int whiteCount = populationCount(whiteBoard);
             int emptyCount = getEmptyCount();
             if (blackCount > whiteCount) {
                 winner = "black";
@@ -190,7 +242,6 @@ public class BitBoard {
      */
     public void nextTurn(boolean passed) {
         currentColor = currentColor ^ 0x3; // 手番を変更
-        turnCount += 1;
         passedBefore = passed;
     }
 
@@ -216,19 +267,19 @@ public class BitBoard {
      * 現在の状態を表示する
      */
     public void printStatus() {
-        String turn;
+        String color;
         String stone;
         if (currentColor == BLACK) {
-            turn = "black";
+            color = "black";
             stone = STONES[BLACK];
         } else {
-            turn = "white";
+            color = "white";
             stone = STONES[WHITE];
         }
-        int blackCount = getStoneCount(blackBoard);
-        int whiteCount = getStoneCount(whiteBoard);
-        System.out.print(String.format("move count:%d ", turnCount));
-        System.out.println(String.format("move:%s(%s)", turn, stone));
+        int blackCount = populationCount(blackBoard);
+        int whiteCount = populationCount(whiteBoard);
+        System.out.print(String.format("depth:%d ", depth));
+        System.out.println(String.format("move:%s(%s)", color, stone));
         System.out.println(String.format("black:%d white:%d", blackCount, whiteCount));
         System.out.println();
     }
@@ -237,7 +288,7 @@ public class BitBoard {
      * スコアを表示する
      */
     public void printScore() {
-        System.out.print(String.format("move count:%d ", turnCount));
+        System.out.print(String.format("depth:%d ", depth));
         System.out.println(String.format("winner:%s", score.getWinner()));
         System.out.println(String.format("black:%d white:%d", score.getBlackStones(), score.getWhiteStones()));
         System.out.println();
