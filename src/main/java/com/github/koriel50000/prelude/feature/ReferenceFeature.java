@@ -1,5 +1,6 @@
 package com.github.koriel50000.prelude.feature;
 
+import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.book.BookSearch;
 import com.github.koriel50000.prelude.rollout.RolloutPolicy;
@@ -20,7 +21,7 @@ public class ReferenceFeature implements Feature {
     private ExecutorService executor;
     private List<EvaluateTask> evaluateTasks;
 
-    public ReferenceFeature(Board board) {
+    public ReferenceFeature(BitBoard board) {
         bookSearch = new BookSearch(board);
         rolloutPolicy = new RolloutPolicy(board);
         winLossExplorer = new WinLossExplorer(board);

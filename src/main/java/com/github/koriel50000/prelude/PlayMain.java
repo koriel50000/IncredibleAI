@@ -22,20 +22,23 @@ public class PlayMain {
     private void oneplay() {
         random = new Random(System.currentTimeMillis());
 
-        BitBoard board = new BitBoard();
+        Board board = new Board();
 
+        Feature preludeFeature = new PreludeFeature(board);
         Feature randomFeature = new RandomFeature();
+        preludeFeature.init();
         randomFeature.init();
 
-        play(board, randomFeature, randomFeature);
+        play(board, preludeFeature, randomFeature);
 
+        preludeFeature.destroy();
         randomFeature.destroy();
     }
 
     /**
      * ゲームを開始する
      */
-    private void play(BitBoard board, Feature blackFeature, Feature whiteFeature) {
+    private void play(Board board, Feature blackFeature, Feature whiteFeature) {
         board.initialize();
 
         while (true) {

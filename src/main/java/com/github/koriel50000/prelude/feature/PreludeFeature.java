@@ -39,9 +39,12 @@ public class PreludeFeature implements Feature {
         List<Eval> evals = new ArrayList<>();
         while (moves != 0) {
             long coord = moves & -moves;  // 一番右のビットのみ取り出す
+
             FloatBuffer state = converter.convertState(board, coord);
             float value = model.calculatePredicatedValue(state);
             evals.add(new Eval(coord, value));
+
+            moves ^= coord;  // 一番右のビットを0にする
         }
 
         return optimumChoice(evals);

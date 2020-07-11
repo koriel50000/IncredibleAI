@@ -1,14 +1,15 @@
 package com.github.koriel50000.prelude.book;
 
+import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Board;
 
 import java.util.List;
 
 public class BookSearch {
 
-    private Board board;
+    private BitBoard board;
 
-    public BookSearch(Board board) {
+    public BookSearch(BitBoard board) {
         this.board = board;
     }
 

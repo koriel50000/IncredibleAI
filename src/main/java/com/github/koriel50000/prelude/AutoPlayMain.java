@@ -4,9 +4,6 @@ import com.github.koriel50000.prelude.feature.Feature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
 import com.github.koriel50000.prelude.feature.ReferenceFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
-import com.github.koriel50000.prelude.reversi.Board;
-
-import java.util.List;
 
 public class AutoPlayMain {
 
@@ -18,9 +15,9 @@ public class AutoPlayMain {
     private void autoplay() {
         BitBoard board = new BitBoard();
 
-        //Feature referenceFeagure = new ReferenceFeature(board);
+        Feature referenceFeagure = new ReferenceFeature(board);
         Feature randomFeature = new RandomFeature();
-        //referenceFeagure.init();
+        referenceFeagure.init();
         randomFeature.init();
 
         int win = 0;
@@ -31,7 +28,7 @@ public class AutoPlayMain {
         BitBoard.Score score;
 
         for (int i = 0; i < 50; i++) {
-            score = play(board, randomFeature, randomFeature);
+            score = play(board, referenceFeagure, randomFeature);
 
             switch (score.getWinner()) {
                 case "black":
@@ -51,7 +48,7 @@ public class AutoPlayMain {
                     break;
             }
 
-            score = play(board, randomFeature, randomFeature);
+            score = play(board, randomFeature, referenceFeagure);
 
             switch (score.getWinner()) {
                 case "black":
@@ -75,7 +72,7 @@ public class AutoPlayMain {
         System.out.println(String.format("win:%d loss:%d draw:%d", win, loss, draw));
         System.out.println(String.format("win_stone:%d loss_stone:%d", winStones, lossStones));
 
-        //referenceFeagure.destroy();
+        referenceFeagure.destroy();
         randomFeature.destroy();
     }
 

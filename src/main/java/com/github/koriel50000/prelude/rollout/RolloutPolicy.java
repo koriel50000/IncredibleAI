@@ -1,5 +1,7 @@
 package com.github.koriel50000.prelude.rollout;
 
+import com.github.koriel50000.prelude.learning.BitConverter;
+import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
@@ -12,16 +14,16 @@ import java.util.Random;
 
 public class RolloutPolicy {
 
-    private Board board;
-    private PreludeConverter converter;
+    private BitBoard board;
+    private BitConverter converter;
     private CNNModel model;
     private Random random;
 
     private volatile long lastCoord;
 
-    public RolloutPolicy(Board board) {
+    public RolloutPolicy(BitBoard board) {
         this.board = board;
-        converter = new PreludeConverter();
+        converter = new BitConverter();
         model = new CNNModel();
         random = new Random(System.currentTimeMillis());
     }

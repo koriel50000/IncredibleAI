@@ -60,11 +60,6 @@ public class BitBoard {
         return populationCount(~bits);
     }
 
-    private int getEmptyCount() {
-        long board = ~(blackBoard | whiteBoard);
-        return populationCount(board);
-    }
-
     /**
      * 一番右端の立っているビット位置を返す
      */
@@ -220,13 +215,12 @@ public class BitBoard {
             String winner;
             int blackCount = populationCount(blackBoard);
             int whiteCount = populationCount(whiteBoard);
-            int emptyCount = getEmptyCount();
             if (blackCount > whiteCount) {
                 winner = "black";
-                blackCount += emptyCount;
+                blackCount = 64 - whiteCount;
             } else if (blackCount < whiteCount) {
                 winner = "white";
-                whiteCount += emptyCount;
+                whiteCount = 64 - blackCount;
             } else {
                 winner = "draw";
             }
