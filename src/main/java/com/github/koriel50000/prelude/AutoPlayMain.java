@@ -4,6 +4,7 @@ import com.github.koriel50000.prelude.feature.Feature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
 import com.github.koriel50000.prelude.feature.ReferenceFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
+import com.github.koriel50000.prelude.reversi.Score;
 
 public class AutoPlayMain {
 
@@ -25,7 +26,7 @@ public class AutoPlayMain {
         int draw = 0;
         int winStones = 0;
         int lossStones = 0;
-        BitBoard.Score score;
+        Score score;
 
         for (int i = 0; i < 50; i++) {
             score = play(board, referenceFeagure, randomFeature);
@@ -79,7 +80,7 @@ public class AutoPlayMain {
     /**
      * ゲームを開始する
      */
-    private BitBoard.Score play(BitBoard board, Feature blackFeature, Feature whiteFeature) {
+    private Score play(BitBoard board, Feature blackFeature, Feature whiteFeature) {
         board.initialize();
 
         while (true) {
@@ -88,7 +89,7 @@ public class AutoPlayMain {
                 long moves = board.availableMoves(board.blackBoard, board.whiteBoard);
                 if (moves != 0) {
                     long move = blackFeature.evaluate(board.blackBoard, board.whiteBoard, moves);
-                    board.makeMove(board.blackBoard, board.whiteBoard, move);
+                    long flipped = board.makeMove(board.blackBoard, board.whiteBoard, move);
                 } else {
                     passed = true;
                 }

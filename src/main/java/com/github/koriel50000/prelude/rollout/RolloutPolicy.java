@@ -2,6 +2,7 @@ package com.github.koriel50000.prelude.rollout;
 
 import com.github.koriel50000.prelude.learning.BitConverter;
 import com.github.koriel50000.prelude.reversi.BitBoard;
+import com.github.koriel50000.prelude.reversi.Bits;
 import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
@@ -40,17 +41,19 @@ public class RolloutPolicy {
         return lastCoord;
     }
 
-    public long rollout(long playerBoard, long opponentBoard, long moves) {
+    public long rollout(long player, long opponent, long coords) {
         // FIXME 仮にPreludeの実装を流用する
         List<RolloutPolicy.Eval> evals = new ArrayList<>();
-        while (moves != 0) {
-            long coord = moves & -moves;  // 一番右のビットのみ取り出す
+        while (coords != 0) {
+            long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
+            int pos = Bits.countTrailingZeros(coords);
 
-            FloatBuffer state = converter.convertState(board, coord);
+            long flipped = board.tryMove(player, opponent, pos);
+            FloatBuffer state = converter.convertState(player, opponent, flipped, coord, pos);
             float value = model.calculatePredicatedValue(state);
             evals.add(new RolloutPolicy.Eval(coord, value));
 
-            moves ^= coord;  // 一番右のビットを0にする
+            coords ^= coord;  // 一番右のビットを0にする
         }
 
         // FIXME 制限時間に返せる着手を１つは用意する

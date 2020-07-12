@@ -3,6 +3,7 @@ package com.github.koriel50000.prelude.learning;
 import com.github.koriel50000.prelude.reversi.Board;
 
 import java.nio.FloatBuffer;
+import java.util.Arrays;
 
 public class PreludeConverter {
 
@@ -222,6 +223,13 @@ public class PreludeConverter {
         state.put(index, 1);
     }
 
+    private void fillState(FloatBuffer state, int channel) {
+        int offset = channel * ROWS * COLUMS;
+        float[] values = new float[ROWS * COLUMS];
+        Arrays.fill(values, 1);
+        state.put(values, offset, values.length);
+    }
+
     /**
      * 石を置いたときの状態を返す
      */
@@ -263,19 +271,19 @@ public class PreludeConverter {
             } else if (oddevenArea[y_][x_] == AREA_EVEN) {
                 putState(state, region, x_, y_, 6); // 偶数領域
             }
-            if (!earlyStage) {
-                putState(state, region, x_, y_, 7); // 序盤でない
-            }
-            if (emptyCount % 2 == 1) {
-                putState(state, region, x_, y_, 8); // 空白数が奇数
-            }
-            if (oddCount == 1 || oddCount % 2 == 0) {
-                putState(state, region, x_, y_, 9); // 奇数領域が1個または偶数
-            }
             int reverseCount = (reverse[y_][x_] < 6) ? reverse[y_][x_] : 6; // 6以上は6プレーン目とする
             if (reverseCount > 0) {
                 putState(state, region, x_, y_, 9 + reverseCount); // 反転数
             }
+        }
+        if (!earlyStage) {
+            fillState(state, 7); // 序盤でない
+        }
+        if (emptyCount % 2 == 1) {
+            fillState(state, 8); // 空白数が奇数
+        }
+        if (oddCount == 1 || oddCount % 2 == 0) {
+            fillState(state, 9); // 奇数領域が1個または偶数
         }
 
         return state;

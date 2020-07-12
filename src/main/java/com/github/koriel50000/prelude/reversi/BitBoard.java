@@ -24,7 +24,7 @@ public class BitBoard {
     }
 
     private int stoneIndex(int x, int y) {
-        long coord = 0x8000000000000000L >>> ((y - 1) * 8 + (x - 1));
+        long coord = Bits.coordAt(x, y);
         if ((blackBoard & coord) != 0) {
             return BLACK;
         } else if ((whiteBoard & coord) != 0) {
@@ -35,53 +35,20 @@ public class BitBoard {
     }
 
     /**
-     * 立っているビットの数を返す
-     */
-    private int populationCount(long bits) {
-        bits = (bits & 0x5555555555555555L) + ((bits >>> 1) & 0x5555555555555555L);
-        bits = (bits & 0x3333333333333333L) + ((bits >>> 2) & 0x3333333333333333L);
-        bits = (bits & 0x0f0f0f0f0f0f0f0fL) + ((bits >>> 4) & 0x0f0f0f0f0f0f0f0fL);
-        bits = (bits & 0x00ff00ff00ff00ffL) + ((bits >>> 8) & 0x00ff00ff00ff00ffL);
-        bits = (bits & 0x0000ffff0000ffffL) + ((bits >>> 16) & 0x0000ffff0000ffffL);
-        bits = (bits & 0x00000000ffffffffL) + ((bits >>> 32) & 0x00000000ffffffffL);
-        return (int)bits;
-    }
-
-    /**
-     * 最上位ビットから連続する 0 のビットの数を返す
-     */
-    private int countLeadingZero(long bits) {
-        bits |= bits >>> 1;
-        bits |= bits >>> 2;
-        bits |= bits >>> 4;
-        bits |= bits >>> 8;
-        bits |= bits >>> 16;
-        bits |= bits >>> 32;
-        return populationCount(~bits);
-    }
-
-    /**
-     * 一番右端の立っているビット位置を返す
-     */
-    private int getRightmostBit(long coord) {
-        return populationCount(coord - 1);
-    }
-
-    /**
      * 着手可能なリストを返す
      */
-    public long availableMoves(long playerBoard, long opponentBoard) {
-        long emptyBoard = ~(playerBoard | opponentBoard);
-        long maskLtRt = opponentBoard & 0x7e7e7e7e7e7e7e7eL;
-        long maskUpDn = opponentBoard & 0x00ffffffffffff00L;
-        long maskDiag = opponentBoard & 0x007e7e7e7e7e7e00L;
+    public long availableMoves(long player, long opponent) {
+        long emptyBoard = ~(player | opponent);
+        long maskLtRt = opponent & 0x7e7e7e7e7e7e7e7eL;
+        long maskUpDn = opponent & 0x00ffffffffffff00L;
+        long maskDiag = opponent & 0x007e7e7e7e7e7e00L;
 
         // 右
-        long tmpRt = playerBoard << 1;
+        long tmpRt = player << 1;
         long mobility = (maskLtRt + tmpRt) & emptyBoard & ~tmpRt;
 
         // 左
-        long tmpLt = playerBoard >>> 1 & maskLtRt;
+        long tmpLt = player >>> 1 & maskLtRt;
         tmpLt |= tmpLt >>> 1 & maskLtRt;
         tmpLt |= tmpLt >>> 1 & maskLtRt;
         tmpLt |= tmpLt >>> 1 & maskLtRt;
@@ -90,7 +57,7 @@ public class BitBoard {
         mobility |= tmpLt >>> 1 & emptyBoard;
 
         // 下
-        long tmpDn = playerBoard << 8 & maskUpDn;
+        long tmpDn = player << 8 & maskUpDn;
         tmpDn |= tmpDn << 8 & maskUpDn;
         tmpDn |= tmpDn << 8 & maskUpDn;
         tmpDn |= tmpDn << 8 & maskUpDn;
@@ -99,7 +66,7 @@ public class BitBoard {
         mobility |= tmpDn << 8 & emptyBoard;
 
         // 上
-        long tmpUp = playerBoard >>> 8 & maskUpDn;
+        long tmpUp = player >>> 8 & maskUpDn;
         tmpUp |= tmpUp >>> 8 & maskUpDn;
         tmpUp |= tmpUp >>> 8 & maskUpDn;
         tmpUp |= tmpUp >>> 8 & maskUpDn;
@@ -108,7 +75,7 @@ public class BitBoard {
         mobility |= tmpUp >>> 8 & emptyBoard;
 
         // 右下
-        long tmpRtDn = playerBoard << 9 & maskDiag;
+        long tmpRtDn = player << 9 & maskDiag;
         tmpRtDn |= tmpRtDn << 9 & maskDiag;
         tmpRtDn |= tmpRtDn << 9 & maskDiag;
         tmpRtDn |= tmpRtDn << 9 & maskDiag;
@@ -117,7 +84,7 @@ public class BitBoard {
         mobility |= tmpRtDn << 9 & emptyBoard;
 
         // 左上
-        long tmpLtUp = playerBoard >>> 9 & maskDiag;
+        long tmpLtUp = player >>> 9 & maskDiag;
         tmpLtUp |= tmpLtUp >>> 9 & maskDiag;
         tmpLtUp |= tmpLtUp >>> 9 & maskDiag;
         tmpLtUp |= tmpLtUp >>> 9 & maskDiag;
@@ -126,7 +93,7 @@ public class BitBoard {
         mobility |= tmpLtUp >>> 9 & emptyBoard;
 
         // 左下
-        long tmpLtDn = playerBoard << 7 & maskDiag;
+        long tmpLtDn = player << 7 & maskDiag;
         tmpLtDn |= tmpLtDn << 7 & maskDiag;
         tmpLtDn |= tmpLtDn << 7 & maskDiag;
         tmpLtDn |= tmpLtDn << 7 & maskDiag;
@@ -135,7 +102,7 @@ public class BitBoard {
         mobility |= tmpLtDn << 7 & emptyBoard;
 
         // 右上
-        long tmpRtUp = playerBoard >>> 7 & maskDiag;
+        long tmpRtUp = player >>> 7 & maskDiag;
         tmpRtUp |= tmpRtUp >>> 7 & maskDiag;
         tmpRtUp |= tmpRtUp >>> 7 & maskDiag;
         tmpRtUp |= tmpRtUp >>> 7 & maskDiag;
@@ -146,60 +113,68 @@ public class BitBoard {
         return mobility;
     }
 
-    /**
-     * 指定された場所に石を打つ
-     */
-    public void makeMove(long playerBoard, long opponentBoard, long coord) {
-        int pos = getRightmostBit(coord);
-        long opponentBoardMasked = opponentBoard & 0x7e7e7e7e7e7e7e7eL;
+    public long tryMove(long player, long opponent, int pos) {
+        long opponentBoardMasked = opponent & 0x7e7e7e7e7e7e7e7eL;
 
         // 下
         long maskDn = 0x0080808080808080L >>> (63 - pos);
-        int clzDn = countLeadingZero(~opponentBoard & maskDn);
-        long outflankDn = (0x8000000000000000L >> clzDn) & playerBoard;
+        int clzDn = Bits.countLeadingZeros(~opponent & maskDn);
+        long outflankDn = (0x8000000000000000L >> clzDn) & player;
         long flipped = (-outflankDn * 2) & maskDn;
 
         // 右
         long maskRt = 0x7f00000000000000L >>> (63 - pos);
-        int clzRt = countLeadingZero(~opponentBoardMasked & maskRt);
-        long outflankRt = (0x8000000000000000L >> clzRt) & playerBoard;
+        int clzRt = Bits.countLeadingZeros(~opponentBoardMasked & maskRt);
+        long outflankRt = (0x8000000000000000L >> clzRt) & player;
         flipped |= (-outflankRt * 2) & maskRt;
 
         // 左下
         long maskLtDn = 0x0102040810204000L >>> (63 - pos);
-        int clzLtDn = countLeadingZero(~opponentBoardMasked & maskLtDn);
-        long outflankLtDn = (0x8000000000000000L >> clzLtDn) & playerBoard;
+        int clzLtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskLtDn);
+        long outflankLtDn = (0x8000000000000000L >> clzLtDn) & player;
         flipped |= (-outflankLtDn * 2) & maskLtDn;
 
         // 右下
         long maskRtDn = 0x0040201008040201L >>> (63 - pos);
-        int clzRtDn = countLeadingZero(~opponentBoardMasked & maskRtDn);
-        long outflankRtDn = (0x8000000000000000L >> clzRtDn) & playerBoard;
+        int clzRtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskRtDn);
+        long outflankRtDn = (0x8000000000000000L >> clzRtDn) & player;
         flipped |= (-outflankRtDn * 2) & maskRtDn;
 
         // 上
         long maskUp = 0x0101010101010100L << pos;
-        long outflankUp = maskUp & ((opponentBoard | ~maskUp) + 1) & playerBoard;
+        long outflankUp = maskUp & ((opponent | ~maskUp) + 1) & player;
         flipped |= (outflankUp - ((outflankUp | -outflankUp) >>> 63)) & maskUp;
 
         // 左
         long maskLt = 0x00000000000000feL << pos;
-        long outflankLt = maskLt & ((opponentBoardMasked | ~maskLt) + 1) & playerBoard;
+        long outflankLt = maskLt & ((opponentBoardMasked | ~maskLt) + 1) & player;
         flipped |= (outflankLt - ((outflankLt | -outflankLt) >>> 63)) & maskLt;
 
         // 右上
         long maskRtUp = 0x0002040810204080L << pos;
-        long outflankRtUp = maskRtUp & ((opponentBoardMasked | ~maskRtUp) + 1) & playerBoard;
+        long outflankRtUp = maskRtUp & ((opponentBoardMasked | ~maskRtUp) + 1) & player;
         flipped |= (outflankRtUp - ((outflankRtUp | -outflankRtUp) >>> 63)) & maskRtUp;
 
         // 左上
         long maskLtUp = 0x8040201008040200L << pos;
-        long outflankLtUp = maskLtUp & ((opponentBoardMasked | ~maskLtUp) + 1) & playerBoard;
+        long outflankLtUp = maskLtUp & ((opponentBoardMasked | ~maskLtUp) + 1) & player;
         flipped |= (outflankLtUp - ((outflankLtUp | -outflankLtUp) >>> 63)) & maskLtUp;
+
+        return flipped;
+    }
+
+    /**
+     * 指定された場所に石を打つ
+     */
+    public long makeMove(long player, long opponent, long coord) {
+        int pos = Bits.countTrailingZeros(coord);
+        long flipped = tryMove(player, opponent, pos);
 
         blackBoard ^= (coord * (currentColor & 1)) | flipped;
         whiteBoard ^= (coord * (currentColor >> 1)) | flipped;
         --depth;
+
+        return flipped;
     }
 
     /**
@@ -210,11 +185,11 @@ public class BitBoard {
         // 先手・後手両方パスで終了
         // 先手・後手どちらかが完勝したら終了
         if (depth == 0 || (passed && passedBefore) ||
-                populationCount(whiteBoard) == 0 || populationCount(blackBoard) == 0)
+                Bits.populationCount(whiteBoard) == 0 || Bits.populationCount(blackBoard) == 0)
         {
             String winner;
-            int blackCount = populationCount(blackBoard);
-            int whiteCount = populationCount(whiteBoard);
+            int blackCount = Bits.populationCount(blackBoard);
+            int whiteCount = Bits.populationCount(whiteBoard);
             if (blackCount > whiteCount) {
                 winner = "black";
                 blackCount = 64 - whiteCount;
@@ -270,8 +245,8 @@ public class BitBoard {
             color = "white";
             stone = STONES[WHITE];
         }
-        int blackCount = populationCount(blackBoard);
-        int whiteCount = populationCount(whiteBoard);
+        int blackCount = Bits.populationCount(blackBoard);
+        int whiteCount = Bits.populationCount(whiteBoard);
         System.out.print(String.format("depth:%d ", depth));
         System.out.println(String.format("move:%s(%s)", color, stone));
         System.out.println(String.format("black:%d white:%d", blackCount, whiteCount));
@@ -290,30 +265,5 @@ public class BitBoard {
 
     public Score getScore() {
         return score;
-    }
-
-    public static class Score {
-
-        private String winner;
-        private int blackStones;
-        private int whiteStones;
-
-        private Score(String winner, int blackStones, int whiteStones) {
-            this.winner = winner;
-            this.blackStones = blackStones;
-            this.whiteStones = whiteStones;
-        }
-
-        public String getWinner() {
-            return winner;
-        }
-
-        public int getBlackStones() {
-            return blackStones;
-        }
-
-        public int getWhiteStones() {
-            return whiteStones;
-        }
     }
 }

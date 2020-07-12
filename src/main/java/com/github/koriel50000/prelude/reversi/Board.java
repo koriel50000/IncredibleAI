@@ -151,27 +151,29 @@ public class Board {
         return nextBoard;
     }
 
-        /**
-         * ゲームの終了を判定する
-         */
+    /**
+     * ゲームの終了を判定する
+     */
     public boolean hasCompleted() {
         // 空白がなくなったら終了
         // 先手・後手どちらかが完勝したら終了
         // 先手・後手両方パスで終了
         if (stones[EMPTY] == 0 || stones[BLACK] == 0 || stones[WHITE] == 0 ||
-                (availableMoves(Color.Black).size() == 0 && availableMoves(Color.White).size() == 0))
-        {
-            Winner winner;
-            if (stones[BLACK] > stones[WHITE]) {
-                winner = Winner.Black;
-                stones[BLACK] += stones[EMPTY];
+                (availableMoves(Color.Black).size() == 0 && availableMoves(Color.White).size() == 0)) {
+            String winner;
+            int blackCount = stones[BLACK];
+            int whiteCount = stones[WHITE];
+            int emptyCount = stones[EMPTY];
+            if (blackCount > whiteCount) {
+                winner = "black";
+                blackCount += emptyCount;
             } else if (stones[BLACK] < stones[WHITE]) {
-                winner = Winner.White;
-                stones[WHITE] += stones[EMPTY];
+                winner = "white";
+                whiteCount += emptyCount;
             } else {
-                winner = Winner.Draw;
+                winner = "draw";
             }
-            score = new Score(winner, stones[BLACK], stones[WHITE]);
+            score = new Score(winner, blackCount, whiteCount);
             return true;
         }
 
@@ -186,7 +188,7 @@ public class Board {
         turnCount += 1;
     }
 
-    private static final String[] STONES = { ".", "@", "O" };
+    private static final String[] STONES = {".", "@", "O"};
 
     /**
      * 盤面を表示する
@@ -314,6 +316,7 @@ public class Board {
         public static Coord[] values() {
             return values;
         }
+
         public static Coord valueOf(int x, int y) {
             return values[(y - 1) * 8 + (x - 1)];
         }
@@ -337,7 +340,7 @@ public class Board {
         private static Direction[] crossValues;
 
         static {
-            values = new Direction[] {
+            values = new Direction[]{
                     new Direction(-1, 0),
                     new Direction(-1, -1),
                     new Direction(0, -1),
@@ -347,7 +350,7 @@ public class Board {
                     new Direction(0, 1),
                     new Direction(-1, 1),
             };
-            crossValues = new Direction[] {
+            crossValues = new Direction[]{
                     values[0],
                     values[2],
                     values[4],
@@ -364,45 +367,4 @@ public class Board {
         }
     }
 
-    public enum Winner {
-        Black("black"),
-        White("white"),
-        Draw("draw");
-
-        private String display;
-
-        Winner(String display) {
-            this.display = display;
-        }
-
-        @Override
-        public String toString() {
-            return display;
-        }
-    }
-
-    public static class Score {
-
-        private Winner winner;
-        private int blackStones;
-        private int whiteStones;
-
-        private Score(Winner winner, int blackStones, int whiteStones) {
-            this.winner = winner;
-            this.blackStones = blackStones;
-            this.whiteStones = whiteStones;
-        }
-
-        public Winner getWinner() {
-            return winner;
-        }
-
-        public int getBlackStones() {
-            return blackStones;
-        }
-
-        public int getWhiteStones() {
-            return whiteStones;
-        }
-    }
 }
