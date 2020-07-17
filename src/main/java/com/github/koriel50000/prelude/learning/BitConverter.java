@@ -1,6 +1,7 @@
 package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
+import com.github.koriel50000.prelude.reversi.Board;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
@@ -175,80 +176,95 @@ public class BitConverter {
         earlyStage = true;
     }
 
-    pvivate void enumerateArea(long coord) {
-        long cornerMask = 0x8100000000000081L;
-        long edgeMask = 0x7e8181818181817eL;
-        long crossMask = 0x0L;
-
-
-        if ((coord & cornerMask) != 0) {
-            // 左上
-            long adjacentDn = 0L;
-            long adjacentRt = 0L;
-            if (adjacentDn == 0 || adjacentRt == 0) {
-                // 領域2分割
-                if ((oddArea | coord) != 0) {
-                    // 奇数領域を埋める
-                    if (Bits.populationCount(adjacentDn) % 2 == 0) {
-                        // 奇数領域 - 1 => 偶数領域 + 偶数領域
-                        evenCount += 2;
-                        --oddCount;
-                    } else {
-                        // 奇数領域 - 1 => 奇数領域 + 奇数領域
-                    }
-                } else {
-                    // 偶数領域を埋める
-                    // 偶数領域 - 1 => 偶数領域 + 奇数領域
-                }
-            } else {
-                // 分割なし
-                if ((oddArea | coord) != 0) {
-                    // 奇数領域を埋める
-
-                } else {
-                    // 偶数領域を埋める
-                }
+    /**
+     * 領域を再帰的にたどって反転領域を返す
+     */
+    private long reverseRecursive(long area, long flipped) {
+        oddevenArea[y][x] = AREA_UNKNOWN;
+        count += 1;
+        for (Board.Direction dir : Board.Direction.corssValues()) {
+            int x_ = x + dir.dx;
+            int y_ = y + dir.dy;
+            if (oddevenArea[y_][x_] == AREA_EMPTY) {
+                count = reverseRecursive(x_, y_, count);
             }
-        } else if ((coord & cornerMask) != 0) {
-            // 右上
-        } else if ((coord & cornerMask) != 0) {
-            // 右下
-        } else if ((coord & cornerMask) != 0) {
-            // 左下
-        } else if ((coord & edgeMask) != 0) {
-            // 上
-            long adjacentDn = 0L;
-            long adjacentRt = 0L;
-            long adjacentLt = 0L;
-            if (divied) {
+        }
+        return flipped;
+    }
 
+    private void calculateOddEven(long area, long coord) {
+        if ((area & coord) != 0) {
+            long flipped = reverseRecursive(area, coord);
+            int oddeven = Bits.populationCount(flipped);
+            if (oddeven % 2 == 0) {
+                oddArea &= ~flipped;
+                evenArea |= flipped;
+                evenCount++;
             } else {
-                if ((oddArea | coord) != 0) {
-                    // 奇数領域を埋める
-
-                } else {
-                    // 偶数領域を埋める
-                }
-            }
-        } else {
-            if ((oddArea | coord) != 0) {
-                // 奇数領域を埋める
-                int pos = 0; // FIXME
-                if ((oddArea | (crossMask << pos)) == 0) {
-                    // 1マス空きを埋める
-                    --oddCount;
-                    oddArea ^= coord;
-                } else {
-                    // 奇数領域が偶数領域に変わる
-                    --oddCount;
-                    evenCount++;
-                    flippedArea(coord); // FIXME
-                }
-            } else {
-                // 偶数領域を埋める
-                --evenCount;
+                oddArea |= flipped;
+                evenArea &= ~flipped;
                 oddCount++;
-                flippedArea(coord); // FIXME
+            }
+        }
+    }
+
+    private void increaseFlipped(long flipped) {
+        while (flipped != 0) {
+            long coord = Bits.getRightmostBit(flipped);
+
+            int pos = Bits.countTrailingZeros(coord);
+            if (flippedBoard[pos] < 6) { // 6以上は6プレーン目とする
+                flippedBoard[pos]++;
+            }
+
+            flipped ^= coord;
+        }
+    }
+
+    /**
+     * 偶数領域、奇数領域を数え上げる
+     */
+    private void enumerateArea(long coord) {
+        if (earlyStage) {
+            // まだ辺に接していない
+            if ((oddArea & coord) != 0) {
+                evenArea |= oddArea ^ coord;
+                oddArea = 0x0000000000000000L;
+                evenCount = 1;
+                oddCount = 0;
+            } else {
+                oddArea |= evenArea ^ coord;
+                evenArea = 0x0000000000000000L;
+                oddCount = 1;
+                evenCount = 0;
+            }
+            earlyStage = (coord & 0xff818181818181ffL) == 0;
+        } else {
+            // すでに辺に接している
+            if ((oddArea & coord) != 0) {
+                // 奇数領域
+                oddArea ^= coord;
+                --oddCount;
+                // 上
+                calculateOddEven(oddArea, coord << 8);
+                // 下
+                calculateOddEven(oddArea, coord >>> 8);
+                // 左
+                calculateOddEven(oddArea, coord << 1 & 0xfefefefefefefefeL);
+                // 右
+                calculateOddEven(oddArea, coord >>> 1 & 0x7f7f7f7f7f7f7f7fL);
+            } else {
+                // 偶数領域
+                evenArea ^= coord;
+                --evenCount;
+                // 上
+                calculateOddEven(evenArea, coord << 8);
+                // 下
+                calculateOddEven(evenArea, coord >>> 8);
+                // 左
+                calculateOddEven(evenArea, coord << 1 & 0xfefefefefefefefeL);
+                // 右
+                calculateOddEven(evenArea, coord >>> 1 & 0x7f7f7f7f7f7f7f7fL);
             }
         }
     }
@@ -261,11 +277,11 @@ public class BitConverter {
         long newOpponent = opponent ^ flipped;
         int region = checkRegion(newPlayer, newOpponent, pos);
 
-        enumerateArea(board);
+        enumerateArea(coord);
+        increaseFlipped(flipped);
 
         FloatBuffer state = FloatBuffer.allocate(ROWS * COLUMS * CHANNEL);
         state.clear();
-
 
         long coord_ = 0x8000000000000000L;
         while (coord_ != 0) {
@@ -287,9 +303,8 @@ public class BitConverter {
             } else if ((evenArea & coord_) != 0) {
                 putState(state, region, coord_, 6); // 偶数領域
             }
-            int reverseCount = (flippedBoard[pos] < 6) ? flippedBoard[pos] : 6; // 6以上は6プレーン目とする
-            if (reverseCount > 0) {
-                putState(state, region, coord_, 9 + reverseCount); // 反転数
+            if (flippedBoard[xxx] > 0) {
+                putState(state, region, coord_, 9 + flippedBoard[xxx]); // 反転数
             }
             coord_ >>>= 1;
         }
