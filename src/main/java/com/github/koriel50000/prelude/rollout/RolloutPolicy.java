@@ -46,7 +46,7 @@ public class RolloutPolicy {
         List<RolloutPolicy.Eval> evals = new ArrayList<>();
         while (coords != 0) {
             long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
-            int pos = Bits.countTrailingZeros(coords);
+            int pos = Bits.lastIndexOf(coord);
 
             long flipped = board.tryMove(player, opponent, pos);
             FloatBuffer state = converter.convertState(player, opponent, flipped, coord, pos);

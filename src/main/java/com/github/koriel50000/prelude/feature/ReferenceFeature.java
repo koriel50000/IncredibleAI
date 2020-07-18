@@ -1,8 +1,7 @@
 package com.github.koriel50000.prelude.feature;
 
-import com.github.koriel50000.prelude.reversi.BitBoard;
-import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.book.BookSearch;
+import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.rollout.RolloutPolicy;
 import com.github.koriel50000.prelude.winloss.WinLossExplorer;
 
@@ -29,20 +28,20 @@ public class ReferenceFeature implements Feature {
         evaluateTasks = new ArrayList<>();
         evaluateTasks.add(new EvaluateTask() {
             @Override
-            protected long evaluate(long playerBoard, long opponentBoard, long moves) throws Exception {
-                return search(playerBoard, opponentBoard, moves);
+            protected long evaluate(long player, long opponent, long coords) {
+                return search(player, opponent, coords);
             }
         });
         evaluateTasks.add(new EvaluateTask() {
             @Override
-            protected long evaluate(long playerBoard, long opponentBoard, long moves) throws Exception {
-                return rollout(playerBoard, opponentBoard, moves);
+            protected long evaluate(long player, long opponent, long coords) {
+                return rollout(player, opponent, coords);
             }
         });
         evaluateTasks.add(new EvaluateTask() {
             @Override
-            protected long evaluate(long playerBoard, long opponentBoard, long moves) throws Exception {
-                return explore(playerBoard, opponentBoard, moves);
+            protected long evaluate(long player, long opponent, long coords) {
+                return explore(player, opponent, coords);
             }
         });
 
@@ -62,9 +61,9 @@ public class ReferenceFeature implements Feature {
     }
 
     @Override
-    public long evaluate(long playerBoard, long opponentBoard, long moves) {
+    public long evaluate(long player, long opponent, long coords) {
         for (EvaluateTask evaluateTask : evaluateTasks) {
-            evaluateTask.setMoves(playerBoard, opponentBoard, moves);
+            evaluateTask.setMoves(player, opponent, coords);
         }
 
         Long coord;
@@ -79,43 +78,43 @@ public class ReferenceFeature implements Feature {
         return coord;
     }
 
-    private long search(long playerBoard, long opponentBoard, long moves) {
+    private long search(long player, long opponent, long coords) {
         if (bookSearch.notExists()) {
             throw new CancellationException("not exists");
         }
 
-        return bookSearch.search(playerBoard, opponentBoard, moves);
+        return bookSearch.search(player, opponent, coords);
     }
 
-    private long rollout(long playerBoard, long opponentBoard, long moves) {
-        return rolloutPolicy.rollout(playerBoard, opponentBoard, moves);
+    private long rollout(long player, long opponent, long coords) {
+        return rolloutPolicy.rollout(player, opponent, coords);
     }
 
-    private long explore(long playerBoard, long opponentBoard, long moves) {
+    private long explore(long player, long opponent, long coords) {
         if (winLossExplorer.notPossible()) {
             throw new CancellationException("not possible");
         }
 
-        return winLossExplorer.explore(playerBoard, opponentBoard, moves);
+        return winLossExplorer.explore(player, opponent, coords);
     }
 
     private static abstract class EvaluateTask implements Callable<Long> {
 
-        private long playerBoard;
-        private long opponentBoard;
-        private long moves;
+        private long player;
+        private long opponent;
+        private long coords;
 
-        private void setMoves(long playerBoard, long opponentBoard, long moves) {
-            this.playerBoard = playerBoard;
-            this.opponentBoard = opponentBoard;
-            this.moves = moves;
+        private void setMoves(long player, long opponent, long coords) {
+            this.player = player;
+            this.opponent = opponent;
+            this.coords = coords;
         }
 
         @Override
-        public Long call() throws Exception {
-            return evaluate(playerBoard, opponentBoard, moves);
+        public Long call() {
+            return evaluate(player, opponent, coords);
         }
 
-        protected abstract long evaluate(long playerBoard, long opponentBoard, long moves) throws Exception;
+        protected abstract long evaluate(long player, long opponent, long coords);
     }
 }

@@ -56,7 +56,7 @@ public class WinLossExplorer {
         int maxValue = Integer.MIN_VALUE;
         while (coords != 0) {
             long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
-            int pos = Bits.countTrailingZeros(coords);
+            int pos = Bits.lastIndexOf(coord);
 
             long flipped = board.tryMove(player, opponent, pos);
             int value = -negamax(opponent ^ flipped, player | coord | flipped, depth - 1, false);

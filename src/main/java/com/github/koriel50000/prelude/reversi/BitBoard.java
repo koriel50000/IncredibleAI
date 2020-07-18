@@ -167,7 +167,7 @@ public class BitBoard {
      * 指定された場所に石を打つ
      */
     public long makeMove(long player, long opponent, long coord) {
-        int pos = Bits.countTrailingZeros(coord);
+        int pos = Bits.lastIndexOf(coord);
         long flipped = tryMove(player, opponent, pos);
 
         blackBoard ^= (coord * (currentColor & 1)) | flipped;

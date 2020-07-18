@@ -42,6 +42,23 @@ public final class Bits {
         return bits & -bits;
     }
 
+    private static int[] perfectHash;
+
+    static {
+        perfectHash = new int[64];
+        long onehot = 0x0000000000000001L;
+        for (int pos = 0; pos <= 63; pos++) {
+            int hash = (int)((onehot * 0x03F566ED27179461L) >>> 58);
+            perfectHash[hash] = pos;
+            onehot <<= 1;
+        }
+    }
+
+    public static int lastIndexOf(long coord) {
+        int hash = (int)((coord * 0x03F566ED27179461L) >>> 58);
+        return perfectHash[hash];
+    }
+
     /**
      *
      */

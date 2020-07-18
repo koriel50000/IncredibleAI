@@ -46,35 +46,35 @@ public class PlayMain {
             board.printStatus();
 
             boolean passed = false;
-            if (board.currentColor == BitBoard.BLACK) {
-                long moves = board.availableMoves(board.blackBoard, board.whiteBoard);
-                if (moves != 0) {
-                    long move = blackFeature.evaluate(board.blackBoard, board.whiteBoard, moves);
-                    board.makeMove(board.blackBoard, board.whiteBoard, move);
-                } else {
-                    System.out.println("Pass!");
-                    passed = true;
-                }
-            } else {
-                long moves = board.availableMoves(board.whiteBoard, board.blackBoard);
-                if (moves != 0) {
-                    long move = whiteFeature.evaluate(board.whiteBoard, board.blackBoard, moves);
-                    board.makeMove(board.whiteBoard, board.blackBoard, move);
-                } else {
-                    System.out.println("Pass!");
-                    passed = true;
-                }
-            }
+//            if (board.currentColor == BitBoard.BLACK) {
+//                long moves = board.availableMoves(board.blackBoard, board.whiteBoard);
+//                if (moves != 0) {
+//                    long move = blackFeature.evaluate(board.blackBoard, board.whiteBoard, moves);
+//                    board.makeMove(board.blackBoard, board.whiteBoard, move);
+//                } else {
+//                    System.out.println("Pass!");
+//                    passed = true;
+//                }
+//            } else {
+//                long moves = board.availableMoves(board.whiteBoard, board.blackBoard);
+//                if (moves != 0) {
+//                    long move = whiteFeature.evaluate(board.whiteBoard, board.blackBoard, moves);
+//                    board.makeMove(board.whiteBoard, board.blackBoard, move);
+//                } else {
+//                    System.out.println("Pass!");
+//                    passed = true;
+//                }
+//            }
 
             // ゲーム終了を判定
-            if (board.hasCompleted(passed)) {
-                break;
-            }
+//            if (board.hasCompleted(passed)) {
+//                break;
+//            }
 
-            board.nextTurn(passed);
+//            board.nextTurn(passed);
         }
 
-        board.printBoard();
-        board.printScore();
+//        board.printBoard();
+//        board.printScore();
     }
 }
