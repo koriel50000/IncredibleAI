@@ -180,9 +180,9 @@ public class BitConverter {
         while (flipped != 0) {
             long coord = Bits.getRightmostBit(flipped);
 
-            int pos = Bits.lastIndexOf(coord);
-            if (flippedBoard[pos] < 6) { // 6以上は6プレーン目とする
-                flippedBoard[pos]++;
+            int index = Bits.indexOf(coord);
+            if (flippedBoard[index] < 6) { // 6以上は6プレーン目とする
+                flippedBoard[index]++;
             }
 
             flipped ^= coord;

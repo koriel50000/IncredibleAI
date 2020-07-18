@@ -46,10 +46,10 @@ public class RolloutPolicy {
         List<RolloutPolicy.Eval> evals = new ArrayList<>();
         while (coords != 0) {
             long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
-            int pos = Bits.lastIndexOf(coord);
+            int index = Bits.indexOf(coord);
 
-            long flipped = board.tryMove(player, opponent, pos);
-            FloatBuffer state = converter.convertState(player, opponent, flipped, coord, pos);
+            long flipped = board.tryMove(player, opponent, index);
+            FloatBuffer state = converter.convertState(player, opponent, flipped, coord, index);
             float value = model.calculatePredicatedValue(state);
             evals.add(new RolloutPolicy.Eval(coord, value));
 

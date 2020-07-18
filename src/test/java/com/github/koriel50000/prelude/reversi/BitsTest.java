@@ -1,8 +1,11 @@
 package com.github.koriel50000.prelude.reversi;
 
+import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static java.lang.Long.parseLong;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BitsTest {
 
@@ -36,11 +39,49 @@ public class BitsTest {
     }
 
     @Test
-    void lastIndexOf() {
+    void indexOf() {
         assertAll(
-                () -> assertEquals(0, Bits.lastIndexOf(0x0000000000000001L)),
-                () -> assertEquals(1, Bits.lastIndexOf(0x0000000000000002L)),
-                () -> assertEquals(63, Bits.lastIndexOf(0x8000000000000000L))
+                () -> assertEquals(0, Bits.indexOf(0x8000000000000000L)),
+                () -> assertEquals(1, Bits.indexOf(0x4000000000000000L)),
+                () -> assertEquals(63, Bits.indexOf(0x0000000000000001L))
         );
+    }
+
+    @Test
+    void transpose() {
+        long test1 = parseLong("" +
+                "10101010" +
+                "00010101" +
+                "00101010" +
+                "00000101" +
+                "00001010" +
+                "00000001" +
+                "00000010" +
+                "00000000", 2);
+        printMatrix(test1);
+        long expected1 = matrix("",
+                "00000000",
+                "00000000",
+                "00000000",
+                "00000000",
+                "00000000",
+                "00000000",
+                "00000000",
+                "00000000");
+        printMatrix(expected1);
+        assertEquals(expected1, Bits.transpose(test1));
+    }
+
+    private static long matrix(String... bits) {
+        return Long.parseLong(String.join("", bits), 2);
+    }
+
+    private static void printMatrix(long matrix) {
+        for (int i = 0; i < 8; i++) {
+            long row = matrix >>> (i * 8) & 0xff;
+            String bits = Long.toBinaryString(row);
+            String line = StringUtils.leftPad("", 8, '0');
+            System.out.println(line);
+        }
     }
 }

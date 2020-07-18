@@ -23,7 +23,7 @@ public class BitBoard {
         score = null;
     }
 
-    private int stoneIndex(int x, int y) {
+    private int stoneColor(int x, int y) {
         long coord = Bits.coordAt(x, y);
         if ((blackBoard & coord) != 0) {
             return BLACK;
@@ -113,50 +113,50 @@ public class BitBoard {
         return mobility;
     }
 
-    public long tryMove(long player, long opponent, int pos) {
+    public long tryMove(long player, long opponent, int index) {
         long opponentBoardMasked = opponent & 0x7e7e7e7e7e7e7e7eL;
 
         // 下
-        long maskDn = 0x0080808080808080L >>> (63 - pos);
+        long maskDn = 0x0080808080808080L >>> index;
         int clzDn = Bits.countLeadingZeros(~opponent & maskDn);
         long outflankDn = (0x8000000000000000L >> clzDn) & player;
         long flipped = (-outflankDn * 2) & maskDn;
 
         // 右
-        long maskRt = 0x7f00000000000000L >>> (63 - pos);
+        long maskRt = 0x7f00000000000000L >>> index;
         int clzRt = Bits.countLeadingZeros(~opponentBoardMasked & maskRt);
         long outflankRt = (0x8000000000000000L >> clzRt) & player;
         flipped |= (-outflankRt * 2) & maskRt;
 
         // 左下
-        long maskLtDn = 0x0102040810204000L >>> (63 - pos);
+        long maskLtDn = 0x0102040810204000L >>> index;
         int clzLtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskLtDn);
         long outflankLtDn = (0x8000000000000000L >> clzLtDn) & player;
         flipped |= (-outflankLtDn * 2) & maskLtDn;
 
         // 右下
-        long maskRtDn = 0x0040201008040201L >>> (63 - pos);
+        long maskRtDn = 0x0040201008040201L >>> index;
         int clzRtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskRtDn);
         long outflankRtDn = (0x8000000000000000L >> clzRtDn) & player;
         flipped |= (-outflankRtDn * 2) & maskRtDn;
 
         // 上
-        long maskUp = 0x0101010101010100L << pos;
+        long maskUp = 0x0101010101010100L << (63 - index);
         long outflankUp = maskUp & ((opponent | ~maskUp) + 1) & player;
         flipped |= (outflankUp - ((outflankUp | -outflankUp) >>> 63)) & maskUp;
 
         // 左
-        long maskLt = 0x00000000000000feL << pos;
+        long maskLt = 0x00000000000000feL << (63 - index);
         long outflankLt = maskLt & ((opponentBoardMasked | ~maskLt) + 1) & player;
         flipped |= (outflankLt - ((outflankLt | -outflankLt) >>> 63)) & maskLt;
 
         // 右上
-        long maskRtUp = 0x0002040810204080L << pos;
+        long maskRtUp = 0x0002040810204080L << (63 - index);
         long outflankRtUp = maskRtUp & ((opponentBoardMasked | ~maskRtUp) + 1) & player;
         flipped |= (outflankRtUp - ((outflankRtUp | -outflankRtUp) >>> 63)) & maskRtUp;
 
         // 左上
-        long maskLtUp = 0x8040201008040200L << pos;
+        long maskLtUp = 0x8040201008040200L << (63 - index);
         long outflankLtUp = maskLtUp & ((opponentBoardMasked | ~maskLtUp) + 1) & player;
         flipped |= (outflankLtUp - ((outflankLtUp | -outflankLtUp) >>> 63)) & maskLtUp;
 
@@ -167,8 +167,8 @@ public class BitBoard {
      * 指定された場所に石を打つ
      */
     public long makeMove(long player, long opponent, long coord) {
-        int pos = Bits.lastIndexOf(coord);
-        long flipped = tryMove(player, opponent, pos);
+        int index = Bits.indexOf(coord);
+        long flipped = tryMove(player, opponent, index);
 
         blackBoard ^= (coord * (currentColor & 1)) | flipped;
         whiteBoard ^= (coord * (currentColor >> 1)) | flipped;
@@ -225,7 +225,7 @@ public class BitBoard {
         for (int y = 1; y <= 8; y++) {
             System.out.print(y);
             for (int x = 1; x <= 8; x++) {
-                String stone = STONES[stoneIndex(x, y)];
+                String stone = STONES[stoneColor(x, y)];
                 System.out.print(" " + stone);
             }
             System.out.println();
