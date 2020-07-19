@@ -24,7 +24,7 @@ public class BitBoard {
     }
 
     private int stoneColor(int x, int y) {
-        long coord = Bits.coordAt(x, y);
+        long coord = Bits.coordAt(x - 1, y - 1);
         if ((blackBoard & coord) != 0) {
             return BLACK;
         } else if ((whiteBoard & coord) != 0) {
@@ -114,30 +114,42 @@ public class BitBoard {
     }
 
     public long tryMove(long player, long opponent, int index) {
+        // http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
+        //
+        // OM.x = O;
+        // OM.yzw = O & 0x7e7e7e7e7e7e7e7eUL;
+        // mask = (ulong4) (0x0080808080808080UL, 0x7f00000000000000UL, 0x0102040810204000UL, 0x0040201008040201UL) >> (63 - pos);
+        // outflank = (0x8000000000000000UL >> clz(~OM & mask)) & P;
+        // flipped  = (-outflank * 2) & mask;
+        // mask = (ulong4) (0x0101010101010100UL, 0x00000000000000feUL, 0x0002040810204080UL, 0x8040201008040200UL) << pos;
+        // outflank = mask & ((OM | ~mask) + 1) & P;
+        // flipped |= (outflank - (outflank != 0)) & mask;
+        // return flipped.x | flipped.y | flipped.z | flipped.w;
+
         long opponentBoardMasked = opponent & 0x7e7e7e7e7e7e7e7eL;
 
         // 下
         long maskDn = 0x0080808080808080L >>> index;
         int clzDn = Bits.countLeadingZeros(~opponent & maskDn);
-        long outflankDn = (0x8000000000000000L >> clzDn) & player;
+        long outflankDn = (0x8000000000000000L >>> clzDn) & player;
         long flipped = (-outflankDn * 2) & maskDn;
 
         // 右
         long maskRt = 0x7f00000000000000L >>> index;
         int clzRt = Bits.countLeadingZeros(~opponentBoardMasked & maskRt);
-        long outflankRt = (0x8000000000000000L >> clzRt) & player;
+        long outflankRt = (0x8000000000000000L >>> clzRt) & player;
         flipped |= (-outflankRt * 2) & maskRt;
 
         // 左下
         long maskLtDn = 0x0102040810204000L >>> index;
         int clzLtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskLtDn);
-        long outflankLtDn = (0x8000000000000000L >> clzLtDn) & player;
+        long outflankLtDn = (0x8000000000000000L >>> clzLtDn) & player;
         flipped |= (-outflankLtDn * 2) & maskLtDn;
 
         // 右下
         long maskRtDn = 0x0040201008040201L >>> index;
         int clzRtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskRtDn);
-        long outflankRtDn = (0x8000000000000000L >> clzRtDn) & player;
+        long outflankRtDn = (0x8000000000000000L >>> clzRtDn) & player;
         flipped |= (-outflankRtDn * 2) & maskRtDn;
 
         // 上
@@ -219,23 +231,23 @@ public class BitBoard {
     /**
      * 盤面を表示する
      */
-    public void printBoard() {
-        System.out.println();
-        System.out.println("  A B C D E F G H");
+    public void printBoard(LineBuffer buffer) {
+        buffer.println();
+        buffer.println("  A B C D E F G H");
         for (int y = 1; y <= 8; y++) {
-            System.out.print(y);
+            buffer.print(y);
             for (int x = 1; x <= 8; x++) {
                 String stone = STONES[stoneColor(x, y)];
-                System.out.print(" " + stone);
+                buffer.print(" " + stone);
             }
-            System.out.println();
+            buffer.println();
         }
     }
 
     /**
      * 現在の状態を表示する
      */
-    public void printStatus() {
+    public void printStatus(LineBuffer buffer) {
         String color;
         String stone;
         if (currentColor == BLACK) {
@@ -247,20 +259,20 @@ public class BitBoard {
         }
         int blackCount = Bits.populationCount(blackBoard);
         int whiteCount = Bits.populationCount(whiteBoard);
-        System.out.print(String.format("depth:%d ", depth));
-        System.out.println(String.format("move:%s(%s)", color, stone));
-        System.out.println(String.format("black:%d white:%d", blackCount, whiteCount));
-        System.out.println();
+        buffer.print(String.format("depth:%d ", depth));
+        buffer.println(String.format("move:%s(%s)", color, stone));
+        buffer.println(String.format("black:%d white:%d", blackCount, whiteCount));
+        buffer.println();
     }
 
     /**
      * スコアを表示する
      */
-    public void printScore() {
-        System.out.print(String.format("depth:%d ", depth));
-        System.out.println(String.format("winner:%s", score.getWinner()));
-        System.out.println(String.format("black:%d white:%d", score.getBlackStones(), score.getWhiteStones()));
-        System.out.println();
+    public void printScore(LineBuffer buffer) {
+        buffer.print(String.format("depth:%d ", depth));
+        buffer.println(String.format("winner:%s", score.getWinner()));
+        buffer.println(String.format("black:%d white:%d", score.getBlackStones(), score.getWhiteStones()));
+        buffer.println();
     }
 
     public Score getScore() {

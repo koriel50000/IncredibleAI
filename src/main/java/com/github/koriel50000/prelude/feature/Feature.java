@@ -6,5 +6,5 @@ public interface Feature {
 
     void destroy();
 
-    long evaluate(long playerBoard, long opponentBoard, long moves);
+    long evaluate(long player, long opponent, long coords);
 }

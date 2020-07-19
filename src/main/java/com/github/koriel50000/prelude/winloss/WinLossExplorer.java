@@ -17,7 +17,8 @@ public class WinLossExplorer {
      */
     public boolean notPossible() {
         // FIXME
-        return board.depth > 10; // 残り10マスから探索開始
+        return true;
+        //return board.depth > 10; // 残り10マスから探索開始
     }
 
     public long explore(long player, long opponent, long moves) {

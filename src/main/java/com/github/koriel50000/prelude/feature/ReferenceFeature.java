@@ -20,9 +20,9 @@ public class ReferenceFeature implements Feature {
     private ExecutorService executor;
     private List<EvaluateTask> evaluateTasks;
 
-    public ReferenceFeature(BitBoard board) {
+    public ReferenceFeature(BitBoard board, long seed) {
         bookSearch = new BookSearch(board);
-        rolloutPolicy = new RolloutPolicy(board);
+        rolloutPolicy = new RolloutPolicy(board, seed);
         winLossExplorer = new WinLossExplorer(board);
 
         evaluateTasks = new ArrayList<>();

@@ -1,9 +1,14 @@
 package com.github.koriel50000.prelude.reversi;
 
+import org.apache.commons.lang3.StringUtils;
+
 public final class Bits {
 
     private static int[] indexTable;
 
+    /**
+     * 最上位ビットのインデックスを0として、ビット位置のハッシュテーブルを作成する
+     */
     static {
         indexTable = new int[64];
         long onehot = 0x8000000000000000L;
@@ -93,5 +98,16 @@ public final class Bits {
                 (matrix >>> 35) & 0x0000000000804020L |
                 (matrix >>> 42) & 0x0000000000008040L |
                 (matrix >>> 49) & 0x0000000000000080L;
+    }
+
+
+    public static void printMatrix(long matrix) {
+        System.out.println(String.format("%016d", matrix));
+        for (int i = 7; i >= 0; --i) {
+            long row = matrix >>> (i * 8) & 0xff;
+            String bits = Long.toBinaryString(row);
+            String line = StringUtils.leftPad(bits, 8, '0');
+            System.out.println(line);
+        }
     }
 }

@@ -16,8 +16,9 @@ public class AutoPlayMain {
     private void autoplay() {
         BitBoard board = new BitBoard();
 
-        Feature referenceFeagure = new ReferenceFeature(board);
-        Feature randomFeature = new RandomFeature();
+        long seed = System.currentTimeMillis();
+        Feature referenceFeagure = new ReferenceFeature(board, seed);
+        Feature randomFeature = new RandomFeature(seed);
         referenceFeagure.init();
         randomFeature.init();
 
@@ -29,7 +30,7 @@ public class AutoPlayMain {
         Score score;
 
         for (int i = 0; i < 50; i++) {
-            score = play(board, referenceFeagure, randomFeature);
+            score = play(board, randomFeature, randomFeature);
 
             switch (score.getWinner()) {
                 case "black":
@@ -49,7 +50,7 @@ public class AutoPlayMain {
                     break;
             }
 
-            score = play(board, randomFeature, referenceFeagure);
+            score = play(board, randomFeature, randomFeature);
 
             switch (score.getWinner()) {
                 case "black":
@@ -86,17 +87,17 @@ public class AutoPlayMain {
         while (true) {
             boolean passed = false;
             if (board.currentColor == BitBoard.BLACK) {
-                long moves = board.availableMoves(board.blackBoard, board.whiteBoard);
-                if (moves != 0) {
-                    long move = blackFeature.evaluate(board.blackBoard, board.whiteBoard, moves);
+                long coords = board.availableMoves(board.blackBoard, board.whiteBoard);
+                if (coords != 0) {
+                    long move = blackFeature.evaluate(board.blackBoard, board.whiteBoard, coords);
                     long flipped = board.makeMove(board.blackBoard, board.whiteBoard, move);
                 } else {
                     passed = true;
                 }
             } else {
-                long moves = board.availableMoves(board.whiteBoard, board.blackBoard);
-                if (moves != 0) {
-                    long move = blackFeature.evaluate(board.whiteBoard, board.blackBoard, moves);
+                long coords = board.availableMoves(board.whiteBoard, board.blackBoard);
+                if (coords != 0) {
+                    long move = whiteFeature.evaluate(board.whiteBoard, board.blackBoard, coords);
                     board.makeMove(board.whiteBoard, board.blackBoard, move);
                 } else {
                     passed = true;

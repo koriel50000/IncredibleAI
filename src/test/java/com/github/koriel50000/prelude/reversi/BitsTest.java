@@ -3,7 +3,6 @@ package com.github.koriel50000.prelude.reversi;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 
-import static java.lang.Long.parseLong;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -39,6 +38,35 @@ public class BitsTest {
     }
 
     @Test
+    void getRightmostBit() {
+        assertAll(
+                () -> assertEquals(0x0000000000000000L, Bits.getRightmostBit(0x0000000000000000L)),
+                () -> assertEquals(0x0000000000000001L, Bits.getRightmostBit(0x1000000000000055L)),
+                () -> assertEquals(0x0000000000020000L, Bits.getRightmostBit(0x000a0005000a0000L)),
+                () -> assertEquals(0x8000000000000000L, Bits.getRightmostBit(0x8000000000000000L))
+        );
+    }
+
+    @Test
+    void countLeadingZeros() {
+        assertAll(
+                () -> assertEquals(64, Bits.countLeadingZeros(0x0000000000000000L)),
+                () -> assertEquals(15, Bits.countLeadingZeros(0x0001000200040008L)),
+                () -> assertEquals(0, Bits.countLeadingZeros(0x8000000080000000L))
+        );
+    }
+
+    @Test
+    void countTrailingZeros() {
+        assertAll(
+                () -> assertEquals(64, Bits.countTrailingZeros(0x0000000000000000L)),
+                () -> assertEquals(31, Bits.countTrailingZeros(0x8000000080000000L)),
+                () -> assertEquals(3, Bits.countTrailingZeros(0x0001000200040008L)),
+                () -> assertEquals(0, Bits.countLeadingZeros(0x8000000080000001L))
+        );
+    }
+
+    @Test
     void indexOf() {
         assertAll(
                 () -> assertEquals(0, Bits.indexOf(0x8000000000000000L)),
@@ -49,39 +77,40 @@ public class BitsTest {
 
     @Test
     void transpose() {
-        long test1 = parseLong("" +
-                "10101010" +
-                "00010101" +
-                "00101010" +
-                "00000101" +
-                "00001010" +
-                "00000001" +
-                "00000010" +
-                "00000000", 2);
-        printMatrix(test1);
+        long test1 = matrix("",
+                "10101010",
+                "00010101",
+                "00101010",
+                "00000101",
+                "00001010",
+                "00000001",
+                "11110010",
+                "11100000");
+        Bits.printMatrix(test1);
         long expected1 = matrix("",
-                "00000000",
-                "00000000",
-                "00000000",
-                "00000000",
-                "00000000",
-                "00000000",
-                "00000000",
-                "00000000");
-        printMatrix(expected1);
+                "10000011",
+                "00000011",
+                "10100011",
+                "01000010",
+                "10101000",
+                "01010000",
+                "10101010",
+                "01010100");
+        Bits.printMatrix(expected1);
         assertEquals(expected1, Bits.transpose(test1));
     }
 
-    private static long matrix(String... bits) {
-        return Long.parseLong(String.join("", bits), 2);
-    }
-
-    private static void printMatrix(long matrix) {
-        for (int i = 0; i < 8; i++) {
-            long row = matrix >>> (i * 8) & 0xff;
-            String bits = Long.toBinaryString(row);
-            String line = StringUtils.leftPad("", 8, '0');
-            System.out.println(line);
+    private static long matrix(String... binaries) {
+        String bin = String.join("", binaries);
+        long bits;
+        if (bin.length() < 64) {
+            bits = Long.parseLong(bin, 2);
+        } else {
+            bits = Long.parseLong(bin.substring(1), 2);
+            if (bin.charAt(0) == '1') {
+                bits |= 0x8000000000000000L;
+            }
         }
+        return bits;
     }
 }

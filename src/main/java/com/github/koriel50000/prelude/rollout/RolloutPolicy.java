@@ -22,15 +22,16 @@ public class RolloutPolicy {
 
     private volatile long lastCoord;
 
-    public RolloutPolicy(BitBoard board) {
+    public RolloutPolicy(BitBoard board, long seed) {
         this.board = board;
         converter = new BitConverter();
         model = new CNNModel();
-        random = new Random(System.currentTimeMillis());
+        random = new Random(seed);
     }
 
     public void init() {
         model.init();
+        converter.initialize();
     }
 
     public void destroy() {

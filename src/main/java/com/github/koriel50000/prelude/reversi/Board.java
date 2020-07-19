@@ -140,13 +140,13 @@ public class Board {
         }
     }
 
-    public Board tryMove(long coord) {
+    public Board tryMove(Coord coord) {
         int[][] board = SerializationUtils.clone(this.board);
         int[][] reverse = SerializationUtils.clone(this.reverse);
         int[] stones = SerializationUtils.clone(this.stones);
 
         Board nextBoard = new Board(board, reverse, stones, currentColor, turnCount);
-        nextBoard.makeMove(null); // FIXME
+        nextBoard.makeMove(coord);
 
         return nextBoard;
     }
@@ -193,22 +193,22 @@ public class Board {
     /**
      * 盤面を表示する
      */
-    public void printBoard() {
-        System.out.println();
-        System.out.println("  A B C D E F G H");
+    public void printBoard(LineBuffer buffer) {
+        buffer.println();
+        buffer.println("  A B C D E F G H");
         for (int y = 1; y <= 8; y++) {
-            System.out.print(y);
+            buffer.print(y);
             for (int x = 1; x <= 8; x++) {
-                System.out.print(" " + STONES[board[y][x]]);
+                buffer.print(" " + STONES[board[y][x]]);
             }
-            System.out.println();
+            buffer.println();
         }
     }
 
     /**
      * 現在の状態を表示する
      */
-    public void printStatus() {
+    public void printStatus(LineBuffer buffer) {
         String turn;
         String stone;
         if (currentColor == Color.Black) {
@@ -218,20 +218,20 @@ public class Board {
             turn = "white";
             stone = STONES[Color.White.boardValue()];
         }
-        System.out.print(String.format("move count:%d ", turnCount));
-        System.out.println(String.format("move:%s(%s)", turn, stone));
-        System.out.println(String.format("black:%d white:%d", stones[BLACK], stones[WHITE]));
-        System.out.println();
+        buffer.print(String.format("move count:%d ", turnCount));
+        buffer.println(String.format("move:%s(%s)", turn, stone));
+        buffer.println(String.format("black:%d white:%d", stones[BLACK], stones[WHITE]));
+        buffer.println();
     }
 
     /**
      * スコアを表示する
      */
-    public void printScore() {
-        System.out.print(String.format("move count:%d ", turnCount));
-        System.out.println(String.format("winner:%s", score.getWinner()));
-        System.out.println(String.format("black:%d white:%d", score.getBlackStones(), score.getWhiteStones()));
-        System.out.println();
+    public void printScore(LineBuffer buffer) {
+        buffer.print(String.format("move count:%d ", turnCount));
+        buffer.println(String.format("winner:%s", score.getWinner()));
+        buffer.println(String.format("black:%d white:%d", score.getBlackStones(), score.getWhiteStones()));
+        buffer.println();
     }
 
     public Color getCurrentColor() {
@@ -321,8 +321,17 @@ public class Board {
             return values[(y - 1) * 8 + (x - 1)];
         }
 
+        public static Coord valueOf(int index) {
+            return values[index];
+        }
+
         public static Coord valueOf(String symbol) {
             return null; // TODO
+        }
+
+        @Override
+        public String toString() {
+            return symbol;
         }
     }
 

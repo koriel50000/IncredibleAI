@@ -70,8 +70,8 @@ public class BitConverter {
     /**
      * 領域を判定する
      */
-    private int checkRegion(long player, long opponent, int pos) {
-        int region = REGION[63 - pos];
+    private int checkRegion(long player, long opponent, int index) {
+        int region = REGION[index];
         if (region >= 8 && isSymmetric(region, player, opponent)) {
             region += 1;
         }
@@ -83,9 +83,9 @@ public class BitConverter {
      */
     private void putState(FloatBuffer state, int region, long coord, int channel) {
         // FIXME
-        int pos = Bits.countLeadingZeros(coord);
-        int x = pos;
-        int y = pos;
+        int index = Bits.indexOf(coord);
+        int x = index % 8;
+        int y = index / 8;
         int x_;
         int y_;
         switch (region) {
@@ -140,15 +140,15 @@ public class BitConverter {
             default:
                 throw new IllegalArgumentException("no match: " + region);
         }
-        int index = channel * ROWS * COLUMS + y_ * COLUMS + x_;
-        state.put(index, 1);
+        int pos = channel * ROWS * COLUMS + y_ * COLUMS + x_;
+        state.put(pos, 1);
     }
 
     private void fillState(FloatBuffer state, int channel) {
         int offset = channel * ROWS * COLUMS;
-        float[] values = new float[ROWS * COLUMS];
-        Arrays.fill(values, 1);
-        state.put(values, offset, values.length);
+        for (int i = 0; i < ROWS * COLUMS; i++) {
+            state.put(offset + i, 1);
+        }
     }
 
     private long oddArea;
@@ -319,7 +319,7 @@ public class BitConverter {
         if (!earlyTurn) {
             fillState(state, 7); // 序盤でない
         }
-        int emptyCount = Bits.populationCount(~(player | opponent));
+        int emptyCount = Bits.populationCount(~(newPlayer | newOpponent));
         if (emptyCount % 2 == 1) {
             fillState(state, 8); // 空白数が奇数
         }

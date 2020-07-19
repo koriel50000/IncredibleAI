@@ -1,5 +1,6 @@
 package com.github.koriel50000.prelude.feature;
 
+import com.github.koriel50000.prelude.reversi.Bits;
 import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
@@ -17,11 +18,11 @@ public class PreludeFeature implements Feature {
     private CNNModel model;
     private Random random;
 
-    public PreludeFeature(Board board) {
+    public PreludeFeature(Board board, long seed) {
         this.board = board;
         converter = new PreludeConverter();
         model = new CNNModel();
-        random = new Random(System.currentTimeMillis());
+        random = new Random(seed);
     }
 
     @Override
@@ -35,29 +36,28 @@ public class PreludeFeature implements Feature {
     }
 
     @Override
-    public long evaluate(long playerBoard, long opponentBoard, long moves) {
+    public long evaluate(long playerDummy, long opponentDummy, long coordsDummy) {
+        List<Board.Coord> moves = board.availableMoves();
+
         List<Eval> evals = new ArrayList<>();
-        while (moves != 0) {
-            long coord = moves & -moves;  // 一番右のビットのみ取り出す
-
-            FloatBuffer state = converter.convertState(board, coord);
+        for (Board.Coord move : moves) {
+            FloatBuffer state = converter.convertState(board, move);
             float value = model.calculatePredicatedValue(state);
-            evals.add(new Eval(coord, value));
-
-            moves ^= coord;  // 一番右のビットを0にする
+            evals.add(new Eval(move, value));
         }
 
-        return optimumChoice(evals);
+        Board.Coord move = optimumChoice(evals);
+        return Bits.coordAt(move.x - 1, move.y - 1);
     }
 
-    private long optimumChoice(List<Eval> evals) {
+    private Board.Coord optimumChoice(List<Eval> evals) {
         Collections.sort(evals, Collections.reverseOrder()); // 評価値で降順
 
-        List<Long> moves = new ArrayList<>();
+        List<Board.Coord> moves = new ArrayList<>();
         float maximumValue = Float.NEGATIVE_INFINITY;
         float delta = 0.001f; // FIXME 近い値を考慮
         for (Eval evel : evals) {
-            long move = evel.getMove();
+            Board.Coord move = evel.getMove();
             float value = evel.getValue();
             if (value + delta < maximumValue) {
                 break;
@@ -71,15 +71,15 @@ public class PreludeFeature implements Feature {
 
     private static class Eval implements Comparable<Eval> {
 
-        private long move;
+        private Board.Coord move;
         private float value;
 
-        Eval(long move, float value) {
+        Eval(Board.Coord move, float value) {
             this.move = move;
             this.value = value;
         }
 
-        long getMove() {
+        Board.Coord getMove() {
             return move;
         }
 

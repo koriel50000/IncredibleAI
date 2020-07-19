@@ -225,17 +225,16 @@ public class PreludeConverter {
 
     private void fillState(FloatBuffer state, int channel) {
         int offset = channel * ROWS * COLUMS;
-        float[] values = new float[ROWS * COLUMS];
-        Arrays.fill(values, 1);
-        state.put(values, offset, values.length);
+        for (int i = 0; i < ROWS * COLUMS; i++) {
+            state.put(offset + i, 1);
+        }
     }
 
     /**
      * 石を置いたときの状態を返す
      */
-    public FloatBuffer convertState(Board reversi, long newCoordLong) {
-        Board.Coord newCoord = null; // FIXME
-        Board nextReversi = reversi.tryMove(0); // FIXME
+    public FloatBuffer convertState(Board reversi, Board.Coord newCoord) {
+        Board nextReversi = reversi.tryMove(newCoord);
 
         int[][] board = reversi.getBoard();
         int[][] nextBoard = nextReversi.getBoard();
