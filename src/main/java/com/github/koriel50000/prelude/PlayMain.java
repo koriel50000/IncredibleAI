@@ -25,16 +25,13 @@ public class PlayMain {
 
     private void oneplay() {
         long seed = System.currentTimeMillis();
-        Feature referenceFeature = new ReferenceFeature(bitBoard, seed);
         Feature preludeFeature = new PreludeFeature(board, seed);
         Feature randomFeature = new RandomFeature(seed);
-        referenceFeature.init();
         preludeFeature.init();
         randomFeature.init();
 
-        play(referenceFeature, preludeFeature, randomFeature);
+        play(preludeFeature, randomFeature);
 
-        referenceFeature.destroy();
         preludeFeature.destroy();
         randomFeature.destroy();
     }
@@ -42,7 +39,7 @@ public class PlayMain {
     /**
      * ゲームを開始する
      */
-    private void play(Feature blackFeature, Feature expectedFeature, Feature whiteFeature) {
+    private void play(Feature blackFeature, Feature whiteFeature) {
         board.initialize();
         bitBoard.initialize();
 
@@ -74,11 +71,7 @@ public class PlayMain {
                 }
 
                 if (coords != 0) {
-                    // Assert
-                    //long coord = blackFeature.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
-                    long expectedCoord = expectedFeature.evaluate(0L, 0L, coords); // dummy
-                    //assertEquals(expectedCoord, coord, "evaluate");
-                    long coord = expectedCoord;
+                    long coord = blackFeature.evaluate(0L, 0L, coords);
 
                     bitBoard.makeMove(bitBoard.blackBoard, bitBoard.whiteBoard, coord);
                     board.makeMove(Board.Coord.valueOf(Bits.indexOf(coord)));
@@ -99,7 +92,7 @@ public class PlayMain {
                 }
 
                 if (coords != 0) {
-                    long coord = whiteFeature.evaluate(0L, 0L, coords); // dummy
+                    long coord = whiteFeature.evaluate(0L, 0L, coords);
 
                     bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
                     board.makeMove(Board.Coord.valueOf(Bits.indexOf(coord)));

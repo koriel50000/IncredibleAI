@@ -113,7 +113,7 @@ public class BitBoard {
         return mobility;
     }
 
-    public long tryMove(long player, long opponent, int index) {
+    public long computeFlipped(long player, long opponent, int index) {
         // http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
         //
         // OM.x = O;
@@ -180,7 +180,7 @@ public class BitBoard {
      */
     public long makeMove(long player, long opponent, long coord) {
         int index = Bits.indexOf(coord);
-        long flipped = tryMove(player, opponent, index);
+        long flipped = computeFlipped(player, opponent, index);
 
         blackBoard ^= (coord * (currentColor & 1)) | flipped;
         whiteBoard ^= (coord * (currentColor >> 1)) | flipped;

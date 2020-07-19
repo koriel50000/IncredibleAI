@@ -1,6 +1,5 @@
 package com.github.koriel50000.prelude.reversi;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
@@ -77,7 +76,7 @@ public class BitsTest {
 
     @Test
     void transpose() {
-        long test1 = matrix("",
+        long test1 = parseMatrix("",
                 "10101010",
                 "00010101",
                 "00101010",
@@ -87,7 +86,7 @@ public class BitsTest {
                 "11110010",
                 "11100000");
         Bits.printMatrix(test1);
-        long expected1 = matrix("",
+        long expected1 = parseMatrix("",
                 "10000011",
                 "00000011",
                 "10100011",
@@ -100,7 +99,7 @@ public class BitsTest {
         assertEquals(expected1, Bits.transpose(test1));
     }
 
-    private static long matrix(String... binaries) {
+    private static long parseMatrix(String... binaries) {
         String bin = String.join("", binaries);
         long bits;
         if (bin.length() < 64) {

@@ -1,11 +1,11 @@
 package com.github.koriel50000.prelude.rollout;
 
 import com.github.koriel50000.prelude.learning.BitConverter;
+import com.github.koriel50000.prelude.learning.PreludeConverter;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
-import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.learning.CNNModel;
-import com.github.koriel50000.prelude.learning.PreludeConverter;
+import com.github.koriel50000.prelude.reversi.Board;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
@@ -20,6 +20,9 @@ public class RolloutPolicy {
     private CNNModel model;
     private Random random;
 
+    private Board expectedBoard;
+    private PreludeConverter expectedConverter;
+
     private volatile long lastCoord;
 
     public RolloutPolicy(BitBoard board, long seed) {
@@ -27,11 +30,16 @@ public class RolloutPolicy {
         converter = new BitConverter();
         model = new CNNModel();
         random = new Random(seed);
+
+        expectedBoard = new Board();
+        expectedConverter = new PreludeConverter();
     }
 
     public void init() {
         model.init();
         converter.initialize();
+
+        expectedBoard.initialize();
     }
 
     public void destroy() {
@@ -49,8 +57,11 @@ public class RolloutPolicy {
             long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
             int index = Bits.indexOf(coord);
 
-            long flipped = board.tryMove(player, opponent, index);
+            long flipped = board.computeFlipped(player, opponent, index);
+
+            // Assert TODO
             FloatBuffer state = converter.convertState(player, opponent, flipped, coord, index);
+
             float value = model.calculatePredicatedValue(state);
             evals.add(new RolloutPolicy.Eval(coord, value));
 
@@ -80,6 +91,10 @@ public class RolloutPolicy {
         }
 
         return moves.get(random.nextInt(moves.size()));
+    }
+
+    private void assertEquals(Object expected, Object actual, String message) {
+        assert expected.equals(actual) : String.format("'%s' not match. %s %s", message, expected, actual);
     }
 
     private static class Eval implements Comparable<RolloutPolicy.Eval> {
