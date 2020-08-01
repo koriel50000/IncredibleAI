@@ -2,6 +2,7 @@ package com.github.koriel50000.prelude.feature;
 
 import com.github.koriel50000.prelude.book.BookSearch;
 import com.github.koriel50000.prelude.reversi.BitBoard;
+import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.rollout.RolloutPolicy;
 import com.github.koriel50000.prelude.winloss.WinLossExplorer;
 
@@ -20,10 +21,10 @@ public class ReferenceFeature implements Feature {
     private ExecutorService executor;
     private List<EvaluateTask> evaluateTasks;
 
-    public ReferenceFeature(BitBoard board, long seed) {
-        bookSearch = new BookSearch(board);
-        rolloutPolicy = new RolloutPolicy(board, seed);
-        winLossExplorer = new WinLossExplorer(board);
+    public ReferenceFeature(BitBoard bitBoard, Board board, long seed) {
+        bookSearch = new BookSearch(bitBoard);
+        rolloutPolicy = new RolloutPolicy(bitBoard, board, seed);
+        winLossExplorer = new WinLossExplorer(bitBoard);
 
         evaluateTasks = new ArrayList<>();
         evaluateTasks.add(new EvaluateTask() {

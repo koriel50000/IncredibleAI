@@ -230,6 +230,8 @@ public class PreludeConverter {
         }
     }
 
+    public int region;
+
     /**
      * 石を置いたときの状態を返す
      */
@@ -243,7 +245,7 @@ public class PreludeConverter {
 
         int x = newCoord.x;
         int y = newCoord.y;
-        int region = checkRegion(nextBoard, x, y, color);
+        region = checkRegion(nextBoard, x, y, color);
 
         enumerateArea(board);
 

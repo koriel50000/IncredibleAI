@@ -82,7 +82,7 @@ public final class Bits {
     /**
      *
      */
-    public static long transpose(long matrix) {
+    public static long transposeMatrix(long matrix) {
         return matrix & 0x8040201008040201L |
                 (matrix & 0x0080402010080402L) << 7 |
                 (matrix & 0x0000804020100804L) << 14 |

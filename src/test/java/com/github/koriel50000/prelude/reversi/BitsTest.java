@@ -75,7 +75,7 @@ public class BitsTest {
     }
 
     @Test
-    void transpose() {
+    void transposeMatrix() {
         long test1 = parseMatrix("",
                 "10101010",
                 "00010101",
@@ -96,7 +96,7 @@ public class BitsTest {
                 "10101010",
                 "01010100");
         Bits.printMatrix(expected1);
-        assertEquals(expected1, Bits.transpose(test1));
+        assertEquals(expected1, Bits.transposeMatrix(test1));
     }
 
     private static long parseMatrix(String... binaries) {

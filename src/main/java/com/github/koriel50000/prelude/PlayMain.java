@@ -15,12 +15,12 @@ import java.util.Random;
 
 public class PlayMain {
 
-    private Board board;
     private BitBoard bitBoard;
+    private Board board;
 
     private PlayMain() {
-        board = new Board();
         bitBoard = new BitBoard();
+        board = new Board();
     }
 
     private void oneplay() {
@@ -40,8 +40,8 @@ public class PlayMain {
      * ゲームを開始する
      */
     private void play(Feature blackFeature, Feature whiteFeature) {
-        board.initialize();
         bitBoard.initialize();
+        board.initialize();
 
         LineBuffer buffer = new LineBuffer();
 

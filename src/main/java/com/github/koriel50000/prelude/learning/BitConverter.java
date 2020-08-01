@@ -3,7 +3,6 @@ package com.github.koriel50000.prelude.learning;
 import com.github.koriel50000.prelude.reversi.Bits;
 
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 
 public class BitConverter {
 
@@ -26,44 +25,10 @@ public class BitConverter {
      * 対角位置の対称変換が必要か
      */
     private boolean isSymmetric(int diagonal, long player, long opponent) {
-        for (int y = 0; y < ROWS; y++) {
-            for (int x = y + 1; x < COLUMS; x++) {
-                int x_;
-                int y_;
-                switch (diagonal) {
-                    case 8:
-                        // 変換なし
-                        x_ = x;
-                        y_ = y;
-                        break;
-                    case 10:
-                        // 左右反転
-                        x_ = 8 - x;
-                        y_ = y;
-                        break;
-                    case 12:
-                        // 上下反転
-                        x_ = x;
-                        y_ = 8 - y;
-                        break;
-                    case 14:
-                        // 上下左右反転
-                        x_ = 8 - x;
-                        y_ = 8 - y;
-                        break;
-                    default:
-                        throw new IllegalArgumentException("no match: " + diagonal);
-                }
-                // FIXME 説明を記載
-                long coord = Bits.coordAt(x_, y_);
-                long transCoord = Bits.coordAt(y_, x_);
-                if ((player & coord) != (player & transCoord)) {
-                    return (player & coord) == 0;
-                } else if ((opponent & coord) != (opponent & transCoord)) {
-                    return true;
-                }
-            }
-        }
+        long transPlayer = Bits.transposeMatrix(player);
+        long transOpponent = Bits.transposeMatrix(opponent);
+        int pPos = Bits.countLeadingZeros(player ^ transPlayer);
+        int oPos = Bits.countLeadingZeros(opponent ^ transOpponent);
         return false;
     }
 
@@ -277,15 +242,17 @@ public class BitConverter {
         }
     }
 
+    public int region;
+
     /**
      * 石を置いたときの状態を返す
      */
-    public FloatBuffer convertState(long player, long opponent, long flipped, long coord, int pos) {
+    public FloatBuffer convertState(long player, long opponent, long flipped, long coord, int index) {
         long newPlayer = player | coord | flipped;
         long newOpponent = opponent ^ flipped;
-        int region = checkRegion(newPlayer, newOpponent, pos);
+        region = checkRegion(newPlayer, newOpponent, index);
 
-        enumerateOddEven(coord);
+        //enumerateOddEven(coord);
         increaseFlipped(flipped);
 
         FloatBuffer state = FloatBuffer.allocate(ROWS * COLUMS * CHANNEL);
