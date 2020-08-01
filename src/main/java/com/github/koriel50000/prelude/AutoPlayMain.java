@@ -8,18 +8,17 @@ import com.github.koriel50000.prelude.reversi.Score;
 
 public class AutoPlayMain {
 
-    public static void main(String[] args) {
-        AutoPlayMain main = new AutoPlayMain();
-        main.autoplay();
+    BitBoard board;
+
+    private AutoPlayMain() {
+        board = new BitBoard();
     }
 
     private void autoplay() {
-        BitBoard board = new BitBoard();
-
         long seed = System.currentTimeMillis();
-        Feature referenceFeagure = new ReferenceFeature(board, seed);
+        Feature referenceFeature = new ReferenceFeature(board, seed);
         Feature randomFeature = new RandomFeature(seed);
-        referenceFeagure.init();
+        referenceFeature.init();
         randomFeature.init();
 
         int win = 0;
@@ -30,7 +29,7 @@ public class AutoPlayMain {
         Score score;
 
         for (int i = 0; i < 50; i++) {
-            score = play(board, randomFeature, randomFeature);
+            score = play(referenceFeature, randomFeature);
 
             switch (score.getWinner()) {
                 case "black":
@@ -50,7 +49,7 @@ public class AutoPlayMain {
                     break;
             }
 
-            score = play(board, randomFeature, randomFeature);
+            score = play(randomFeature, referenceFeature);
 
             switch (score.getWinner()) {
                 case "black":
@@ -74,14 +73,14 @@ public class AutoPlayMain {
         System.out.println(String.format("win:%d loss:%d draw:%d", win, loss, draw));
         System.out.println(String.format("win_stone:%d loss_stone:%d", winStones, lossStones));
 
-        referenceFeagure.destroy();
+        referenceFeature.destroy();
         randomFeature.destroy();
     }
 
     /**
      * ゲームを開始する
      */
-    private Score play(BitBoard board, Feature blackFeature, Feature whiteFeature) {
+    private Score play(Feature blackFeature, Feature whiteFeature) {
         board.initialize();
 
         while (true) {
@@ -90,7 +89,7 @@ public class AutoPlayMain {
                 long coords = board.availableMoves(board.blackBoard, board.whiteBoard);
                 if (coords != 0) {
                     long move = blackFeature.evaluate(board.blackBoard, board.whiteBoard, coords);
-                    long flipped = board.makeMove(board.blackBoard, board.whiteBoard, move);
+                    board.makeMove(board.blackBoard, board.whiteBoard, move);
                 } else {
                     passed = true;
                 }
@@ -112,5 +111,10 @@ public class AutoPlayMain {
         }
 
         return board.getScore();
+    }
+
+    public static void main(String[] args) {
+        AutoPlayMain main = new AutoPlayMain();
+        main.autoplay();
     }
 }
