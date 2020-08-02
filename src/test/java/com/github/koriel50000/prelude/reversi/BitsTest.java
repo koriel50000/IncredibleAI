@@ -99,6 +99,56 @@ public class BitsTest {
         assertEquals(expected1, Bits.transposeMatrix(test1));
     }
 
+    @Test
+    void verticalMatrix() {
+        long test1 = parseMatrix("",
+                "10101010",
+                "00010101",
+                "00101010",
+                "00000101",
+                "00001010",
+                "00000001",
+                "11110010",
+                "11100000");
+        Bits.printMatrix(test1);
+        long expected1 = parseMatrix("",
+                "11100000",
+                "11110010",
+                "00000001",
+                "00001010",
+                "00000101",
+                "00101010",
+                "00010101",
+                "10101010");
+                Bits.printMatrix(expected1);
+        assertEquals(expected1, Bits.verticalMatrix(test1));
+    }
+
+    @Test
+    void horizontalMatrix() {
+        long test1 = parseMatrix("",
+                "10101010",
+                "00010101",
+                "00101010",
+                "00000101",
+                "00001010",
+                "00000001",
+                "11110010",
+                "11100000");
+        Bits.printMatrix(test1);
+        long expected1 = parseMatrix("",
+                "01010101",
+                "10101000",
+                "01010100",
+                "10100000",
+                "01010000",
+                "10000000",
+                "01001111",
+                "00000111");
+        Bits.printMatrix(expected1);
+        assertEquals(expected1, Bits.horizontalMatrix(test1));
+    }
+
     private static long parseMatrix(String... binaries) {
         String bin = String.join("", binaries);
         long bits;

@@ -80,7 +80,7 @@ public final class Bits {
     }
 
     /**
-     *
+     * 8x8行列の転置行列を返す
      */
     public static long transposeMatrix(long matrix) {
         return matrix & 0x8040201008040201L |
@@ -100,6 +100,33 @@ public final class Bits {
                 (matrix >>> 49) & 0x0000000000000080L;
     }
 
+    /**
+     * 8x8行列の上下反転した行列を返す
+     */
+    public static long verticalMatrix(long matrix) {
+        return (matrix & 0xff00000000000000L) >>> 56 |
+                (matrix & 0x00ff000000000000L) >>> 40 |
+                (matrix & 0x0000ff0000000000L) >>> 24 |
+                (matrix & 0x000000ff00000000L) >>> 8 |
+                (matrix & 0x00000000ff000000L) << 8 |
+                (matrix & 0x0000000000ff0000L) << 24 |
+                (matrix & 0x000000000000ff00L) << 40 |
+                (matrix & 0x00000000000000ffL) << 56;
+    }
+
+    /**
+     * 8x8行列の左右反転した行列を返す
+     */
+    public static long horizontalMatrix(long matrix) {
+        return (matrix & 0x8080808080808080L) >>> 7 |
+                (matrix & 0x4040404040404040L) >>> 5 |
+                (matrix & 0x2020202020202020L) >>> 3 |
+                (matrix & 0x1010101010101010L) >>> 1 |
+                (matrix & 0x0808080808080808L) << 1 |
+                (matrix & 0x0404040404040404L) << 3 |
+                (matrix & 0x0202020202020202L) << 5 |
+                (matrix & 0x0101010101010101L) << 7;
+    }
 
     public static void printMatrix(long matrix) {
         System.out.println(String.format("%016d", matrix));
