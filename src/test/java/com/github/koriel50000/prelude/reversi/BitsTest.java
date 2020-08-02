@@ -37,6 +37,16 @@ public class BitsTest {
     }
 
     @Test
+    void reverseBits() {
+        assertAll(
+                () -> assertEquals(0x0000000000000000L, Bits.reverseBits(0x0000000000000000L)),
+                () -> assertEquals(0xaa00000000000008L, Bits.reverseBits(0x1000000000000055L)),
+                () -> assertEquals(0x00005000a0005000L, Bits.reverseBits(0x000a0005000a0000L)),
+                () -> assertEquals(0x0000000000000001L, Bits.reverseBits(0x8000000000000000L))
+        );
+    }
+
+    @Test
     void getRightmostBit() {
         assertAll(
                 () -> assertEquals(0x0000000000000000L, Bits.getRightmostBit(0x0000000000000000L)),
@@ -75,7 +85,7 @@ public class BitsTest {
     }
 
     @Test
-    void transposeMatrix() {
+    void transposedMatrix() {
         long test1 = parseMatrix("",
                 "10101010",
                 "00010101",
@@ -96,7 +106,7 @@ public class BitsTest {
                 "10101010",
                 "01010100");
         Bits.printMatrix(expected1);
-        assertEquals(expected1, Bits.transposeMatrix(test1));
+        assertEquals(expected1, Bits.transposedMatrix(test1));
     }
 
     @Test
@@ -147,6 +157,31 @@ public class BitsTest {
                 "00000111");
         Bits.printMatrix(expected1);
         assertEquals(expected1, Bits.horizontalMatrix(test1));
+    }
+
+    @Test
+    void verticalAndHorizontalMatrix() {
+        long test1 = parseMatrix("",
+                "10101010",
+                "00010101",
+                "00101010",
+                "00000101",
+                "00001010",
+                "00000001",
+                "11110010",
+                "11100000");
+        Bits.printMatrix(test1);
+        long expected1 = parseMatrix("",
+                "00000111",
+                "01001111",
+                "10000000",
+                "01010000",
+                "10100000",
+                "01010100",
+                "10101000",
+                "01010101");
+        Bits.printMatrix(expected1);
+        assertEquals(expected1, Bits.verticalAndHorizontalMatrix(test1));
     }
 
     private static long parseMatrix(String... binaries) {

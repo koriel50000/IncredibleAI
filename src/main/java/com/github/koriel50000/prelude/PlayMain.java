@@ -3,15 +3,12 @@ package com.github.koriel50000.prelude;
 import com.github.koriel50000.prelude.feature.Feature;
 import com.github.koriel50000.prelude.feature.PreludeFeature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
-import com.github.koriel50000.prelude.feature.ReferenceFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
 import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class PlayMain {
 

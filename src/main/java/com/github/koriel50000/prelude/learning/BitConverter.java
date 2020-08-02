@@ -25,11 +25,44 @@ public class BitConverter {
      * 対角位置の対称変換が必要か
      */
     private boolean isSymmetric(int diagonal, long player, long opponent) {
-        long transPlayer = Bits.transposeMatrix(player);
-        long transOpponent = Bits.transposeMatrix(opponent);
-        int pPos = Bits.countLeadingZeros(player ^ transPlayer);
-        int oPos = Bits.countLeadingZeros(opponent ^ transOpponent);
-        return false;
+        long player_;
+        long opponent_;
+        switch (diagonal) {
+            case 8:
+                // 変換なし
+                player_ = player;
+                opponent_ = opponent;
+                break;
+            case 10:
+                // 左右反転
+                player_ = Bits.horizontalMatrix(player);
+                opponent_ = Bits.horizontalMatrix(opponent);
+                break;
+            case 12:
+                // 上下反転
+                player_ = Bits.verticalMatrix(player);
+                opponent_ = Bits.verticalMatrix(opponent);
+                break;
+            case 14:
+                // 上下左右反転
+                player_ = Bits.verticalAndHorizontalMatrix(player);
+                opponent_ = Bits.verticalAndHorizontalMatrix(opponent);
+                break;
+            default:
+                throw new IllegalArgumentException("no match: " + diagonal);
+        }
+        final long mask = 0x7F3F1F0F07030100L;
+        long transPlayer_ = Bits.transposedMatrix(player_);
+        long transOpponent_ = Bits.transposedMatrix(opponent_);
+        int pPos = Bits.countLeadingZeros((player_ & mask) ^ (transPlayer_ & mask));
+        int oPos = Bits.countLeadingZeros((opponent_ & mask) ^ (transOpponent_ & mask));
+        if (pPos > oPos) {
+            System.out.println(String.format("actualColor[%d]=%d", oPos, (opponent_ & Bits.coordAt(oPos))));
+            return (opponent_ & Bits.coordAt(oPos)) != 0;
+        } else {
+            System.out.println(String.format("actualColor[%d]=%d", pPos, (player_ & Bits.coordAt(pPos))));
+            return (player_ & Bits.coordAt(pPos)) != 0;
+        }
     }
 
     /**
@@ -248,9 +281,7 @@ public class BitConverter {
      * 石を置いたときの状態を返す
      */
     public FloatBuffer convertState(long player, long opponent, long flipped, long coord, int index) {
-        long newPlayer = player | coord | flipped;
-        long newOpponent = opponent ^ flipped;
-        region = checkRegion(newPlayer, newOpponent, index);
+        region = checkRegion(player, opponent, index);
 
         //enumerateOddEven(coord);
         increaseFlipped(flipped);
@@ -286,7 +317,7 @@ public class BitConverter {
         if (!earlyTurn) {
             fillState(state, 7); // 序盤でない
         }
-        int emptyCount = Bits.populationCount(~(newPlayer | newOpponent));
+        int emptyCount = Bits.populationCount(~(player | opponent | coord)); // FIXME depthでよくない？
         if (emptyCount % 2 == 1) {
             fillState(state, 8); // 空白数が奇数
         }

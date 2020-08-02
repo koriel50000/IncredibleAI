@@ -32,8 +32,8 @@ public class PreludeConverter {
      * 対角位置の対称変換が必要か
      */
     private boolean isSymmetric(int diagonal, int[][] board, Board.Color color) {
-        for (int y = 1; y <= 8; y++) {
-            for (int x = y + 1; x <= 8; x++) {
+        for (int y = 0; y < 8; y++) {
+            for (int x = y + 1; x < 8; x++) {
                 int x_;
                 int y_;
                 switch (diagonal) {
@@ -44,25 +44,26 @@ public class PreludeConverter {
                         break;
                     case 10:
                         // 左右反転
-                        x_ = 9 - x;
+                        x_ = 7 - x;
                         y_ = y;
                         break;
                     case 12:
                         // 上下反転
                         x_ = x;
-                        y_ = 9 - y;
+                        y_ = 7 - y;
                         break;
                     case 14:
                         // 上下左右反転
-                        x_ = 9 - x;
-                        y_ = 9 - y;
+                        x_ = 7 - x;
+                        y_ = 7 - y;
                         break;
                     default:
                         throw new IllegalArgumentException("no match: " + diagonal);
                 }
-                // FIXME 説明を記載
+                // 転置行列と左上から比較して、初めての違いが自石のときtrue、それ以外はfalse
                 if (board[y_][x_] != board[x_][y_]) {
-                    return board[y_][x_] != color.boardValue();
+                    System.out.println(String.format("expectedColor[%d]=%d", (y_ * 8 + x_), board[y_][x_]));
+                    return board[y_][x_] == color.boardValue();
                 }
             }
         }
@@ -245,7 +246,7 @@ public class PreludeConverter {
 
         int x = newCoord.x;
         int y = newCoord.y;
-        region = checkRegion(nextBoard, x, y, color);
+        region = checkRegion(board, x, y, color);
 
         enumerateArea(board);
 

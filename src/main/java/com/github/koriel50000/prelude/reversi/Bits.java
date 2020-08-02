@@ -33,7 +33,20 @@ public final class Bits {
     }
 
     /**
-     * もっとも右端の立っている("1"の)ビットを返す
+     * ビット列の並び順を反転して返す
+     */
+    public static long reverseBits(long bits) {
+        bits = (bits >>> 32) | (bits << 32);
+        bits = ((bits & 0xffff0000ffff0000L) >>> 16) | ((bits & 0x0000ffff0000ffffL) << 16);
+        bits = ((bits & 0xff00ff00ff00ff00L) >>> 8) | ((bits & 0x00ff00ff00ff00ffL) << 8);
+        bits = ((bits & 0xf0f0f0f0f0f0f0f0L) >>> 4) | ((bits & 0x0f0f0f0f0f0f0f0fL) << 4);
+        bits = ((bits & 0xccccccccccccccccL) >>> 2) | ((bits & 0x3333333333333333L) << 2);
+        bits = ((bits & 0xaaaaaaaaaaaaaaaaL) >>> 1) | ((bits & 0x5555555555555555L) << 1);
+        return bits;
+    }
+
+    /**
+     * もっとも右端の立っている("1"の)ビット列を返す
      */
     public static long getRightmostBit(long bits) {
         return bits & -bits;
@@ -65,7 +78,7 @@ public final class Bits {
     }
 
     /**
-     *
+     * one-hotビット列のビット位置を返す
      */
     public static int indexOf(long coord) {
         int hash = (int) ((coord * 0x03F566ED27179461L) >>> 58);
@@ -73,16 +86,23 @@ public final class Bits {
     }
 
     /**
-     *
+     * 8x8行列で指定位置のビット列を返す
+     */
+    public static long coordAt(int index) {
+        return 0x8000000000000000L >>> index;
+    }
+
+    /**
+     * 8x8行列で指定位置のビット列を返す
      */
     public static long coordAt(int x, int y) {
-        return 0x8000000000000000L >>> (y * 8 + x);
+        return coordAt(y * 8 + x);
     }
 
     /**
      * 8x8行列の転置行列を返す
      */
-    public static long transposeMatrix(long matrix) {
+    public static long transposedMatrix(long matrix) {
         return matrix & 0x8040201008040201L |
                 (matrix & 0x0080402010080402L) << 7 |
                 (matrix & 0x0000804020100804L) << 14 |
@@ -104,28 +124,25 @@ public final class Bits {
      * 8x8行列の上下反転した行列を返す
      */
     public static long verticalMatrix(long matrix) {
-        return (matrix & 0xff00000000000000L) >>> 56 |
-                (matrix & 0x00ff000000000000L) >>> 40 |
-                (matrix & 0x0000ff0000000000L) >>> 24 |
-                (matrix & 0x000000ff00000000L) >>> 8 |
-                (matrix & 0x00000000ff000000L) << 8 |
-                (matrix & 0x0000000000ff0000L) << 24 |
-                (matrix & 0x000000000000ff00L) << 40 |
-                (matrix & 0x00000000000000ffL) << 56;
+        matrix = (matrix >>> 32) | (matrix << 32);
+        matrix = ((matrix & 0xffff0000ffff0000L) >>> 16) | ((matrix & 0x0000ffff0000ffffL) << 16);
+        return ((matrix & 0xff00ff00ff00ff00L) >>> 8) | ((matrix & 0x00ff00ff00ff00ffL) << 8);
     }
 
     /**
      * 8x8行列の左右反転した行列を返す
      */
     public static long horizontalMatrix(long matrix) {
-        return (matrix & 0x8080808080808080L) >>> 7 |
-                (matrix & 0x4040404040404040L) >>> 5 |
-                (matrix & 0x2020202020202020L) >>> 3 |
-                (matrix & 0x1010101010101010L) >>> 1 |
-                (matrix & 0x0808080808080808L) << 1 |
-                (matrix & 0x0404040404040404L) << 3 |
-                (matrix & 0x0202020202020202L) << 5 |
-                (matrix & 0x0101010101010101L) << 7;
+        matrix = ((matrix & 0xf0f0f0f0f0f0f0f0L) >>> 4) | ((matrix & 0x0f0f0f0f0f0f0f0fL) << 4);
+        matrix = ((matrix & 0xccccccccccccccccL) >>> 2) | ((matrix & 0x3333333333333333L) << 2);
+        return ((matrix & 0xaaaaaaaaaaaaaaaaL) >>> 1) | ((matrix & 0x5555555555555555L) << 1);
+    }
+
+    /**
+     * 8x8行列の上下左右反転した行列を返す
+     */
+    public static long verticalAndHorizontalMatrix(long matrix) {
+        return reverseBits(matrix);
     }
 
     public static void printMatrix(long matrix) {
