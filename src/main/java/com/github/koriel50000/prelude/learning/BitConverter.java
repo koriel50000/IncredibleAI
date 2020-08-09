@@ -1,5 +1,6 @@
 package com.github.koriel50000.prelude.learning;
 
+import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
 
 import java.nio.FloatBuffer;
@@ -51,18 +52,17 @@ public class BitConverter {
             default:
                 throw new IllegalArgumentException("no match: " + diagonal);
         }
-        final long mask = 0x7F3F1F0F07030100L;
-        long transPlayer_ = Bits.transposedMatrix(player_);
-        long transOpponent_ = Bits.transposedMatrix(opponent_);
-        int pPos = Bits.countLeadingZeros((player_ & mask) ^ (transPlayer_ & mask));
-        int oPos = Bits.countLeadingZeros((opponent_ & mask) ^ (transOpponent_ & mask));
-        if (pPos > oPos) {
-            System.out.println(String.format("actualColor[%d]=%d", oPos, (opponent_ & Bits.coordAt(oPos))));
-            return (opponent_ & Bits.coordAt(oPos)) != 0;
-        } else {
-            System.out.println(String.format("actualColor[%d]=%d", pPos, (player_ & Bits.coordAt(pPos))));
-            return (player_ & Bits.coordAt(pPos)) != 0;
-        }
+
+        long mask = 0x7F3F1F0F07030100L;
+        long tPlayer_ = Bits.transposedMatrix(player_);
+        long tOpponent_ = Bits.transposedMatrix(opponent_);
+
+        long pDiff = (player_ & mask) ^ (tPlayer_ & mask);
+        long oDiff = (opponent_ & mask) ^ (tOpponent_ & mask);
+        int pPos = Bits.countLeadingZeros(pDiff);
+        int oPos = Bits.countLeadingZeros(oDiff);
+        System.out.println(String.format("actual: %d %d", pPos, oPos));
+        return pPos <= oPos && (player_ & Bits.coordAt(pPos)) != 0;
     }
 
     /**
@@ -304,26 +304,26 @@ public class BitConverter {
             } else if ((flipped & coord_) != 0) {
                 putState(state, region, coord_, 4); // 変化した石
             }
-            if ((oddArea & coord_) != 0) {
-                putState(state, region, coord_, 5); // 奇数領域
-            } else if ((evenArea & coord_) != 0) {
-                putState(state, region, coord_, 6); // 偶数領域
-            }
+//            if ((oddArea & coord_) != 0) {
+//                putState(state, region, coord_, 5); // 奇数領域
+//            } else if ((evenArea & coord_) != 0) {
+//                putState(state, region, coord_, 6); // 偶数領域
+//            }
             if (flippedBoard[i] > 0) {
                 putState(state, region, coord_, 9 + flippedBoard[i]); // 反転数
             }
             coord_ >>>= 1;
         }
-        if (!earlyTurn) {
-            fillState(state, 7); // 序盤でない
-        }
-        int emptyCount = Bits.populationCount(~(player | opponent | coord)); // FIXME depthでよくない？
-        if (emptyCount % 2 == 1) {
-            fillState(state, 8); // 空白数が奇数
-        }
-        if (oddCount == 1 || oddCount % 2 == 0) {
-            fillState(state, 9); // 奇数領域が1個または偶数
-        }
+//        if (!earlyTurn) {
+//            fillState(state, 7); // 序盤でない
+//        }
+//        int emptyCount = Bits.populationCount(~(player | opponent | coord)); // FIXME depthでよくない？
+//        if (emptyCount % 2 == 1) {
+//            fillState(state, 8); // 空白数が奇数
+//        }
+//        if (oddCount == 1 || oddCount % 2 == 0) {
+//            fillState(state, 9); // 奇数領域が1個または偶数
+//        }
 
         return state;
     }

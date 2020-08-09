@@ -36,12 +36,12 @@ public final class Bits {
      * ビット列の並び順を反転して返す
      */
     public static long reverseBits(long bits) {
-        bits = (bits >>> 32) | (bits << 32);
-        bits = ((bits & 0xffff0000ffff0000L) >>> 16) | ((bits & 0x0000ffff0000ffffL) << 16);
-        bits = ((bits & 0xff00ff00ff00ff00L) >>> 8) | ((bits & 0x00ff00ff00ff00ffL) << 8);
-        bits = ((bits & 0xf0f0f0f0f0f0f0f0L) >>> 4) | ((bits & 0x0f0f0f0f0f0f0f0fL) << 4);
-        bits = ((bits & 0xccccccccccccccccL) >>> 2) | ((bits & 0x3333333333333333L) << 2);
-        bits = ((bits & 0xaaaaaaaaaaaaaaaaL) >>> 1) | ((bits & 0x5555555555555555L) << 1);
+        bits = bits >>> 32 | bits << 32;
+        bits = (bits >>> 16) & 0x0000ffff0000ffffL | (bits & 0x0000ffff0000ffffL) << 16;
+        bits = (bits >>> 8) & 0x00ff00ff00ff00ffL | (bits & 0x00ff00ff00ff00ffL) << 8;
+        bits = (bits >>> 4) & 0x0f0f0f0f0f0f0f0fL | (bits & 0x0f0f0f0f0f0f0f0fL) << 4;
+        bits = (bits >>> 2) & 0x3333333333333333L | (bits & 0x3333333333333333L) << 2;
+        bits = (bits >>> 1) & 0x5555555555555555L | (bits & 0x5555555555555555L) << 1;
         return bits;
     }
 
@@ -124,18 +124,18 @@ public final class Bits {
      * 8x8行列の上下反転した行列を返す
      */
     public static long verticalMatrix(long matrix) {
-        matrix = (matrix >>> 32) | (matrix << 32);
-        matrix = ((matrix & 0xffff0000ffff0000L) >>> 16) | ((matrix & 0x0000ffff0000ffffL) << 16);
-        return ((matrix & 0xff00ff00ff00ff00L) >>> 8) | ((matrix & 0x00ff00ff00ff00ffL) << 8);
+        matrix = matrix >>> 32 | matrix << 32;
+        matrix = (matrix >>> 16) & 0x0000ffff0000ffffL | (matrix & 0x0000ffff0000ffffL) << 16;
+        return (matrix >>> 8) & 0x00ff00ff00ff00ffL | (matrix & 0x00ff00ff00ff00ffL) << 8;
     }
 
     /**
      * 8x8行列の左右反転した行列を返す
      */
     public static long horizontalMatrix(long matrix) {
-        matrix = ((matrix & 0xf0f0f0f0f0f0f0f0L) >>> 4) | ((matrix & 0x0f0f0f0f0f0f0f0fL) << 4);
-        matrix = ((matrix & 0xccccccccccccccccL) >>> 2) | ((matrix & 0x3333333333333333L) << 2);
-        return ((matrix & 0xaaaaaaaaaaaaaaaaL) >>> 1) | ((matrix & 0x5555555555555555L) << 1);
+        matrix = (matrix >>> 4) & 0x0f0f0f0f0f0f0f0fL | ((matrix & 0x0f0f0f0f0f0f0f0fL) << 4);
+        matrix = (matrix >>> 2) & 0x3333333333333333L | ((matrix & 0x3333333333333333L) << 2);
+        return (matrix >>> 1) & 0x5555555555555555L | ((matrix & 0x5555555555555555L) << 1);
     }
 
     /**
@@ -153,5 +153,16 @@ public final class Bits {
             String line = StringUtils.leftPad(bits, 8, '0');
             System.out.println(line);
         }
+    }
+
+    public static void printMatrix(int[][] matrix, boolean padding) {
+        int offset = padding ? 1 : 0;
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                System.out.print(matrix[y + offset][x + offset]);
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 }

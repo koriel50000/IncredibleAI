@@ -1,5 +1,6 @@
 package com.github.koriel50000.prelude.learning;
 
+import com.github.koriel50000.prelude.reversi.Bits;
 import com.github.koriel50000.prelude.reversi.Board;
 
 import java.nio.FloatBuffer;
@@ -32,8 +33,9 @@ public class PreludeConverter {
      * 対角位置の対称変換が必要か
      */
     private boolean isSymmetric(int diagonal, int[][] board, Board.Color color) {
+        int[][] tmp = new int[8][8];
         for (int y = 0; y < 8; y++) {
-            for (int x = y + 1; x < 8; x++) {
+            for (int x = 0; x < 8; x++) {
                 int x_;
                 int y_;
                 switch (diagonal) {
@@ -60,13 +62,21 @@ public class PreludeConverter {
                     default:
                         throw new IllegalArgumentException("no match: " + diagonal);
                 }
+                tmp[y][x] = board[y_ + 1][x_ + 1];
+            }
+        }
+
+        for (int y = 0; y < 8; y++) {
+            for (int x = y + 1; x < 8; x++) {
                 // 転置行列と左上から比較して、初めての違いが自石のときtrue、それ以外はfalse
-                if (board[y_][x_] != board[x_][y_]) {
-                    System.out.println(String.format("expectedColor[%d]=%d", (y_ * 8 + x_), board[y_][x_]));
-                    return board[y_][x_] == color.boardValue();
+                if (tmp[y][x] != tmp[x][y]) {
+                    System.out.println(String.format("expected: %d", y * 8 + x));
+                    Bits.printMatrix(tmp, false);
+                    return tmp[y][x] == color.boardValue();
                 }
             }
         }
+        System.out.println(String.format("expected: %d", 64));
         return false;
     }
 
@@ -268,25 +278,25 @@ public class PreludeConverter {
             if (board[y_][x_] != nextBoard[y_][x_]) {
                 putState(state, region, x_, y_, 4); // 変化した石
             }
-            if (oddevenArea[y_][x_] == AREA_ODD) {
-                putState(state, region, x_, y_, 5); // 奇数領域
-            } else if (oddevenArea[y_][x_] == AREA_EVEN) {
-                putState(state, region, x_, y_, 6); // 偶数領域
-            }
+//            if (oddevenArea[y_][x_] == AREA_ODD) {
+//                putState(state, region, x_, y_, 5); // 奇数領域
+//            } else if (oddevenArea[y_][x_] == AREA_EVEN) {
+//                putState(state, region, x_, y_, 6); // 偶数領域
+//            }
             int reverseCount = (reverse[y_][x_] < 6) ? reverse[y_][x_] : 6; // 6以上は6プレーン目とする
             if (reverseCount > 0) {
                 putState(state, region, x_, y_, 9 + reverseCount); // 反転数
             }
         }
-        if (!earlyStage) {
-            fillState(state, 7); // 序盤でない
-        }
-        if (emptyCount % 2 == 1) {
-            fillState(state, 8); // 空白数が奇数
-        }
-        if (oddCount == 1 || oddCount % 2 == 0) {
-            fillState(state, 9); // 奇数領域が1個または偶数
-        }
+//        if (!earlyStage) {
+//            fillState(state, 7); // 序盤でない
+//        }
+//        if (emptyCount % 2 == 1) {
+//            fillState(state, 8); // 空白数が奇数
+//        }
+//        if (oddCount == 1 || oddCount % 2 == 0) {
+//            fillState(state, 9); // 奇数領域が1個または偶数
+//        }
 
         return state;
     }

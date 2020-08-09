@@ -85,6 +85,20 @@ public class BitsTest {
     }
 
     @Test
+    void coordAt() {
+        assertAll(
+                () -> assertEquals(0x8000000000000000L, Bits.coordAt(0)),
+                () -> assertEquals(0x0000000020000000L, Bits.coordAt(34)),
+                () -> assertEquals(0x0000000000000001L, Bits.coordAt(63))
+        );
+        assertAll(
+                () -> assertEquals(0x8000000000000000L, Bits.coordAt(0, 0)),
+                () -> assertEquals(0x0000000020000000L, Bits.coordAt(2, 4)),
+                () -> assertEquals(0x0000000000000001L, Bits.coordAt(7, 7))
+        );
+    }
+
+    @Test
     void transposedMatrix() {
         long test1 = parseMatrix("",
                 "10101010",
@@ -130,7 +144,7 @@ public class BitsTest {
                 "00101010",
                 "00010101",
                 "10101010");
-                Bits.printMatrix(expected1);
+        Bits.printMatrix(expected1);
         assertEquals(expected1, Bits.verticalMatrix(test1));
     }
 

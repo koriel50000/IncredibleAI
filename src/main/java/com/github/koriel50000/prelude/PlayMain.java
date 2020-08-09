@@ -22,7 +22,7 @@ public class PlayMain {
 
     private void oneplay() {
         long seed = System.currentTimeMillis();
-        Feature preludeFeature = new PreludeFeature(board, seed);
+        Feature preludeFeature = new PreludeFeature(bitBoard, board, seed);
         Feature randomFeature = new RandomFeature(seed);
         preludeFeature.init();
         randomFeature.init();
@@ -68,7 +68,7 @@ public class PlayMain {
                 }
 
                 if (coords != 0) {
-                    long coord = blackFeature.evaluate(0L, 0L, coords);
+                    long coord = blackFeature.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
 
                     bitBoard.makeMove(bitBoard.blackBoard, bitBoard.whiteBoard, coord);
                     board.makeMove(Board.Coord.valueOf(Bits.indexOf(coord)));
@@ -89,7 +89,7 @@ public class PlayMain {
                 }
 
                 if (coords != 0) {
-                    long coord = whiteFeature.evaluate(0L, 0L, coords);
+                    long coord = whiteFeature.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
 
                     bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
                     board.makeMove(Board.Coord.valueOf(Bits.indexOf(coord)));
