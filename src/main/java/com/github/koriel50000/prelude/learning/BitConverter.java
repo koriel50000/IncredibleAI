@@ -149,31 +149,6 @@ public class BitConverter {
         }
     }
 
-    private long oddArea;
-    private long evenArea;
-    private int oddCount;
-    private int evenCount;
-    private boolean earlyTurn;
-    private int[] flippedBoard;
-
-    public void initialize() {
-        oddArea = 0x0000000000000000L;
-        evenArea = 0xffffffe7e7ffffffL;
-        oddCount = 0;
-        evenCount = 1;
-        earlyTurn = true;
-        flippedBoard = new int[] {
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 1, 1, 0, 0, 0,
-                0, 0, 0, 1, 1, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0,
-                0, 0, 0, 0, 0, 0, 0, 0
-        };
-    }
-
     private void increaseFlipped(long flipped) {
         while (flipped != 0) {
             long coord = Bits.getRightmostBit(flipped);
@@ -280,10 +255,10 @@ public class BitConverter {
     /**
      * 石を置いたときの状態を返す
      */
-    public FloatBuffer convertState(long player, long opponent, long flipped, long coord, int index) {
+    public BitState convertState(long player, long opponent, long flipped, long coord, int index) {
         region = checkRegion(player, opponent, index);
 
-        //enumerateOddEven(coord);
+        enumerateOddEven(coord);
         increaseFlipped(flipped);
 
         FloatBuffer state = FloatBuffer.allocate(ROWS * COLUMS * CHANNEL);
@@ -304,26 +279,26 @@ public class BitConverter {
             } else if ((flipped & coord_) != 0) {
                 putState(state, region, coord_, 4); // 変化した石
             }
-//            if ((oddArea & coord_) != 0) {
-//                putState(state, region, coord_, 5); // 奇数領域
-//            } else if ((evenArea & coord_) != 0) {
-//                putState(state, region, coord_, 6); // 偶数領域
-//            }
+            if ((oddArea & coord_) != 0) {
+                putState(state, region, coord_, 5); // 奇数領域
+            } else if ((evenArea & coord_) != 0) {
+                putState(state, region, coord_, 6); // 偶数領域
+            }
             if (flippedBoard[i] > 0) {
                 putState(state, region, coord_, 9 + flippedBoard[i]); // 反転数
             }
             coord_ >>>= 1;
         }
-//        if (!earlyTurn) {
-//            fillState(state, 7); // 序盤でない
-//        }
-//        int emptyCount = Bits.populationCount(~(player | opponent | coord)); // FIXME depthでよくない？
-//        if (emptyCount % 2 == 1) {
-//            fillState(state, 8); // 空白数が奇数
-//        }
-//        if (oddCount == 1 || oddCount % 2 == 0) {
-//            fillState(state, 9); // 奇数領域が1個または偶数
-//        }
+        if (!earlyTurn) {
+            fillState(state, 7); // 序盤でない
+        }
+        int emptyCount = Bits.populationCount(~(player | opponent | coord)); // FIXME depthでよくない？
+        if (emptyCount % 2 == 1) {
+            fillState(state, 8); // 空白数が奇数
+        }
+        if (oddCount == 1 || oddCount % 2 == 0) {
+            fillState(state, 9); // 奇数領域が1個または偶数
+        }
 
         return state;
     }

@@ -91,12 +91,6 @@ public class PreludeConverter {
         return region;
     }
 
-    private boolean earlyStage;
-    private int[][] oddevenArea = new int[10][10];
-    private int emptyCount;
-    private int oddCount;
-    private int evenCount;
-
     /**
      * 空白を再帰的にたどって偶数領域か奇数領域かに分割する
      */
@@ -278,25 +272,25 @@ public class PreludeConverter {
             if (board[y_][x_] != nextBoard[y_][x_]) {
                 putState(state, region, x_, y_, 4); // 変化した石
             }
-//            if (oddevenArea[y_][x_] == AREA_ODD) {
-//                putState(state, region, x_, y_, 5); // 奇数領域
-//            } else if (oddevenArea[y_][x_] == AREA_EVEN) {
-//                putState(state, region, x_, y_, 6); // 偶数領域
-//            }
+            if (oddevenArea[y_][x_] == AREA_ODD) {
+                putState(state, region, x_, y_, 5); // 奇数領域
+            } else if (oddevenArea[y_][x_] == AREA_EVEN) {
+                putState(state, region, x_, y_, 6); // 偶数領域
+            }
             int reverseCount = (reverse[y_][x_] < 6) ? reverse[y_][x_] : 6; // 6以上は6プレーン目とする
             if (reverseCount > 0) {
                 putState(state, region, x_, y_, 9 + reverseCount); // 反転数
             }
         }
-//        if (!earlyStage) {
-//            fillState(state, 7); // 序盤でない
-//        }
-//        if (emptyCount % 2 == 1) {
-//            fillState(state, 8); // 空白数が奇数
-//        }
-//        if (oddCount == 1 || oddCount % 2 == 0) {
-//            fillState(state, 9); // 奇数領域が1個または偶数
-//        }
+        if (!earlyStage) {
+            fillState(state, 7); // 序盤でない
+        }
+        if (emptyCount % 2 == 1) {
+            fillState(state, 8); // 空白数が奇数
+        }
+        if (oddCount == 1 || oddCount % 2 == 0) {
+            fillState(state, 9); // 奇数領域が1個または偶数
+        }
 
         return state;
     }
