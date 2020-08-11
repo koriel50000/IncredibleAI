@@ -235,8 +235,6 @@ public class PreludeConverter {
         }
     }
 
-    public int region;
-
     /**
      * 石を置いたときの状態を返す
      */

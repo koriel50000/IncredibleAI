@@ -1,9 +1,13 @@
 package com.github.koriel50000.prelude.reversi;
 
+import com.github.koriel50000.prelude.learning.PreludeConverter;
+import com.github.koriel50000.prelude.learning.State;
 import org.apache.commons.lang3.SerializationUtils;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Board {
 
@@ -13,31 +17,36 @@ public class Board {
     public static final int BORDER = 3;
 
     private int[][] board;
-    private int[][] reverse;
     private int[] stones;
 
     private Color currentColor;
     private int turnCount;
     private Score score;
 
+    private PreludeConverter converter;
+    private Map<Long, State> availableStates;
+
     public Board() {
         board = new int[10][10];
         reverse = new int[10][10];
         stones = new int[3];
+
+        converter = new PreludeConverter();
+        availableStates = new HashMap<>();
     }
 
-    private Board(int[][] board, int[][] reverse, int[] stones, Color currentColor, int turnCount) {
-        this.board = board;
-        this.reverse = reverse;
-        this.stones = stones;
-        this.currentColor = currentColor;
-        this.turnCount = turnCount;
-    }
+//    private Board(int[][] board, int[][] reverse, int[] stones, Color currentColor, int turnCount) {
+//        this.board = board;
+//        this.reverse = reverse;
+//        this.stones = stones;
+//        this.currentColor = currentColor;
+//        this.turnCount = turnCount;
+//    }
 
     /**
      * 盤面を初期化する
      */
-    public void initialize() {
+    public void clear() {
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 if (1 <= x && x <= 8 && 1 <= y && y <= 8) {
@@ -108,6 +117,10 @@ public class Board {
             }
         }
         return coords;
+    }
+
+    public State convertState(Coord coord) {
+        return null;
     }
 
     /**
@@ -325,8 +338,21 @@ public class Board {
             return values[index];
         }
 
+        public static Coord valueOf(long coord) {
+            int index = Bits.indexOf(coord);
+            return values[index];
+        }
+
         public static Coord valueOf(String symbol) {
             return null; // TODO
+        }
+
+        public static long toCoords(List<Coord> moves) {
+            long coords = 0L;
+            for (Coord move : moves) {
+                coords |= Bits.coordAt(move.x - 1, move.y - 1);
+            }
+            return coords;
         }
 
         @Override

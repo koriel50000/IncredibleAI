@@ -1,5 +1,11 @@
 package com.github.koriel50000.prelude.reversi;
 
+import com.github.koriel50000.prelude.learning.BitConverter;
+import com.github.koriel50000.prelude.learning.BitState;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class BitBoard {
 
     public static final int EMPTY = 0;
@@ -14,13 +20,23 @@ public class BitBoard {
     private boolean passedBefore;
     private Score score;
 
-    public void initialize() {
+    private BitConverter converter;
+    private Map<Long, BitState> availableStates;
+
+    public BitBoard() {
+        converter = new BitConverter();
+        availableStates = new HashMap<>();
+    }
+
+    public void clear() {
         blackBoard = 0x0000000810000000L;
         whiteBoard = 0x0000001008000000L;
         currentColor = BLACK;
         depth = 60;
         passedBefore = false;
         score = null;
+        converter.clear();
+        availableStates.clear();
     }
 
     private int stoneColor(int x, int y) {
@@ -32,6 +48,68 @@ public class BitBoard {
         } else {
             return EMPTY;
         }
+    }
+
+    private long computeFlipped(long player, long opponent, int index) {
+        // http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
+        //
+        // OM.x = O;
+        // OM.yzw = O & 0x7e7e7e7e7e7e7e7eUL;
+        // mask = (ulong4) (0x0080808080808080UL, 0x7f00000000000000UL, 0x0102040810204000UL, 0x0040201008040201UL) >> (63 - pos);
+        // outflank = (0x8000000000000000UL >> clz(~OM & mask)) & P;
+        // flipped  = (-outflank * 2) & mask;
+        // mask = (ulong4) (0x0101010101010100UL, 0x00000000000000feUL, 0x0002040810204080UL, 0x8040201008040200UL) << pos;
+        // outflank = mask & ((OM | ~mask) + 1) & P;
+        // flipped |= (outflank - (outflank != 0)) & mask;
+        // return flipped.x | flipped.y | flipped.z | flipped.w;
+
+        long opponentBoardMasked = opponent & 0x7e7e7e7e7e7e7e7eL;
+
+        // 下
+        long maskDn = 0x0080808080808080L >>> index;
+        int clzDn = Bits.countLeadingZeros(~opponent & maskDn);
+        long outflankDn = (0x8000000000000000L >>> clzDn) & player;
+        long flipped = (-outflankDn * 2) & maskDn;
+
+        // 右
+        long maskRt = 0x7f00000000000000L >>> index;
+        int clzRt = Bits.countLeadingZeros(~opponentBoardMasked & maskRt);
+        long outflankRt = (0x8000000000000000L >>> clzRt) & player;
+        flipped |= (-outflankRt * 2) & maskRt;
+
+        // 左下
+        long maskLtDn = 0x0102040810204000L >>> index;
+        int clzLtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskLtDn);
+        long outflankLtDn = (0x8000000000000000L >>> clzLtDn) & player;
+        flipped |= (-outflankLtDn * 2) & maskLtDn;
+
+        // 右下
+        long maskRtDn = 0x0040201008040201L >>> index;
+        int clzRtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskRtDn);
+        long outflankRtDn = (0x8000000000000000L >>> clzRtDn) & player;
+        flipped |= (-outflankRtDn * 2) & maskRtDn;
+
+        // 上
+        long maskUp = 0x0101010101010100L << (63 - index);
+        long outflankUp = maskUp & ((opponent | ~maskUp) + 1) & player;
+        flipped |= (outflankUp - ((outflankUp | -outflankUp) >>> 63)) & maskUp;
+
+        // 左
+        long maskLt = 0x00000000000000feL << (63 - index);
+        long outflankLt = maskLt & ((opponentBoardMasked | ~maskLt) + 1) & player;
+        flipped |= (outflankLt - ((outflankLt | -outflankLt) >>> 63)) & maskLt;
+
+        // 右上
+        long maskRtUp = 0x0002040810204080L << (63 - index);
+        long outflankRtUp = maskRtUp & ((opponentBoardMasked | ~maskRtUp) + 1) & player;
+        flipped |= (outflankRtUp - ((outflankRtUp | -outflankRtUp) >>> 63)) & maskRtUp;
+
+        // 左上
+        long maskLtUp = 0x8040201008040200L << (63 - index);
+        long outflankLtUp = maskLtUp & ((opponentBoardMasked | ~maskLtUp) + 1) & player;
+        flipped |= (outflankLtUp - ((outflankLtUp | -outflankLtUp) >>> 63)) & maskLtUp;
+
+        return flipped;
     }
 
     /**
@@ -113,80 +191,31 @@ public class BitBoard {
         return mobility;
     }
 
-    public long computeFlipped(long player, long opponent, int index) {
-        // http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
-        //
-        // OM.x = O;
-        // OM.yzw = O & 0x7e7e7e7e7e7e7e7eUL;
-        // mask = (ulong4) (0x0080808080808080UL, 0x7f00000000000000UL, 0x0102040810204000UL, 0x0040201008040201UL) >> (63 - pos);
-        // outflank = (0x8000000000000000UL >> clz(~OM & mask)) & P;
-        // flipped  = (-outflank * 2) & mask;
-        // mask = (ulong4) (0x0101010101010100UL, 0x00000000000000feUL, 0x0002040810204080UL, 0x8040201008040200UL) << pos;
-        // outflank = mask & ((OM | ~mask) + 1) & P;
-        // flipped |= (outflank - (outflank != 0)) & mask;
-        // return flipped.x | flipped.y | flipped.z | flipped.w;
+    public BitState convertState(long player, long opponent, long coord) {
+        int index = Bits.indexOf(coord);
+        long flipped = computeFlipped(player, opponent, index);
 
-        long opponentBoardMasked = opponent & 0x7e7e7e7e7e7e7e7eL;
-
-        // 下
-        long maskDn = 0x0080808080808080L >>> index;
-        int clzDn = Bits.countLeadingZeros(~opponent & maskDn);
-        long outflankDn = (0x8000000000000000L >>> clzDn) & player;
-        long flipped = (-outflankDn * 2) & maskDn;
-
-        // 右
-        long maskRt = 0x7f00000000000000L >>> index;
-        int clzRt = Bits.countLeadingZeros(~opponentBoardMasked & maskRt);
-        long outflankRt = (0x8000000000000000L >>> clzRt) & player;
-        flipped |= (-outflankRt * 2) & maskRt;
-
-        // 左下
-        long maskLtDn = 0x0102040810204000L >>> index;
-        int clzLtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskLtDn);
-        long outflankLtDn = (0x8000000000000000L >>> clzLtDn) & player;
-        flipped |= (-outflankLtDn * 2) & maskLtDn;
-
-        // 右下
-        long maskRtDn = 0x0040201008040201L >>> index;
-        int clzRtDn = Bits.countLeadingZeros(~opponentBoardMasked & maskRtDn);
-        long outflankRtDn = (0x8000000000000000L >>> clzRtDn) & player;
-        flipped |= (-outflankRtDn * 2) & maskRtDn;
-
-        // 上
-        long maskUp = 0x0101010101010100L << (63 - index);
-        long outflankUp = maskUp & ((opponent | ~maskUp) + 1) & player;
-        flipped |= (outflankUp - ((outflankUp | -outflankUp) >>> 63)) & maskUp;
-
-        // 左
-        long maskLt = 0x00000000000000feL << (63 - index);
-        long outflankLt = maskLt & ((opponentBoardMasked | ~maskLt) + 1) & player;
-        flipped |= (outflankLt - ((outflankLt | -outflankLt) >>> 63)) & maskLt;
-
-        // 右上
-        long maskRtUp = 0x0002040810204080L << (63 - index);
-        long outflankRtUp = maskRtUp & ((opponentBoardMasked | ~maskRtUp) + 1) & player;
-        flipped |= (outflankRtUp - ((outflankRtUp | -outflankRtUp) >>> 63)) & maskRtUp;
-
-        // 左上
-        long maskLtUp = 0x8040201008040200L << (63 - index);
-        long outflankLtUp = maskLtUp & ((opponentBoardMasked | ~maskLtUp) + 1) & player;
-        flipped |= (outflankLtUp - ((outflankLtUp | -outflankLtUp) >>> 63)) & maskLtUp;
-
-        return flipped;
+        BitState state = converter.convertState(player, opponent, flipped, coord, index);
+        availableStates.put(coord, state);
+        return state;
     }
 
     /**
      * 指定された場所に石を打つ
      */
-    public long makeMove(long player, long opponent, long coord) {
-        int index = Bits.indexOf(coord);
-        long flipped = computeFlipped(player, opponent, index);
+    public void makeMove(long player, long opponent, long coord) {
+        BitState state = availableStates.get(coord);
+        if (state == null) {
+            state = convertState(player, opponent, coord);
+        } else {
+            availableStates.clear();
+        }
+        converter.setState(state);
 
+        long flipped = state.flipped;
         blackBoard ^= (coord * (currentColor & 1)) | flipped;
         whiteBoard ^= (coord * (currentColor >> 1)) | flipped;
         --depth;
-
-        return flipped;
     }
 
     /**
