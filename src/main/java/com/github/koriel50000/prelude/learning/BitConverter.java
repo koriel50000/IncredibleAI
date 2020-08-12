@@ -2,8 +2,6 @@ package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
 
-import java.nio.FloatBuffer;
-
 public class BitConverter {
 
     private static final int[] REGION = new int[]{
@@ -41,26 +39,26 @@ public class BitConverter {
                 break;
             case 10:
                 // 左右反転
-                player_ = Bits.horizontalMatrix(player);
-                opponent_ = Bits.horizontalMatrix(opponent);
+                player_ = Bits.flipLtRt(player);
+                opponent_ = Bits.flipLtRt(opponent);
                 break;
             case 12:
                 // 上下反転
-                player_ = Bits.verticalMatrix(player);
-                opponent_ = Bits.verticalMatrix(opponent);
+                player_ = Bits.flipUpDn(player);
+                opponent_ = Bits.flipUpDn(opponent);
                 break;
             case 14:
                 // 上下左右反転
-                player_ = Bits.verticalAndHorizontalMatrix(player);
-                opponent_ = Bits.verticalAndHorizontalMatrix(opponent);
+                player_ = Bits.flip(player);
+                opponent_ = Bits.flip(opponent);
                 break;
             default:
                 throw new IllegalArgumentException("no match: " + diagonal);
         }
 
         long mask = 0x7F3F1F0F07030100L;
-        long tPlayer_ = Bits.transposedMatrix(player_);
-        long tOpponent_ = Bits.transposedMatrix(opponent_);
+        long tPlayer_ = Bits.transposed(player_);
+        long tOpponent_ = Bits.transposed(opponent_);
 
         long pDiff = (player_ & mask) ^ (tPlayer_ & mask);
         long oDiff = (opponent_ & mask) ^ (tOpponent_ & mask);

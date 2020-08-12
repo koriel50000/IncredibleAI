@@ -5,6 +5,7 @@ import com.github.koriel50000.prelude.reversi.Board;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
+import java.util.List;
 
 public class PreludeConverter {
 
@@ -28,6 +29,16 @@ public class PreludeConverter {
             new int[]{6, 12, 2, 2, 3, 3, 14, 7},
             new int[]{12, 2, 2, 2, 3, 3, 3, 14}
     };
+
+    private State currentState;
+
+    public void clear() {
+        currentState = new State();
+    }
+
+    public void setState(State state) {
+        this.currentState = state;
+    }
 
     /**
      * 対角位置の対称変換が必要か
@@ -89,6 +100,27 @@ public class PreludeConverter {
             region += 1;
         }
         return region;
+    }
+
+    private void increaseFlipped(State state, List<Board.Coord> flipped) {
+        for (Board.Coord coord : flipped) {
+            if ((state.flippedBoard1 & coord) != 0) {
+                state.flippedBoard1 ^= coord;
+                state.flippedBoard2 ^= coord;
+            } else if ((state.flippedBoard2 & coord) != 0) {
+                state.flippedBoard2 ^= coord;
+                state.flippedBoard3 ^= coord;
+            } else if ((state.flippedBoard3 & coord) != 0) {
+                state.flippedBoard3 ^= coord;
+                state.flippedBoard4 ^= coord;
+            } else if ((state.flippedBoard4 & coord) != 0) {
+                state.flippedBoard4 ^= coord;
+                state.flippedBoard5 ^= coord;
+            } else if ((state.flippedBoard5 & coord) != 0) {
+                state.flippedBoard5 ^= coord;
+                state.flippedBoard6 ^= coord;
+            }
+        }
     }
 
     /**
@@ -167,128 +199,19 @@ public class PreludeConverter {
     }
 
     /**
-     * 着手をプロットする
-     */
-    private void putState(FloatBuffer state, int region, int x, int y, int channel) {
-        int x_;
-        int y_;
-        switch (region) {
-            case 0:
-            case 8:
-                // 変換なし
-                x_ = x - 1;
-                y_ = y - 1;
-                break;
-            case 1:
-            case 10:
-                // 左右反転
-                x_ = 8 - x;
-                y_ = y - 1;
-                break;
-            case 2:
-            case 12:
-                // 上下反転
-                x_ = x - 1;
-                y_ = 8 - y;
-                break;
-            case 3:
-            case 14:
-                // 上下左右反転
-                x_ = 8 - x;
-                y_ = 8 - y;
-                break;
-            case 4:
-            case 9:
-                // 対称反転
-                x_ = y - 1;
-                y_ = x - 1;
-                break;
-            case 5:
-            case 11:
-                // 左右対称反転
-                x_ = y - 1;
-                y_ = 8 - x;
-                break;
-            case 6:
-            case 13:
-                // 上下対称反転
-                x_ = 8 - y;
-                y_ = x - 1;
-                break;
-            case 7:
-            case 15:
-                // 上下左右対称反転
-                x_ = 8 - y;
-                y_ = 8 - x;
-                break;
-            default:
-                throw new IllegalArgumentException("no match: " + region);
-        }
-        int index = channel * ROWS * COLUMS + y_ * COLUMS + x_;
-        state.put(index, 1);
-    }
-
-    private void fillState(FloatBuffer state, int channel) {
-        int offset = channel * ROWS * COLUMS;
-        for (int i = 0; i < ROWS * COLUMS; i++) {
-            state.put(offset + i, 1);
-        }
-    }
-
-    /**
      * 石を置いたときの状態を返す
      */
-    public FloatBuffer convertState(Board reversi, Board.Coord newCoord) {
-        Board nextReversi = reversi.tryMove(newCoord);
+    public State convertState(int[][] board, List<Board.Coord> flipped, Board.Coord coord, Board.Color color) {
+        State state = new State(currentState);
+        state.board = board;
+        state.flipped = flipped;
+        state.coord = coord;
+        state.region = checkRegion(board, x, y, color);
 
-        int[][] board = reversi.getBoard();
-        int[][] nextBoard = nextReversi.getBoard();
-        int[][] reverse = reversi.getReverse();
-        Board.Color color = reversi.getCurrentColor();
+        enumerateArea(state, coord);
+        increaseFlipped(state, flipped);
 
-        int x = newCoord.x;
-        int y = newCoord.y;
-        region = checkRegion(board, x, y, color);
-
-        enumerateArea(board);
-
-        FloatBuffer state = FloatBuffer.allocate(ROWS * COLUMS * CHANNEL);
-        state.clear();
-
-        putState(state, region, x, y, 3); // 着手
-
-        for (Board.Coord move : Board.Coord.values()) {
-            int x_ = move.x;
-            int y_ = move.y;
-            if (board[y_][x_] == color.boardValue()) {
-                putState(state, region, x_, y_, 0); // 着手前に自石
-            } else if (board[y_][x_] == color.opponentBoardValue()) {
-                putState(state, region, x_, y_, 1); // 着手前に相手石
-            } else {
-                putState(state, region, x_, y_, 2); // 着手前に空白
-            }
-            if (board[y_][x_] != nextBoard[y_][x_]) {
-                putState(state, region, x_, y_, 4); // 変化した石
-            }
-            if (oddevenArea[y_][x_] == AREA_ODD) {
-                putState(state, region, x_, y_, 5); // 奇数領域
-            } else if (oddevenArea[y_][x_] == AREA_EVEN) {
-                putState(state, region, x_, y_, 6); // 偶数領域
-            }
-            int reverseCount = (reverse[y_][x_] < 6) ? reverse[y_][x_] : 6; // 6以上は6プレーン目とする
-            if (reverseCount > 0) {
-                putState(state, region, x_, y_, 9 + reverseCount); // 反転数
-            }
-        }
-        if (!earlyStage) {
-            fillState(state, 7); // 序盤でない
-        }
-        if (emptyCount % 2 == 1) {
-            fillState(state, 8); // 空白数が奇数
-        }
-        if (oddCount == 1 || oddCount % 2 == 0) {
-            fillState(state, 9); // 奇数領域が1個または偶数
-        }
+        state.convertBuffer();
 
         return state;
     }

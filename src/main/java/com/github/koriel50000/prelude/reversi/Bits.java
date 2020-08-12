@@ -102,7 +102,7 @@ public final class Bits {
     /**
      * 8x8行列の転置行列を返す
      */
-    public static long transposedMatrix(long matrix) {
+    public static long transposed(long matrix) {
         return matrix & 0x8040201008040201L |
                 (matrix & 0x0080402010080402L) << 7 |
                 (matrix & 0x0000804020100804L) << 14 |
@@ -123,7 +123,7 @@ public final class Bits {
     /**
      * 8x8行列の上下反転した行列を返す
      */
-    public static long verticalMatrix(long matrix) {
+    public static long flipUpDn(long matrix) {
         matrix = matrix >>> 32 | matrix << 32;
         matrix = (matrix >>> 16) & 0x0000ffff0000ffffL | (matrix & 0x0000ffff0000ffffL) << 16;
         return (matrix >>> 8) & 0x00ff00ff00ff00ffL | (matrix & 0x00ff00ff00ff00ffL) << 8;
@@ -132,7 +132,7 @@ public final class Bits {
     /**
      * 8x8行列の左右反転した行列を返す
      */
-    public static long horizontalMatrix(long matrix) {
+    public static long flipLtRt(long matrix) {
         matrix = (matrix >>> 4) & 0x0f0f0f0f0f0f0f0fL | ((matrix & 0x0f0f0f0f0f0f0f0fL) << 4);
         matrix = (matrix >>> 2) & 0x3333333333333333L | ((matrix & 0x3333333333333333L) << 2);
         return (matrix >>> 1) & 0x5555555555555555L | ((matrix & 0x5555555555555555L) << 1);
@@ -141,7 +141,7 @@ public final class Bits {
     /**
      * 8x8行列の上下左右反転した行列を返す
      */
-    public static long verticalAndHorizontalMatrix(long matrix) {
+    public static long flip(long matrix) {
         return reverseBits(matrix);
     }
 

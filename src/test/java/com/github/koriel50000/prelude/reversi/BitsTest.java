@@ -99,7 +99,7 @@ public class BitsTest {
     }
 
     @Test
-    void transposedMatrix() {
+    void transposed() {
         long test1 = parseMatrix("",
                 "10101010",
                 "00010101",
@@ -120,11 +120,11 @@ public class BitsTest {
                 "10101010",
                 "01010100");
         Bits.printMatrix(expected1);
-        assertEquals(expected1, Bits.transposedMatrix(test1));
+        assertEquals(expected1, Bits.transposed(test1));
     }
 
     @Test
-    void verticalMatrix() {
+    void flipUpDn() {
         long test1 = parseMatrix("",
                 "10101010",
                 "00010101",
@@ -145,11 +145,11 @@ public class BitsTest {
                 "00010101",
                 "10101010");
         Bits.printMatrix(expected1);
-        assertEquals(expected1, Bits.verticalMatrix(test1));
+        assertEquals(expected1, Bits.flipUpDn(test1));
     }
 
     @Test
-    void horizontalMatrix() {
+    void flipLtRt() {
         long test1 = parseMatrix("",
                 "10101010",
                 "00010101",
@@ -170,11 +170,11 @@ public class BitsTest {
                 "01001111",
                 "00000111");
         Bits.printMatrix(expected1);
-        assertEquals(expected1, Bits.horizontalMatrix(test1));
+        assertEquals(expected1, Bits.flipLtRt(test1));
     }
 
     @Test
-    void verticalAndHorizontalMatrix() {
+    void flip() {
         long test1 = parseMatrix("",
                 "10101010",
                 "00010101",
@@ -195,7 +195,7 @@ public class BitsTest {
                 "10101000",
                 "01010101");
         Bits.printMatrix(expected1);
-        assertEquals(expected1, Bits.verticalAndHorizontalMatrix(test1));
+        assertEquals(expected1, Bits.flip(test1));
     }
 
     private static long parseMatrix(String... binaries) {

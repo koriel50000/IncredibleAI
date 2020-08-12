@@ -1,5 +1,6 @@
 package com.github.koriel50000.prelude.reversi;
 
+import com.github.koriel50000.prelude.learning.BitState;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
 import com.github.koriel50000.prelude.learning.State;
 import org.apache.commons.lang3.SerializationUtils;
@@ -24,7 +25,7 @@ public class Board {
     private Score score;
 
     private PreludeConverter converter;
-    private Map<Long, State> availableStates;
+    private Map<Coord, State> availableStates;
 
     public Board() {
         board = new int[10][10];
@@ -34,14 +35,6 @@ public class Board {
         converter = new PreludeConverter();
         availableStates = new HashMap<>();
     }
-
-//    private Board(int[][] board, int[][] reverse, int[] stones, Color currentColor, int turnCount) {
-//        this.board = board;
-//        this.reverse = reverse;
-//        this.stones = stones;
-//        this.currentColor = currentColor;
-//        this.turnCount = turnCount;
-//    }
 
     /**
      * 盤面を初期化する
@@ -70,6 +63,8 @@ public class Board {
         currentColor = Color.Black;
         turnCount = 1;
         score = null;
+        converter.clear();
+        availableStates.clear();
     }
 
     /**
@@ -102,6 +97,22 @@ public class Board {
         return false;
     }
 
+    private List<Coord> computeFlipped(int[][] board, Coord coord, Color color) {
+        List<Coord> flipped = new ArrayList<>();
+        for (Direction dir : Direction.values()) {
+            if (!canMoveDirection(color, coord, dir)) {
+                continue;
+            }
+            x = coord.x + dir.dx;
+            y = coord.y + dir.dy;
+            while (board[y][x] == color.opponentBoardValue()) { // 相手石ならば継続
+                board[y][x] = color.boardValue(); // 石を反転
+                x += dir.dx;
+                y += dir.dy;
+            }
+        }
+    }
+
     /**
      * 着手可能なリストを返す
      */
@@ -119,8 +130,12 @@ public class Board {
         return coords;
     }
 
-    public State convertState(Coord coord) {
-        return null;
+    public State convertState(int[][] board, Coord coord, Color color) {
+        List<Coord> flipped = computeFlipped(board, coord, color);
+
+        State state = converter.convertState(board, flipped, coord, color);
+        availableStates.put(coord, state);
+        return state;
     }
 
     /**
@@ -128,41 +143,37 @@ public class Board {
      */
     public void makeMove(Coord coord) {
         Color color = currentColor;
-        int x = coord.x;
-        int y = coord.y;
+        State state = availableStates.get(coord);
+        if (state == null) {
+            state = convertState(board, coord, color);
+        } else {
+            availableStates.clear();
+        }
+        converter.setState(state);
 
-        board[y][x] = color.boardValue(); // 石を打つ
-        reverse[y][x] += 1; // 反転数+1
+        board[coord.y][coord.x] = color.boardValue(); // 石を打つ
         stones[color.boardValue()] += 1; // 自石を増やす
         stones[EMPTY] -= 1; // 空白を減らす
 
-        for (Direction dir : Direction.values()) {
-            if (!canMoveDirection(color, coord, dir)) {
-                continue;
-            }
-            x = coord.x + dir.dx;
-            y = coord.y + dir.dy;
-            while (board[y][x] == color.opponentBoardValue()) { // 相手石ならば継続
-                board[y][x] = color.boardValue(); // 石を反転
-                reverse[y][x] += 1; // 反転数+1
-                stones[color.boardValue()] += 1; // 自石を増やす
-                stones[color.opponentBoardValue()] -= 1; // 相手石を減らす
-                x += dir.dx;
-                y += dir.dy;
-            }
+        List<Coord> flipped = state.getFlipped();
+        int flippedCount = flipped.size();
+        for (Coord coord_ : flipped) {
+            board[coord_.y][coord_.x] = color.boardValue(); // 石を反転
         }
+        stones[color.boardValue()] += flippedCount; // 自石を増やす
+        stones[color.opponentBoardValue()] -= flippedCount; // 相手石を減らす
     }
 
-    public Board tryMove(Coord coord) {
-        int[][] board = SerializationUtils.clone(this.board);
-        int[][] reverse = SerializationUtils.clone(this.reverse);
-        int[] stones = SerializationUtils.clone(this.stones);
-
-        Board nextBoard = new Board(board, reverse, stones, currentColor, turnCount);
-        nextBoard.makeMove(coord);
-
-        return nextBoard;
-    }
+//    public Board tryMove(Coord coord) {
+//        int[][] board = SerializationUtils.clone(this.board);
+//        int[][] reverse = SerializationUtils.clone(this.reverse);
+//        int[] stones = SerializationUtils.clone(this.stones);
+//
+//        Board nextBoard = new Board(board, reverse, stones, currentColor, turnCount);
+//        nextBoard.makeMove(coord);
+//
+//        return nextBoard;
+//    }
 
     /**
      * ゲームの終了を判定する
@@ -271,8 +282,8 @@ public class Board {
         Black(BLACK, "black"),
         White(WHITE, "white");
 
-        private int boardValue;
-        private String display;
+        private final int boardValue;
+        private final String display;
 
         Color(int boardValue, String display) {
             this.boardValue = boardValue;
@@ -401,5 +412,4 @@ public class Board {
             return crossValues;
         }
     }
-
 }
