@@ -1,72 +1,49 @@
 package com.github.koriel50000.prelude.reversi;
 
 import com.github.koriel50000.prelude.learning.PreludeConverter;
-import com.github.koriel50000.prelude.learning.State;
 
+import java.nio.FloatBuffer;
 import java.util.*;
 
-public class Board {
+public class Reversi {
 
-    public static final int EMPTY = 0;
-    public static final int BLACK = 1;
-    public static final int WHITE = 2;
-    public static final int BORDER = 3;
+    public static final int COLUMNS = 8;
+    public static final int ROWS = 8;
+    public static final int CHANNELS = 16;
 
-    private int[][] board;
-    private int[] stones;
-
+    private Board board;
     private Color currentColor;
     private int turnCount;
+    private boolean passedBefore;
     private Score score;
 
     private PreludeConverter converter;
-    private Map<Coord, State> availableStates;
 
-    public Board() {
-        board = new int[10][10];
-        stones = new int[3];
-
+    public Reversi() {
+        board = new Board();
         converter = new PreludeConverter();
-        availableStates = new HashMap<>();
     }
 
     /**
      * 盤面を初期化する
      */
     public void clear() {
-        for (int y = 0; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
-                if (1 <= x && x <= 8 && 1 <= y && y <= 8) {
-                    board[y][x] = EMPTY;
-                } else {
-                    board[y][x] = BORDER;
-                }
-            }
-        }
-        board[4][4] = WHITE;
-        board[4][5] = BLACK;
-        board[5][4] = BLACK;
-        board[5][5] = WHITE;
-        stones[EMPTY] = 60;
-        stones[BLACK] = 2;
-        stones[WHITE] = 2;
+        board.clear();
         currentColor = Color.Black;
         turnCount = 1;
+        passedBefore = false;
         score = null;
         converter.clear();
-        availableStates.clear();
     }
 
     /**
      * 方向を指定して石が打てるかを判定する
      */
-    private boolean canMoveDirection(Coord coord, Direction dir, Color color) {
-        int x = coord.x + dir.dx;
-        int y = coord.y + dir.dy;
-        while (board[y][x] == color.opponentBoardValue()) { // 相手石ならば継続
-            x += dir.dx;
-            y += dir.dy;
-            if (board[y][x] == color.boardValue()) { // 自石ならば終了
+    private boolean canMoveDirection(Coord coord, Direction dir) {
+        Coord coord_ = coord.move(dir);
+        while (board.get(coord_) == currentColor.opponentValue()) { // 相手石ならば継続
+            coord_ = coord_.move(dir);
+            if (board.get(coord_) == currentColor.value()) { // 自石ならば終了
                 return true;
             }
         }
@@ -76,10 +53,10 @@ public class Board {
     /**
      * 指定した位置に石が打てるかを判定する
      */
-    private boolean canMove(Coord coord, Color color) {
-        if (board[coord.y][coord.x] == EMPTY) {
+    private boolean canMove(Coord coord) {
+        if (board.get(coord) == Stone.EMPTY) {
             for (Direction dir : Direction.values()) {
-                if (canMoveDirection(coord, dir, color)) {
+                if (canMoveDirection(coord, dir)) {
                     return true;
                 }
             }
@@ -87,18 +64,16 @@ public class Board {
         return false;
     }
 
-    private List<Coord> computeFlipped(int[][] board, Coord coord, Color color) {
+    private List<Coord> computeFlipped(Coord coord) {
         List<Coord> flipped = new ArrayList<>();
         for (Direction dir : Direction.values()) {
-            if (!canMoveDirection(coord, dir, color)) {
+            if (!canMoveDirection(coord, dir)) {
                 continue;
             }
-            int x = coord.x + dir.dx;
-            int y = coord.y + dir.dy;
-            while (board[y][x] == color.opponentBoardValue()) { // 相手石ならば継続
-                flipped.add(Coord.valueOf(x, y)); // 反転位置を追加
-                x += dir.dx;
-                y += dir.dy;
+            Coord coord_ = coord.move(dir);
+            while (board.get(coord_) == currentColor.opponentValue()) { // 相手石ならば継続
+                flipped.add(coord_); // 反転位置を追加
+                coord_ = coord_.move(dir);
             }
         }
         return Collections.unmodifiableList(flipped);
@@ -108,69 +83,54 @@ public class Board {
      * 着手可能なリストを返す
      */
     public List<Coord> availableMoves() {
-        return availableMoves(currentColor);
-    }
-
-    private List<Coord> availableMoves(Color color) {
         List<Coord> coords = new ArrayList<>();
         for (Coord coord : Coord.values()) {
-            if (canMove(coord, color)) {
+            if (canMove(coord)) {
                 coords.add(coord);
             }
         }
         return Collections.unmodifiableList(coords);
     }
 
-    public State convertState(Coord coord) {
-        List<Coord> flipped = computeFlipped(board, coord, currentColor);
+    public int region;
 
-        State state = converter.convertState(board, flipped, coord, currentColor);
-        availableStates.put(coord, state);
-        return state;
+    public FloatBuffer convertState(Coord coord) {
+        List<Coord> flipped = computeFlipped(coord);
+        FloatBuffer buffer = converter.convertState(board, flipped, coord, currentColor);
+        region = converter.region;
+        return buffer;
     }
 
     /**
      * 指定された場所に石を打つ
      */
     public void makeMove(Coord coord) {
-        State state = availableStates.get(coord);
-        if (state == null) {
-            state = convertState(coord);
-        } else {
-            availableStates.clear();
-        }
-        converter.setState(state);
+        List<Coord> flipped = computeFlipped(coord);
+        converter.setFlipped(flipped);
 
-        board[coord.y][coord.x] = currentColor.boardValue(); // 石を打つ
-        stones[currentColor.boardValue()] += 1; // 自石を増やす
-        stones[EMPTY] -= 1; // 空白を減らす
-
-        List<Coord> flipped = state.getFlipped();
-        int flippedCount = flipped.size();
+        board.put(coord, currentColor); // 石を打つ
         for (Coord coord_ : flipped) {
-            board[coord_.y][coord_.x] = currentColor.boardValue(); // 石を反転
+            board.put(coord_, currentColor); // 石を反転
         }
-        stones[currentColor.boardValue()] += flippedCount; // 自石を増やす
-        stones[currentColor.opponentBoardValue()] -= flippedCount; // 相手石を減らす
     }
 
     /**
      * ゲームの終了を判定する
      */
-    public boolean hasCompleted() {
+    public boolean hasCompleted(boolean passed) {
         // 空白がなくなったら終了
-        // 先手・後手どちらかが完勝したら終了
         // 先手・後手両方パスで終了
-        if (stones[EMPTY] == 0 || stones[BLACK] == 0 || stones[WHITE] == 0 ||
-                (availableMoves(Color.Black).size() == 0 && availableMoves(Color.White).size() == 0)) {
+        // 先手・後手どちらかが完勝したら終了
+        if (board.getEmptyStones() == 0 || (passed && passedBefore) ||
+                board.getWhiteStones() == 0 || board.getBlackStones() == 0) {
             String winner;
-            int blackCount = stones[BLACK];
-            int whiteCount = stones[WHITE];
-            int emptyCount = stones[EMPTY];
+            int emptyCount = board.getEmptyStones();
+            int blackCount = board.getBlackStones();
+            int whiteCount = board.getWhiteStones();
             if (blackCount > whiteCount) {
                 winner = "black";
                 blackCount += emptyCount;
-            } else if (stones[BLACK] < stones[WHITE]) {
+            } else if (blackCount < whiteCount) {
                 winner = "white";
                 whiteCount += emptyCount;
             } else {
@@ -186,12 +146,11 @@ public class Board {
     /**
      * 手番を進める
      */
-    public void nextTurn() {
+    public void nextTurn(boolean passed) {
         currentColor = currentColor.opponentColor(); // 手番を変更
-        turnCount += 1;
+        turnCount++;
+        passedBefore = passed;
     }
-
-    private static final String[] STONES = {".", "@", "O"};
 
     /**
      * 盤面を表示する
@@ -199,10 +158,10 @@ public class Board {
     public void printBoard(LineBuffer buffer) {
         buffer.println();
         buffer.println("  A B C D E F G H");
-        for (int y = 1; y <= 8; y++) {
+        for (int y = 1; y <= ROWS; y++) {
             buffer.print(y);
-            for (int x = 1; x <= 8; x++) {
-                buffer.print(" " + STONES[board[y][x]]);
+            for (int x = 1; x <= COLUMNS; x++) {
+                buffer.print(" " + board.get(x, y).toString());
             }
             buffer.println();
         }
@@ -216,14 +175,15 @@ public class Board {
         String stone;
         if (currentColor == Color.Black) {
             turn = "black";
-            stone = STONES[Color.Black.boardValue()];
+            stone = Stone.BLACK.toString();
         } else {
             turn = "white";
-            stone = STONES[Color.White.boardValue()];
+            stone = Stone.WHITE.toString();
         }
         buffer.print(String.format("move count:%d ", turnCount));
         buffer.println(String.format("move:%s(%s)", turn, stone));
-        buffer.println(String.format("black:%d white:%d", stones[BLACK], stones[WHITE]));
+        buffer.println(String.format("black:%d white:%d",
+                board.getBlackStones(), board.getWhiteStones()));
         buffer.println();
     }
 
@@ -245,32 +205,73 @@ public class Board {
         return score;
     }
 
-    public enum Color {
-        Black(BLACK, "black"),
-        White(WHITE, "white");
+    public static final class Board {
 
-        private final int boardValue;
+        private Stone[] board;
+        private int[] stones;
+
+        Board() {
+            board = new Stone[COLUMNS * ROWS];
+            stones = new int[3];
+        }
+
+        void clear() {
+            for (Coord coord : Coord.values()) {
+                board[coord.index()] = Stone.EMPTY;
+            }
+            board[Coord.valueOf(4, 4).index()] = Stone.WHITE;
+            board[Coord.valueOf(5, 4).index()] = Stone.BLACK;
+            board[Coord.valueOf(4, 5).index()] = Stone.BLACK;
+            board[Coord.valueOf(5, 5).index()] = Stone.WHITE;
+            stones[Stone.EMPTY.ordinal()] = 60;
+            stones[Stone.BLACK.ordinal()] = 2;
+            stones[Stone.WHITE.ordinal()] = 2;
+        }
+
+        void put(Coord coord, Color color) {
+            if (get(coord) == Stone.EMPTY) {
+                --stones[Stone.EMPTY.ordinal()]; // 空白を減らす
+            } else {
+                --stones[color.opponentValue().ordinal()]; // 相手石を減らす
+            }
+            board[coord.index()] = color.value();
+            stones[color.value().ordinal()]++; // 自石を増やす
+        }
+
+        public int getEmptyStones() {
+            return stones[Stone.EMPTY.ordinal()];
+        }
+
+        public int getBlackStones() {
+            return stones[Stone.BLACK.ordinal()];
+        }
+
+        public int getWhiteStones() {
+            return stones[Stone.WHITE.ordinal()];
+        }
+
+        public Stone get(int x, int y) {
+            return get(Coord.valueOf(x, y));
+        }
+
+        public Stone get(Coord coord) {
+            if (coord == Coord.OUT_OF_BOUNDS) {
+                return Stone.BORDER;
+            }
+            return board[coord.index()];
+        }
+    }
+
+    public enum Stone {
+        EMPTY("."),
+        BLACK("@"),
+        WHITE("O"),
+        BORDER("#");
+
         private final String display;
 
-        Color(int boardValue, String display) {
-            this.boardValue = boardValue;
+        Stone(String display) {
             this.display = display;
-        }
-
-        /**
-         * 相手の手番を返す
-         * Black->White、White->Black
-         */
-        Color opponentColor() {
-            return this == Black ? White : Black;
-        }
-
-        public int boardValue() {
-            return boardValue;
-        }
-
-        public int opponentBoardValue() {
-            return opponentColor().boardValue();
         }
 
         @Override
@@ -279,7 +280,43 @@ public class Board {
         }
     }
 
-    public static class Coord {
+    public enum Color {
+        Black(Stone.BLACK, "black"),
+        White(Stone.WHITE, "white");
+
+        private final Stone value;
+        private final String display;
+
+        Color(Stone value, String display) {
+            this.value = value;
+            this.display = display;
+        }
+
+        /**
+         * 相手の手番を返す
+         * Black->White、White->Black
+         */
+        private Color opponentColor() {
+            return this == Black ? White : Black;
+        }
+
+        public Stone value() {
+            return value;
+        }
+
+        public Stone opponentValue() {
+            return opponentColor().value();
+        }
+
+        @Override
+        public String toString() {
+            return display;
+        }
+    }
+
+    public static final class Coord {
+
+        public static final Coord OUT_OF_BOUNDS;
 
         public final int x;
         public final int y;
@@ -294,7 +331,8 @@ public class Board {
         private static Coord[] values;
 
         static {
-            values = new Coord[8 * 8];
+            OUT_OF_BOUNDS = new Coord(-1, -1, "OB");
+            values = new Coord[COLUMNS * ROWS];
             int i = 0;
             for (int y = 1; y <= 8; y++) {
                 for (int x = 1; x <= 8; x++) {
@@ -304,21 +342,53 @@ public class Board {
             }
         }
 
+        public int index() {
+            if (this == OUT_OF_BOUNDS) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return (y - 1) * 8 + (x - 1);
+        }
+
+        public Coord move(Direction dir) {
+            if (this == OUT_OF_BOUNDS) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return valueOf(x + dir.dx, y + dir.dy);
+        }
+
+        public boolean isCircum() {
+            return x == 1 || x == 8 || y == 1 || y == 8;
+        }
+
+        public boolean idEdge() {
+            return false; // TODO
+        }
+
+        public boolean isCorner() {
+            return false; // TODO
+        }
+
         public static Coord[] values() {
             return values;
         }
 
         public static Coord valueOf(int x, int y) {
+            if (x < 1 || COLUMNS < x || y < 1 || ROWS < y) {
+                return OUT_OF_BOUNDS;
+            }
             return values[(y - 1) * 8 + (x - 1)];
         }
 
         public static Coord valueOf(int index) {
-            return values[index];
+            if (0 <= index && index < values.length) {
+                return values[index];
+            }
+            throw new ArrayIndexOutOfBoundsException();
         }
 
         public static Coord valueOf(long coord) {
             int index = Bits.indexOf(coord);
-            return values[index];
+            return valueOf(index);
         }
 
         public static Coord valueOf(String symbol) {
@@ -339,7 +409,7 @@ public class Board {
         }
     }
 
-    public static class Direction {
+    public static final class Direction {
 
         public final int dx;
         public final int dy;

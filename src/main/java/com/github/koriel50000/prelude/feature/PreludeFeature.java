@@ -1,7 +1,6 @@
 package com.github.koriel50000.prelude.feature;
 
 import com.github.koriel50000.prelude.learning.BitState;
-import com.github.koriel50000.prelude.learning.State;
 import com.github.koriel50000.prelude.reversi.*;
 import com.github.koriel50000.prelude.learning.CNNModel;
 
@@ -14,13 +13,13 @@ import java.util.Random;
 public class PreludeFeature implements Feature {
 
     private BitBoard bitBoard;
-    private Board board;
+    private Reversi reversi;
     private CNNModel model;
     private Random random;
 
-    public PreludeFeature(BitBoard bitBoard, Board board, long seed) {
+    public PreludeFeature(BitBoard bitBoard, Reversi reversi, long seed) {
         this.bitBoard = bitBoard;
-        this.board = board;
+        this.reversi = reversi;
         model = new CNNModel();
         random = new Random(seed);
     }
@@ -44,12 +43,11 @@ public class PreludeFeature implements Feature {
 
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
-            State expectedState = board.convertState(Board.Coord.valueOf(coord));
+            FloatBuffer expectedBuffer = reversi.convertState(Reversi.Coord.valueOf(coord));
             try {
                 int region = state.region;
-                int expectedRegion = expectedState.region;
+                int expectedRegion = reversi.region;
                 FloatBuffer buffer = state.getBuffer();
-                FloatBuffer expectedBuffer = expectedState.getBuffer();
                 assertEquals(expectedRegion, region, "region");
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {

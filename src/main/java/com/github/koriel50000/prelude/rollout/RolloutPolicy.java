@@ -3,7 +3,7 @@ package com.github.koriel50000.prelude.rollout;
 import com.github.koriel50000.prelude.learning.*;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
-import com.github.koriel50000.prelude.reversi.Board;
+import com.github.koriel50000.prelude.reversi.Reversi;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
 
 import java.nio.FloatBuffer;
@@ -18,14 +18,14 @@ public class RolloutPolicy {
     private CNNModel model;
     private Random random;
 
-    private Board board;
+    private Reversi reversi;
     private PreludeConverter converter;
 
     private volatile long lastCoord;
 
-    public RolloutPolicy(BitBoard bitBoard, Board board, long seed) {
+    public RolloutPolicy(BitBoard bitBoard, Reversi reversi, long seed) {
         this.bitBoard = bitBoard;
-        this.board = board;
+        this.reversi = reversi;
         model = new CNNModel();
         random = new Random(seed);
 
@@ -52,17 +52,16 @@ public class RolloutPolicy {
 
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
-            State expectedState = board.convertState(Board.Coord.valueOf(coord));
+            FloatBuffer expectedBuffer = reversi.convertState(Reversi.Coord.valueOf(coord));
             try {
                 int region = state.region;
-                int expectedRegion = expectedState.region;
+                int expectedRegion = reversi.region;
                 FloatBuffer buffer = state.getBuffer();
-                FloatBuffer expectedBuffer = expectedState.getBuffer();
-                assertEquals(expectedRegion, region, "regin");
+                assertEquals(expectedRegion, region, "region");
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {
                 LineBuffer buffer = new LineBuffer();
-                board.printBoard(buffer.offset(0));
+                reversi.printBoard(buffer.offset(0));
                 buffer.flush();
                 Bits.printMatrix(coord);
                 throw e;

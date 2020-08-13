@@ -1,14 +1,11 @@
 package com.github.koriel50000.prelude.learning;
 
+import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
 
 import java.nio.FloatBuffer;
 
 public class BitState {
-
-    private static final int ROWS = 8;
-    private static final int COLUMS = 8;
-    private static final int CHANNEL = 16;
 
     public int region;
     public long oddArea;
@@ -46,7 +43,7 @@ public class BitState {
         flippedBoard5 = 0x0000000000000000L;
         flippedBoard6 = 0x0000000000000000L;
 
-        buffer = FloatBuffer.allocate(ROWS * COLUMS * CHANNEL);
+        buffer = FloatBuffer.allocate(BitBoard.ROWS * BitBoard.COLUMNS * BitBoard.CHANNELS);
     }
 
     BitState(BitState state) {
@@ -64,7 +61,7 @@ public class BitState {
         this.flippedBoard5 = state.flippedBoard5;
         this.flippedBoard6 = state.flippedBoard6;
 
-        buffer = FloatBuffer.allocate(ROWS * COLUMS * CHANNEL);
+        buffer = FloatBuffer.allocate(BitBoard.ROWS * BitBoard.COLUMNS * BitBoard.CHANNELS);
     }
 
     public FloatBuffer getBuffer() {
@@ -74,7 +71,7 @@ public class BitState {
     /**
      * 着手をプロットする
      */
-    private void putBuffer(FloatBuffer buffer, int region, long coord, int channel) {
+    private void putBuffer(FloatBuffer buffer, long coord, int channel) {
         // FIXME
         int index = Bits.indexOf(coord);
         int x = index % 8;
@@ -133,13 +130,13 @@ public class BitState {
             default:
                 throw new IllegalArgumentException("no match: " + region);
         }
-        int pos = channel * ROWS * COLUMS + y_ * COLUMS + x_;
+        int pos = channel * BitBoard.ROWS * BitBoard.COLUMNS + y_ * BitBoard.COLUMNS + x_;
         buffer.put(pos, 1);
     }
 
     private void fillBuffer(FloatBuffer buffer, int channel) {
-        int offset = channel * ROWS * COLUMS;
-        for (int i = 0; i < ROWS * COLUMS; i++) {
+        int offset = channel * BitBoard.ROWS * BitBoard.COLUMNS;
+        for (int i = 0; i < BitBoard.ROWS * BitBoard.COLUMNS; i++) {
             buffer.put(offset + i, 1);
         }
     }
@@ -148,40 +145,40 @@ public class BitState {
         long coord_ = 0x8000000000000000L;
         for (int i = 0; i < 64; i++) {
             if ((player & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 0); // 着手前に自石
+                putBuffer(buffer, coord_, 0); // 着手前に自石
             } else if ((opponent & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 1); // 着手前に相手石
+                putBuffer(buffer, coord_, 1); // 着手前に相手石
             } else {
-                putBuffer(buffer, region, coord_, 2); // 着手前に空白
+                putBuffer(buffer, coord_, 2); // 着手前に空白
             }
             if (coord == coord_) {
-                putBuffer(buffer, region, coord_, 3); // 着手
-                putBuffer(buffer, region, coord_, 4); // 変化した石
+                putBuffer(buffer, coord_, 3); // 着手
+                putBuffer(buffer, coord_, 4); // 変化した石
             } else if ((flipped & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 4); // 変化した石
+                putBuffer(buffer, coord_, 4); // 変化した石
             }
-            if ((oddArea & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 5); // 奇数領域
-            } else if ((evenArea & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 6); // 偶数領域
-            }
+//            if ((oddArea & coord_) != 0) {
+//                putBuffer(buffer, coord_, 5); // 奇数領域
+//            } else if ((evenArea & coord_) != 0) {
+//                putBuffer(buffer, coord_, 6); // 偶数領域
+//            }
             if ((flippedBoard1 & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 10); // 反転数1
+                putBuffer(buffer, coord_, 10); // 反転数1
             }
             if ((flippedBoard2 & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 11); // 反転数2
+                putBuffer(buffer, coord_, 11); // 反転数2
             }
             if ((flippedBoard3 & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 12); // 反転数3
+                putBuffer(buffer, coord_, 12); // 反転数3
             }
             if ((flippedBoard4 & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 13); // 反転数4
+                putBuffer(buffer, coord_, 13); // 反転数4
             }
             if ((flippedBoard5 & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 14); // 反転数5
+                putBuffer(buffer, coord_, 14); // 反転数5
             }
             if ((flippedBoard6 & coord_) != 0) {
-                putBuffer(buffer, region, coord_, 15); // 反転数6
+                putBuffer(buffer, coord_, 15); // 反転数6
             }
             coord_ >>>= 1;
         }
@@ -192,8 +189,8 @@ public class BitState {
         if (emptyCount % 2 == 1) {
             fillBuffer(buffer, 8); // 空白数が奇数
         }
-        if (oddCount == 1 || oddCount % 2 == 0) {
-            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
-        }
+//        if (oddCount == 1 || oddCount % 2 == 0) {
+//            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
+//        }
     }
 }

@@ -5,22 +5,24 @@ import com.github.koriel50000.prelude.feature.PreludeFeature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
-import com.github.koriel50000.prelude.reversi.Board;
+import com.github.koriel50000.prelude.reversi.Reversi;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
+
+import static com.github.koriel50000.prelude.reversi.Reversi.*;
 
 public class PlayMain {
 
     private BitBoard bitBoard;
-    private Board board;
+    private Reversi reversi;
 
     private PlayMain() {
         bitBoard = new BitBoard();
-        board = new Board();
+        reversi = new Reversi();
     }
 
     private void oneplay() {
         long seed = System.currentTimeMillis();
-        Feature preludeFeature = new PreludeFeature(bitBoard, board, seed);
+        Feature preludeFeature = new PreludeFeature(bitBoard, reversi, seed);
         Feature randomFeature = new RandomFeature(seed);
         preludeFeature.init();
         randomFeature.init();
@@ -36,27 +38,27 @@ public class PlayMain {
      */
     private void play(Feature blackFeature, Feature whiteFeature) {
         bitBoard.clear();
-        board.clear();
+        reversi.clear();
 
         LineBuffer buffer = new LineBuffer();
 
         while (true) {
             bitBoard.printBoard(buffer.offset(0));
             bitBoard.printStatus(buffer.offset(0));
-            board.printBoard(buffer.offset(30));
-            board.printStatus(buffer.offset(30));
+            reversi.printBoard(buffer.offset(30));
+            reversi.printStatus(buffer.offset(30));
             buffer.flush();
 
             boolean passed = false;
             // Assert
             boolean blackTurn = bitBoard.currentColor == BitBoard.BLACK;
-            boolean expectedBlackTurn = board.getCurrentColor() == Board.Color.Black;
+            boolean expectedBlackTurn = reversi.getCurrentColor() == Reversi.Color.Black;
             assertEquals(expectedBlackTurn, blackTurn,  "currentColor");
 
             if (blackTurn) {
                 // Assert
                 long coords = bitBoard.availableMoves(bitBoard.blackBoard, bitBoard.whiteBoard);
-                long expectedCoords = Board.Coord.toCoords(board.availableMoves());
+                long expectedCoords = Coord.toCoords(reversi.availableMoves());
                 try {
                     assertEquals(expectedCoords, coords, "availableMoves");
                 } catch (AssertionError e) {
@@ -69,7 +71,7 @@ public class PlayMain {
                     long coord = blackFeature.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
 
                     bitBoard.makeMove(bitBoard.blackBoard, bitBoard.whiteBoard, coord);
-                    board.makeMove(Board.Coord.valueOf(coord));
+                    reversi.makeMove(Coord.valueOf(coord));
                 } else {
                     System.out.println("Pass!");
                     passed = true;
@@ -77,7 +79,7 @@ public class PlayMain {
             } else {
                 // Assert
                 long coords = bitBoard.availableMoves(bitBoard.whiteBoard, bitBoard.blackBoard);
-                long expectedCoords = Board.Coord.toCoords(board.availableMoves());
+                long expectedCoords = Reversi.Coord.toCoords(reversi.availableMoves());
                 try {
                     assertEquals(expectedCoords, coords, "availableMoves");
                 } catch (AssertionError e) {
@@ -90,7 +92,7 @@ public class PlayMain {
                     long coord = whiteFeature.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
 
                     bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
-                    board.makeMove(Board.Coord.valueOf(coord));
+                    reversi.makeMove(Reversi.Coord.valueOf(coord));
                 } else {
                     System.out.println("Pass!");
                     passed = true;
@@ -99,7 +101,7 @@ public class PlayMain {
 
             // Assert
             boolean completed = bitBoard.hasCompleted(passed);
-            boolean expectedCompleted = board.hasCompleted();
+            boolean expectedCompleted = reversi.hasCompleted(passed);
             assertEquals(expectedCompleted, completed, "hasCompleted");
 
             // ゲーム終了を判定
@@ -108,13 +110,13 @@ public class PlayMain {
             }
 
             bitBoard.nextTurn(passed);
-            board.nextTurn();
+            reversi.nextTurn(passed);
         }
 
         bitBoard.printBoard(buffer.offset(0));
         bitBoard.printScore(buffer.offset(0));
-        board.printBoard(buffer.offset(30));
-        board.printScore(buffer.offset(30));
+        reversi.printBoard(buffer.offset(30));
+        reversi.printScore(buffer.offset(30));
         buffer.flush();
     }
 

@@ -8,6 +8,10 @@ import java.util.Map;
 
 public class BitBoard {
 
+    public static final int COLUMNS = 8;
+    public static final int ROWS = 8;
+    public static final int CHANNELS = 16;
+
     public static final int EMPTY = 0;
     public static final int BLACK = 1;
     public static final int WHITE = 2;
@@ -195,7 +199,7 @@ public class BitBoard {
         int index = Bits.indexOf(coord);
         long flipped = computeFlipped(player, opponent, index);
 
-        BitState state = converter.convertState(player, opponent, flipped, coord, index);
+        BitState state = converter.convertState(player, opponent, flipped, coord, index, depth);
         availableStates.put(coord, state);
         return state;
     }

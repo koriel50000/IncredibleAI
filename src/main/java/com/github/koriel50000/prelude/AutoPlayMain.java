@@ -5,19 +5,21 @@ import com.github.koriel50000.prelude.feature.RandomFeature;
 import com.github.koriel50000.prelude.feature.ReferenceFeature;
 import com.github.koriel50000.prelude.reversi.*;
 
+import static com.github.koriel50000.prelude.reversi.Reversi.*;
+
 public class AutoPlayMain {
 
     private BitBoard bitBoard;
-    private Board board;
+    private Reversi reversi;
 
     private AutoPlayMain() {
         bitBoard = new BitBoard();
-        board = new Board();
+        reversi = new Reversi();
     }
 
     private void autoplay() {
         long seed = System.currentTimeMillis();
-        Feature referenceFeature = new ReferenceFeature(bitBoard, board, seed);
+        Feature referenceFeature = new ReferenceFeature(bitBoard, reversi, seed);
         Feature randomFeature = new RandomFeature(seed);
         referenceFeature.init();
         randomFeature.init();
@@ -83,7 +85,7 @@ public class AutoPlayMain {
      */
     private Score play(Feature blackFeature, Feature whiteFeature) {
         bitBoard.clear();
-        board.clear();
+        reversi.clear();
 
         LineBuffer buffer = new LineBuffer();
 
@@ -94,7 +96,7 @@ public class AutoPlayMain {
                 if (coords != 0) {
                     long coord = blackFeature.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
                     bitBoard.makeMove(bitBoard.blackBoard, bitBoard.whiteBoard, coord);
-                    board.makeMove(Board.Coord.valueOf(Bits.indexOf(coord)));
+                    reversi.makeMove(Coord.valueOf(coord));
                 } else {
                     passed = true;
                 }
@@ -103,25 +105,25 @@ public class AutoPlayMain {
                 if (coords != 0) {
                     long coord = whiteFeature.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
                     bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
-                    board.makeMove(Board.Coord.valueOf(Bits.indexOf(coord)));
+                    reversi.makeMove(Coord.valueOf(coord));
                 } else {
                     passed = true;
                 }
             }
 
             // ゲーム終了を判定
-            boolean dummy = board.hasCompleted();
+            boolean dummy = reversi.hasCompleted(passed);
             if (bitBoard.hasCompleted(passed)) {
                 break;
             }
             bitBoard.nextTurn(passed);
-            board.nextTurn();
+            reversi.nextTurn(passed);
         }
 
         bitBoard.printBoard(buffer.offset(0));
         bitBoard.printScore(buffer.offset(0));
-        board.printBoard(buffer.offset(30));
-        board.printScore(buffer.offset(30));
+        reversi.printBoard(buffer.offset(30));
+        reversi.printScore(buffer.offset(30));
         buffer.flush();
 
         return bitBoard.getScore();

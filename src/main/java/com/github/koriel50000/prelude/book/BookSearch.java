@@ -1,9 +1,6 @@
 package com.github.koriel50000.prelude.book;
 
 import com.github.koriel50000.prelude.reversi.BitBoard;
-import com.github.koriel50000.prelude.reversi.Board;
-
-import java.util.List;
 
 public class BookSearch {
 

@@ -195,15 +195,16 @@ public class BitConverter {
     /**
      * 石を置いたときの状態を返す
      */
-    public BitState convertState(long player, long opponent, long flipped, long coord, int index) {
+    public BitState convertState(long player, long opponent, long flipped, long coord, int index, int depth) {
         BitState state = new BitState(currentState);
         state.player = player;
         state.opponent = opponent;
         state.flipped = flipped;
         state.coord = coord;
+        state.emptyCount = depth;
         state.region = checkRegion(player, opponent, index);
 
-        enumerateOddEven(state, coord);
+        //enumerateOddEven(state, coord);
         increaseFlipped(state, flipped);
 
         state.convertBuffer();
