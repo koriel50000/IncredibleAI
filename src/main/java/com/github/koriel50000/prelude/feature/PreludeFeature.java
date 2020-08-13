@@ -47,7 +47,7 @@ public class PreludeFeature implements Feature {
             State expectedState = board.convertState(Board.Coord.valueOf(coord));
             try {
                 int region = state.region;
-                int expectedRegion = expectedState.getRegion();
+                int expectedRegion = expectedState.region;
                 FloatBuffer buffer = state.getBuffer();
                 FloatBuffer expectedBuffer = expectedState.getBuffer();
                 assertEquals(expectedRegion, region, "region");

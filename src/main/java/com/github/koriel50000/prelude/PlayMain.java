@@ -8,8 +8,6 @@ import com.github.koriel50000.prelude.reversi.Bits;
 import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
 
-import java.util.List;
-
 public class PlayMain {
 
     private BitBoard bitBoard;

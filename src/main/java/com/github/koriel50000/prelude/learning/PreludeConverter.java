@@ -9,15 +9,15 @@ import java.util.List;
 
 public class PreludeConverter {
 
-    private static final int ROWS = 8;
-    private static final int COLUMS = 8;
-    private static final int CHANNEL = 16;
+    public static final int ROWS = 8;
+    public static final int COLUMS = 8;
+    public static final int CHANNEL = 16;
 
-    private static final int AREA_EMPTY = 0;
-    private static final int AREA_ODD = 1;
-    private static final int AREA_EVEN = 2;
-    private static final int AREA_UNKNOWN = 3;
-    private static final int AREA_NOT_EMPTY = 4;
+    public static final int AREA_EMPTY = 0;
+    public static final int AREA_ODD = 1;
+    public static final int AREA_EVEN = 2;
+    public static final int AREA_UNKNOWN = 3;
+    public static final int AREA_NOT_EMPTY = 4;
 
     private static final int[][] REGION = new int[][]{
             new int[]{8, 0, 0, 0, 1, 1, 1, 10},
@@ -104,36 +104,23 @@ public class PreludeConverter {
 
     private void increaseFlipped(State state, List<Board.Coord> flipped) {
         for (Board.Coord coord : flipped) {
-            if ((state.flippedBoard1 & coord) != 0) {
-                state.flippedBoard1 ^= coord;
-                state.flippedBoard2 ^= coord;
-            } else if ((state.flippedBoard2 & coord) != 0) {
-                state.flippedBoard2 ^= coord;
-                state.flippedBoard3 ^= coord;
-            } else if ((state.flippedBoard3 & coord) != 0) {
-                state.flippedBoard3 ^= coord;
-                state.flippedBoard4 ^= coord;
-            } else if ((state.flippedBoard4 & coord) != 0) {
-                state.flippedBoard4 ^= coord;
-                state.flippedBoard5 ^= coord;
-            } else if ((state.flippedBoard5 & coord) != 0) {
-                state.flippedBoard5 ^= coord;
-                state.flippedBoard6 ^= coord;
-            }
+            int x = coord.x;
+            int y = coord.y;
+            state.reverse[y][x]++;
         }
     }
 
     /**
      * 空白を再帰的にたどって偶数領域か奇数領域かに分割する
      */
-    private int calculateOddEvenRecursive(int x, int y, int count) {
-        oddevenArea[y][x] = AREA_UNKNOWN;
+    private int calculateOddEvenRecursive(int[][] area, int x, int y, int count) {
+        area[y][x] = AREA_UNKNOWN;
         count += 1;
         for (Board.Direction dir : Board.Direction.corssValues()) {
             int x_ = x + dir.dx;
             int y_ = y + dir.dy;
-            if (oddevenArea[y_][x_] == AREA_EMPTY) {
-                count = calculateOddEvenRecursive(x_, y_, count);
+            if (area[y_][x_] == AREA_EMPTY) {
+                count = calculateOddEvenRecursive(area, x_, y_, count);
             }
         }
         return count;
@@ -142,19 +129,19 @@ public class PreludeConverter {
     /**
      * 空白を偶数領域か奇数領域かに分割する
      */
-    private int calculateOddEven(int x, int y) {
-        if (oddevenArea[y][x] == AREA_ODD || oddevenArea[y][x] == AREA_EVEN) {
+    private int calculateOddEven(int[][] area, int x, int y) {
+        if (area[y][x] == AREA_ODD || area[y][x] == AREA_EVEN) {
             return -1; // すでに分類済み
         }
 
-        int count = calculateOddEvenRecursive(x, y, 0);
+        int count = calculateOddEvenRecursive(area, x, y, 0);
         int oddeven = (count % 2 == 1) ? AREA_ODD : AREA_EVEN;
 
         for (Board.Coord move : Board.Coord.values()) {
             int x_ = move.x;
             int y_ = move.y;
-            if (oddevenArea[y_][x_] == AREA_UNKNOWN) {
-                oddevenArea[y_][x_] = oddeven;
+            if (area[y_][x_] == AREA_UNKNOWN) {
+                area[y_][x_] = oddeven;
             }
         }
         return oddeven;
@@ -163,36 +150,36 @@ public class PreludeConverter {
     /**
      * 偶数/奇数/空白の領域を集計する
      */
-    private void enumerateArea(int[][] board) {
-        earlyStage = true;
-        emptyCount = 0;
-        oddCount = 0;
-        evenCount = 0;
+    private void enumerateArea(State state, int[][] board) {
+        state.earlyTurn = true;
+        state.emptyCount = 0;
+        state.oddCount = 0;
+        state.evenCount = 0;
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 if (board[y][x] == Board.EMPTY) {
-                    oddevenArea[y][x] = AREA_EMPTY;
+                    state.oddevenArea[y][x] = AREA_EMPTY;
                 } else if (board[y][x] == Board.BORDER) {
-                    oddevenArea[y][x] = AREA_NOT_EMPTY;
+                    state.oddevenArea[y][x] = AREA_NOT_EMPTY;
                 } else {
-                    oddevenArea[y][x] = AREA_NOT_EMPTY;
+                    state.oddevenArea[y][x] = AREA_NOT_EMPTY;
                     if (x == 1 || x == 8 || y == 1 || y == 8) {
-                        earlyStage = false;
+                        state.earlyTurn = false;
                     }
                 }
             }
         }
 
-        for (Board.Coord move : Board.Coord.values()) {
-            int x = move.x;
-            int y = move.y;
-            if (oddevenArea[y][x] != AREA_NOT_EMPTY) {
-                emptyCount += 1;
-                int oddeven = calculateOddEven(x, y);
+        for (Board.Coord coord : Board.Coord.values()) {
+            int x = coord.x;
+            int y = coord.y;
+            if (state.oddevenArea[y][x] != AREA_NOT_EMPTY) {
+                state.emptyCount += 1;
+                int oddeven = calculateOddEven(state.oddevenArea, x, y);
                 if (oddeven == AREA_ODD) {
-                    oddCount += 1;
+                    state.oddCount += 1;
                 } else if (oddeven == AREA_EVEN) {
-                    evenCount += 1;
+                    state.evenCount += 1;
                 }
             }
         }
@@ -202,13 +189,10 @@ public class PreludeConverter {
      * 石を置いたときの状態を返す
      */
     public State convertState(int[][] board, List<Board.Coord> flipped, Board.Coord coord, Board.Color color) {
-        State state = new State(currentState);
-        state.board = board;
-        state.flipped = flipped;
-        state.coord = coord;
-        state.region = checkRegion(board, x, y, color);
+        State state = new State(currentState, board, flipped, coord, color);
+        state.region = checkRegion(board, coord.x, coord.y, color);
 
-        enumerateArea(state, coord);
+        enumerateArea(state, board);
         increaseFlipped(state, flipped);
 
         state.convertBuffer();

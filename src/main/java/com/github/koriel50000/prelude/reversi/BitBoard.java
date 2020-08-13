@@ -50,7 +50,7 @@ public class BitBoard {
         }
     }
 
-    private long computeFlipped(long player, long opponent, int index) {
+    public long computeFlipped(long player, long opponent, int index) {
         // http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
         //
         // OM.x = O;

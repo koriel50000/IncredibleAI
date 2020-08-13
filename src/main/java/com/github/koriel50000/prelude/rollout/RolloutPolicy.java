@@ -1,10 +1,8 @@
 package com.github.koriel50000.prelude.rollout;
 
-import com.github.koriel50000.prelude.learning.BitConverter;
-import com.github.koriel50000.prelude.learning.PreludeConverter;
+import com.github.koriel50000.prelude.learning.*;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
-import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.reversi.Board;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
 
@@ -17,7 +15,6 @@ import java.util.Random;
 public class RolloutPolicy {
 
     private BitBoard bitBoard;
-    private BitConverter bitConverter;
     private CNNModel model;
     private Random random;
 
@@ -29,7 +26,6 @@ public class RolloutPolicy {
     public RolloutPolicy(BitBoard bitBoard, Board board, long seed) {
         this.bitBoard = bitBoard;
         this.board = board;
-        bitConverter = new BitConverter();
         model = new CNNModel();
         random = new Random(seed);
 
@@ -38,7 +34,6 @@ public class RolloutPolicy {
 
     public void init() {
         model.init();
-        bitConverter.initialize();
     }
 
     public void destroy() {
@@ -54,19 +49,17 @@ public class RolloutPolicy {
         List<RolloutPolicy.Eval> evals = new ArrayList<>();
         while (coords != 0) {
             long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
-            int index = Bits.indexOf(coord);
-
-            long flipped = bitBoard.computeFlipped(player, opponent, index);
 
             // Assert
-            FloatBuffer state = bitConverter.convertState(player, opponent, flipped, coord, index);
-            FloatBuffer expectedState = converter.convertState(board, Board.Coord.valueOf(index));
-            int region = bitConverter.region;
-            int expectedRegion = converter.region;
+            BitState state = bitBoard.convertState(player, opponent, coord);
+            State expectedState = board.convertState(Board.Coord.valueOf(coord));
             try {
+                int region = state.region;
+                int expectedRegion = expectedState.region;
+                FloatBuffer buffer = state.getBuffer();
+                FloatBuffer expectedBuffer = expectedState.getBuffer();
                 assertEquals(expectedRegion, region, "regin");
-                //assertEquals(expectedState, state, "convertState");
-                state = expectedState;
+                assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {
                 LineBuffer buffer = new LineBuffer();
                 board.printBoard(buffer.offset(0));
@@ -75,7 +68,7 @@ public class RolloutPolicy {
                 throw e;
             }
 
-            float value = model.calculatePredicatedValue(state);
+            float value = model.calculatePredicatedValue(state.getBuffer());
             evals.add(new RolloutPolicy.Eval(coord, value));
 
             coords ^= coord;  // 一番右のビットを0にする

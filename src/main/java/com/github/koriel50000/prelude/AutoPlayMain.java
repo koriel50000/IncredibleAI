@@ -82,8 +82,8 @@ public class AutoPlayMain {
      * ゲームを開始する
      */
     private Score play(Feature blackFeature, Feature whiteFeature) {
-        bitBoard.initialize();
-        board.initialize();
+        bitBoard.clear();
+        board.clear();
 
         LineBuffer buffer = new LineBuffer();
 

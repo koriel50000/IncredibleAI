@@ -1,14 +1,9 @@
 package com.github.koriel50000.prelude.reversi;
 
-import com.github.koriel50000.prelude.learning.BitState;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
 import com.github.koriel50000.prelude.learning.State;
-import org.apache.commons.lang3.SerializationUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Board {
 
@@ -29,7 +24,6 @@ public class Board {
 
     public Board() {
         board = new int[10][10];
-        reverse = new int[10][10];
         stones = new int[3];
 
         converter = new PreludeConverter();
@@ -53,10 +47,6 @@ public class Board {
         board[4][5] = BLACK;
         board[5][4] = BLACK;
         board[5][5] = WHITE;
-        reverse[4][4] = 1;
-        reverse[4][5] = 1;
-        reverse[5][4] = 1;
-        reverse[5][5] = 1;
         stones[EMPTY] = 60;
         stones[BLACK] = 2;
         stones[WHITE] = 2;
@@ -70,7 +60,7 @@ public class Board {
     /**
      * 方向を指定して石が打てるかを判定する
      */
-    private boolean canMoveDirection(Color color, Coord coord, Direction dir) {
+    private boolean canMoveDirection(Coord coord, Direction dir, Color color) {
         int x = coord.x + dir.dx;
         int y = coord.y + dir.dy;
         while (board[y][x] == color.opponentBoardValue()) { // 相手石ならば継続
@@ -86,10 +76,10 @@ public class Board {
     /**
      * 指定した位置に石が打てるかを判定する
      */
-    private boolean canMove(Color color, Coord coord) {
+    private boolean canMove(Coord coord, Color color) {
         if (board[coord.y][coord.x] == EMPTY) {
             for (Direction dir : Direction.values()) {
-                if (canMoveDirection(color, coord, dir)) {
+                if (canMoveDirection(coord, dir, color)) {
                     return true;
                 }
             }
@@ -100,17 +90,18 @@ public class Board {
     private List<Coord> computeFlipped(int[][] board, Coord coord, Color color) {
         List<Coord> flipped = new ArrayList<>();
         for (Direction dir : Direction.values()) {
-            if (!canMoveDirection(color, coord, dir)) {
+            if (!canMoveDirection(coord, dir, color)) {
                 continue;
             }
-            x = coord.x + dir.dx;
-            y = coord.y + dir.dy;
+            int x = coord.x + dir.dx;
+            int y = coord.y + dir.dy;
             while (board[y][x] == color.opponentBoardValue()) { // 相手石ならば継続
-                board[y][x] = color.boardValue(); // 石を反転
+                flipped.add(Coord.valueOf(x, y)); // 反転位置を追加
                 x += dir.dx;
                 y += dir.dy;
             }
         }
+        return Collections.unmodifiableList(flipped);
     }
 
     /**
@@ -123,17 +114,17 @@ public class Board {
     private List<Coord> availableMoves(Color color) {
         List<Coord> coords = new ArrayList<>();
         for (Coord coord : Coord.values()) {
-            if (canMove(color, coord)) {
+            if (canMove(coord, color)) {
                 coords.add(coord);
             }
         }
-        return coords;
+        return Collections.unmodifiableList(coords);
     }
 
-    public State convertState(int[][] board, Coord coord, Color color) {
-        List<Coord> flipped = computeFlipped(board, coord, color);
+    public State convertState(Coord coord) {
+        List<Coord> flipped = computeFlipped(board, coord, currentColor);
 
-        State state = converter.convertState(board, flipped, coord, color);
+        State state = converter.convertState(board, flipped, coord, currentColor);
         availableStates.put(coord, state);
         return state;
     }
@@ -142,38 +133,26 @@ public class Board {
      * 指定された場所に石を打つ
      */
     public void makeMove(Coord coord) {
-        Color color = currentColor;
         State state = availableStates.get(coord);
         if (state == null) {
-            state = convertState(board, coord, color);
+            state = convertState(coord);
         } else {
             availableStates.clear();
         }
         converter.setState(state);
 
-        board[coord.y][coord.x] = color.boardValue(); // 石を打つ
-        stones[color.boardValue()] += 1; // 自石を増やす
+        board[coord.y][coord.x] = currentColor.boardValue(); // 石を打つ
+        stones[currentColor.boardValue()] += 1; // 自石を増やす
         stones[EMPTY] -= 1; // 空白を減らす
 
         List<Coord> flipped = state.getFlipped();
         int flippedCount = flipped.size();
         for (Coord coord_ : flipped) {
-            board[coord_.y][coord_.x] = color.boardValue(); // 石を反転
+            board[coord_.y][coord_.x] = currentColor.boardValue(); // 石を反転
         }
-        stones[color.boardValue()] += flippedCount; // 自石を増やす
-        stones[color.opponentBoardValue()] -= flippedCount; // 相手石を減らす
+        stones[currentColor.boardValue()] += flippedCount; // 自石を増やす
+        stones[currentColor.opponentBoardValue()] -= flippedCount; // 相手石を減らす
     }
-
-//    public Board tryMove(Coord coord) {
-//        int[][] board = SerializationUtils.clone(this.board);
-//        int[][] reverse = SerializationUtils.clone(this.reverse);
-//        int[] stones = SerializationUtils.clone(this.stones);
-//
-//        Board nextBoard = new Board(board, reverse, stones, currentColor, turnCount);
-//        nextBoard.makeMove(coord);
-//
-//        return nextBoard;
-//    }
 
     /**
      * ゲームの終了を判定する
@@ -262,20 +241,8 @@ public class Board {
         return currentColor;
     }
 
-    public int getTurnCount() {
-        return turnCount;
-    }
-
     public Score getScore() {
         return score;
-    }
-
-    public int[][] getBoard() {
-        return board;
-    }
-
-    public int[][] getReverse() {
-        return reverse;
     }
 
     public enum Color {
