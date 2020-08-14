@@ -17,14 +17,14 @@ public class PreludeConverter {
     public static final int AREA_NOT_EMPTY = 4;
 
     private static final int[] REGION = new int[]{
-            8, 0, 0, 0, 1, 1, 1, 10,
-            4, 8, 0, 0, 1, 1, 10, 5,
-            4, 4, 8, 0, 1, 10, 5, 5,
-            4, 4, 4, 8, 10, 5, 5, 5,
-            6, 6, 6, 12, 14, 7, 7, 7,
-            6, 6, 12, 2, 3, 14, 7, 7,
-            6, 12, 2, 2, 3, 3, 14, 7,
-            12, 2, 2, 2, 3, 3, 3, 14
+            8, 0, 0, 0, 2, 2, 2, 10,
+            1, 8, 0, 0, 2, 2, 10, 3,
+            1, 1, 8, 0, 2, 10, 3, 3,
+            1, 1, 1, 8, 10, 3, 3, 3,
+            5, 5, 5, 12, 14, 7, 7, 7,
+            5, 5, 12, 4, 6, 14, 7, 7,
+            5, 12, 4, 4, 6, 6, 14, 7,
+            12, 4, 4, 4, 6, 6, 6, 14
     };
 
     public int region;
@@ -189,32 +189,32 @@ public class PreludeConverter {
                 // 変換なし
                 coord_ = coord;
                 break;
-            case 1:
+            case 2:
             case 10:
                 // 左右反転
                 coord_ = coord.flipLtRt();
                 break;
-            case 2:
+            case 4:
             case 12:
                 // 上下反転
                 coord_ = coord.flipUpDn();
                 break;
-            case 3:
+            case 6:
             case 14:
                 // 上下左右反転
                 coord_ = coord.flip();
                 break;
-            case 4:
+            case 1:
             case 9:
                 // 対称反転
                 coord_ = coord.transposed();
                 break;
-            case 5:
+            case 3:
             case 11:
                 // 左右対称反転
                 coord_ = coord.flipLtRtTransposed();
                 break;
-            case 6:
+            case 5:
             case 13:
                 // 上下対称反転
                 coord_ = coord.flipUpDnTransposed();

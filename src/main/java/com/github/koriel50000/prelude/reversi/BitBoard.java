@@ -43,17 +43,6 @@ public class BitBoard {
         availableStates.clear();
     }
 
-    private int stoneColor(int x, int y) {
-        long coord = Bits.coordAt(x - 1, y - 1);
-        if ((blackBoard & coord) != 0) {
-            return BLACK;
-        } else if ((whiteBoard & coord) != 0) {
-            return WHITE;
-        } else {
-            return EMPTY;
-        }
-    }
-
     public long computeFlipped(long player, long opponent, int index) {
         // http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
         //
@@ -260,6 +249,17 @@ public class BitBoard {
     }
 
     private static final String[] STONES = { ".", "@", "O" };
+
+    private int stoneColor(int x, int y) {
+        long coord = Bits.coordAt(x - 1, y - 1);
+        if ((blackBoard & coord) != 0) {
+            return BLACK;
+        } else if ((whiteBoard & coord) != 0) {
+            return WHITE;
+        } else {
+            return EMPTY;
+        }
+    }
 
     /**
      * 盤面を表示する
