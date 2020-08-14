@@ -79,28 +79,34 @@ public class BitConverter {
     }
 
     private void increaseFlipped(BitState state, long flipped) {
+        long first = state.flippedBoard2 | state.flippedBoard3;
+        long second = state.flippedBoard4 | state.flippedBoard5;
+        long all = state.flippedBoard1 | first | second | state.flippedBoard6;
+
         while (flipped != 0) {
             long coord = Bits.getRightmostBit(flipped);
 
-            if ((state.flippedBoard1 & coord) != 0) {
+            if ((all & coord) == 0) {
+                state.flippedBoard1 ^= coord;
+            } else if ((state.flippedBoard1 & coord) != 0) {
                 state.flippedBoard1 ^= coord;
                 state.flippedBoard2 ^= coord;
-            } else if ((state.flippedBoard2 & coord) != 0) {
-                state.flippedBoard2 ^= coord;
-                state.flippedBoard3 ^= coord;
-            } else if ((state.flippedBoard3 & coord) != 0) {
-                state.flippedBoard3 ^= coord;
-                state.flippedBoard4 ^= coord;
-            } else if ((state.flippedBoard4 & coord) != 0) {
-                state.flippedBoard4 ^= coord;
-                state.flippedBoard5 ^= coord;
-            } else if ((state.flippedBoard5 & coord) != 0) {
-                state.flippedBoard5 ^= coord;
-                state.flippedBoard6 ^= coord;
-            } else if ((state.flippedBoard6 & coord) != 0) {
-                // nothing
-            } else {
-                state.flippedBoard1 ^= coord;
+            } else if ((first & coord) != 0) {
+                if ((state.flippedBoard2 & coord) != 0) {
+                    state.flippedBoard2 ^= coord;
+                    state.flippedBoard3 ^= coord;
+                } else {
+                    state.flippedBoard3 ^= coord;
+                    state.flippedBoard4 ^= coord;
+                }
+            } else if ((second & coord) != 0) {
+                if ((state.flippedBoard4 & coord) != 0) {
+                    state.flippedBoard4 ^= coord;
+                    state.flippedBoard5 ^= coord;
+                } else {
+                    state.flippedBoard5 ^= coord;
+                    state.flippedBoard6 ^= coord;
+                }
             }
 
             flipped ^= coord;

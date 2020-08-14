@@ -283,6 +283,7 @@ public class PreludeConverter {
 //            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
 //        }
 
+        buffer.clear();
         return buffer;
     }
 }
