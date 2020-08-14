@@ -193,62 +193,53 @@ public class PreludeConverter {
      * 着手をプロットする
      */
     private void putBuffer(FloatBuffer buffer, Coord coord, int channel) {
-        int x_ = coord.x;
-        int y_ = coord.y;
+        Coord coord_;
         switch (region) {
             case 0:
             case 8:
                 // 変換なし
-                x_ = x_ - 1;
-                y_ = y_ - 1;
+                coord_ = coord;
                 break;
             case 1:
             case 10:
                 // 左右反転
-                x_ = 8 - x_;
-                y_ = y_ - 1;
+                coord_ = coord.flipLtRt();
                 break;
             case 2:
             case 12:
                 // 上下反転
-                x_ = x_ - 1;
-                y_ = 8 - y_;
+                coord_ = coord.flipUpDn();
                 break;
             case 3:
             case 14:
                 // 上下左右反転
-                x_ = 8 - x_;
-                y_ = 8 - y_;
+                coord_ = coord.flip();
                 break;
             case 4:
             case 9:
                 // 対称反転
-                x_ = y_ - 1;
-                y_ = x_ - 1;
+                coord_ = coord.transposed();
                 break;
             case 5:
             case 11:
                 // 左右対称反転
-                x_ = y_ - 1;
-                y_ = 8 - x_;
+                coord_ = coord.flipLtRtTransposed();
                 break;
             case 6:
             case 13:
                 // 上下対称反転
-                x_ = 8 - y_;
-                y_ = x_ - 1;
+                coord_ = coord.flipUpDnTransposed();
                 break;
             case 7:
             case 15:
                 // 上下左右対称反転
-                x_ = 8 - y_;
-                y_ = 8 - x_;
+                coord_ = coord.flipTransposed();
                 break;
             default:
                 throw new IllegalArgumentException("no match: " + region);
         }
-        int index = channel * ROWS * COLUMNS + y_ * COLUMNS + x_;
-        buffer.put(index, 1);
+        int offset = channel * ROWS * COLUMNS;
+        buffer.put(offset + coord_.index(), 1);
     }
 
     private void fillBuffer(FloatBuffer buffer, int channel) {

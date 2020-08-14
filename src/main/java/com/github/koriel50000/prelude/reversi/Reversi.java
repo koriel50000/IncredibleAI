@@ -356,6 +356,55 @@ public class Reversi {
             return valueOf(x + dir.dx, y + dir.dy);
         }
 
+        public Coord flipUpDn() {
+            if (this == OUT_OF_BOUNDS) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return valueOf(9 - x, y);
+        }
+
+        public Coord flipLtRt() {
+            if (this == OUT_OF_BOUNDS) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return valueOf(x, 9 - y);
+        }
+
+        public Coord flip() {
+            if (this == OUT_OF_BOUNDS) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return valueOf(9 - x, 9 - y);
+        }
+
+        public Coord transposed() {
+            if (this == OUT_OF_BOUNDS) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return valueOf(y, x);
+        }
+
+        public Coord flipLtRtTransposed() {
+            if (this == OUT_OF_BOUNDS) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return valueOf(y, 9 - x);
+        }
+
+        public Coord flipUpDnTransposed() {
+            if (this == OUT_OF_BOUNDS) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return valueOf(9 - y, x);
+        }
+
+        public Coord flipTransposed() {
+            if (this == OUT_OF_BOUNDS) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return valueOf(9 - y, 9 - x);
+        }
+
         public boolean isCircum() {
             return x == 1 || x == 8 || y == 1 || y == 8;
         }
