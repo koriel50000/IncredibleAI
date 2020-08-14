@@ -92,12 +92,9 @@ public class Reversi {
         return Collections.unmodifiableList(coords);
     }
 
-    public int region;
-
     public FloatBuffer convertState(Coord coord) {
         List<Coord> flipped = computeFlipped(coord);
         FloatBuffer buffer = converter.convertState(board, flipped, coord, currentColor);
-        region = converter.region;
         return buffer;
     }
 

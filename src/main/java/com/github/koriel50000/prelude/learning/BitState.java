@@ -110,7 +110,7 @@ public class BitState {
         buffer.put(values);
     }
 
-    private void putBuffer(FloatBuffer buffer, int channel) {
+    private void fillBuffer(FloatBuffer buffer, int channel) {
         float[] values = new float[ROWS * COLUMNS];
         Arrays.fill(values, 1);
         buffer.position(channel * ROWS * COLUMNS);
@@ -123,11 +123,16 @@ public class BitState {
         putBuffer(buffer, ~(player | opponent), 2); // 着手前に空白
         putBuffer(buffer, coord, 3); // 着手
         putBuffer(buffer, flipped | coord, 4); // 変化した石
-//        if (oddArea != 0) {
-//            fillBuffer(buffer, oddArea, 5); // 奇数領域
-//        } else if (evenArea != 0) {
-//            fillBuffer(buffer, evenArea, 6); // 偶数領域
-//        }
+//        System.out.println("odd");
+//        Bits.printMatrix(oddArea);
+//        System.out.println("even");
+//        Bits.printMatrix(evenArea);
+        if (oddArea != 0) {
+            putBuffer(buffer, oddArea, 5); // 奇数領域
+        }
+        if (evenArea != 0) {
+            putBuffer(buffer, evenArea, 6); // 偶数領域
+        }
         if (flippedBoard1 != 0) {
             putBuffer(buffer, flippedBoard1,10); // 反転数1
         }
@@ -146,15 +151,16 @@ public class BitState {
         if (flippedBoard6 != 0) {
             putBuffer(buffer, flippedBoard6,15); // 反転数6
         }
-//        if (!earlyTurn) {
-//            fillBuffer(buffer, 7); // 序盤でない
-//        }
-        if (emptyCount % 2 == 1) {
-            putBuffer(buffer, 8); // 空白数が奇数
+        if (!earlyTurn) {
+            fillBuffer(buffer, 7); // 序盤でない
         }
-//        if (oddCount == 1 || oddCount % 2 == 0) {
-//            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
-//        }
+        if (emptyCount % 2 == 1) {
+            fillBuffer(buffer, 8); // 空白数が奇数
+        }
+        System.out.println(String.format("actual: odd=%d even=%d", oddCount, evenCount));
+        if (oddCount == 1 || oddCount % 2 == 0) {
+            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
+        }
         buffer.clear();
     }
 }

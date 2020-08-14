@@ -27,7 +27,7 @@ public class PreludeConverter {
             12, 4, 4, 4, 6, 6, 6, 14
     };
 
-    public int region;
+    private int region;
     private int[] oddevenArea;
     private int oddCount;
     private int evenCount;
@@ -52,10 +52,10 @@ public class PreludeConverter {
     }
 
     public void setFlipped(List<Coord> flipped, Coord coord) {
-        increaseFlipped(reverse, flipped, coord);
+        increaseFlipped(flipped, coord);
     }
 
-    private void increaseFlipped(int[] reverse, List<Coord> flipped, Coord coord) {
+    private void increaseFlipped(List<Coord> flipped, Coord coord) {
         for (Coord coord_ : flipped) {
             reverse[coord_.index()]++;
         }
@@ -244,8 +244,6 @@ public class PreludeConverter {
     public FloatBuffer convertState(Board board, List<Coord> flipped, Coord coord, Color color) {
         region = checkRegion(board, coord, color);
         enumerateArea(board);
-        int[] reverse_ = Arrays.copyOf(reverse, reverse.length);
-        increaseFlipped(reverse_, flipped, coord);
 
         FloatBuffer buffer = FloatBuffer.allocate(COLUMNS * ROWS * CHANNELS);
 
@@ -263,25 +261,26 @@ public class PreludeConverter {
             } else if (flipped.contains(coord_)) {
                 putBuffer(buffer, coord_, 4); // 変化した石
             }
-//            if (oddevenArea[coord_.index()] == AREA_ODD) {
-//                putBuffer(buffer, coord_, 5); // 奇数領域
-//            } else if (oddevenArea[coord_.index()] == AREA_EVEN) {
-//                putBuffer(buffer, coord_, 6); // 偶数領域
-//            }
-            int reverseCount = (reverse_[coord_.index()] < 6) ? reverse_[coord_.index()] : 6; // 6以上は6プレーン目とする
+            if (oddevenArea[coord_.index()] == AREA_ODD) {
+                putBuffer(buffer, coord_, 5); // 奇数領域
+            } else if (oddevenArea[coord_.index()] == AREA_EVEN) {
+                putBuffer(buffer, coord_, 6); // 偶数領域
+            }
+            int reverseCount = (reverse[coord_.index()] < 6) ? reverse[coord_.index()] : 6; // 6以上は6プレーン目とする
             if (reverseCount > 0) {
                 putBuffer(buffer, coord_, 9 + reverseCount); // 反転数
             }
         }
-//        if (!earlyTurn) {
-//            fillBuffer(buffer, 7); // 序盤でない
-//        }
+        if (!earlyTurn) {
+            fillBuffer(buffer, 7); // 序盤でない
+        }
         if (board.getEmptyStones() % 2 == 1) {
             fillBuffer(buffer, 8); // 空白数が奇数
         }
-//        if (oddCount == 1 || oddCount % 2 == 0) {
-//            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
-//        }
+        System.out.println(String.format("expected: odd=%d even=%d", oddCount, evenCount));
+        if (oddCount == 1 || oddCount % 2 == 0) {
+            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
+        }
 
         buffer.clear();
         return buffer;

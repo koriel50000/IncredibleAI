@@ -45,11 +45,8 @@ public class PreludeFeature implements Feature {
             BitState state = bitBoard.convertState(player, opponent, coord);
             FloatBuffer expectedBuffer = reversi.convertState(Reversi.Coord.valueOf(coord));
             try {
-                int region = state.region;
-                int expectedRegion = reversi.region;
-                System.out.println(String.format("region: %d %d", expectedRegion, region));
                 FloatBuffer buffer = state.getBuffer();
-                assertEquals(expectedRegion, region, "region");
+                //assertEquals(expectedRegion, region, "region");
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {
                 throw e;
@@ -93,7 +90,9 @@ public class PreludeFeature implements Feature {
             actual_.get(matrix);
             long actualMatrix = matrixTo(matrix);
             if (expectedMatrix != actualMatrix) {
+                System.out.println("expected");
                 Bits.printMatrix(expectedMatrix);
+                System.out.println("actual");
                 Bits.printMatrix(actualMatrix);
                 assert (expectedMatrix == actualMatrix) : String.format("'%s' not match. channel=%d", message, channel);
             }

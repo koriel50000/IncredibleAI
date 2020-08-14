@@ -22,6 +22,8 @@ public class BitConverter {
     }
 
     public void setState(BitState state) {
+        enumerateOddEven(state, state.coord);
+        increaseFlipped(state, state.flipped | state.coord);
         this.currentState = state;
     }
 
@@ -120,15 +122,15 @@ public class BitConverter {
         if ((area & coord) == 0) {
             return flipped;
         }
-        flipped ^= coord;
+        flipped |= coord;
         // 上
-        flipped = flippedArea(area ^ flipped, coord << 8, flipped);
-        // 下
-        flipped = flippedArea(area ^ flipped, coord >>> 8, flipped);
+        flipped = flippedArea(area & ~flipped, (coord & 0x00ffffffffffffffL) << 8, flipped);
         // 左
-        flipped = flippedArea(area ^ flipped, coord << 1 & 0xfefefefefefefefeL, flipped);
+        flipped = flippedArea(area & ~flipped, (coord & 0x7f7f7f7f7f7f7f7fL) << 1, flipped);
+        // 下
+        flipped = flippedArea(area & ~flipped, coord >>> 8, flipped);
         // 右
-        flipped = flippedArea(area ^ flipped, coord >>> 1 & 0x7f7f7f7f7f7f7f7fL, flipped);
+        flipped = flippedArea(area & ~flipped, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL, flipped);
         return flipped;
     }
 
@@ -178,25 +180,25 @@ public class BitConverter {
                 state.oddArea ^= coord;
                 --state.oddCount;
                 // 上
-                calculateArea(state, state.oddArea, coord << 8);
+                calculateArea(state, state.oddArea, (coord & 0x00ffffffffffffffL) << 8);
+                // 左
+                calculateArea(state, state.oddArea, (coord & 0x7f7f7f7f7f7f7f7fL) << 1);
                 // 下
                 calculateArea(state, state.oddArea, coord >>> 8);
-                // 左
-                calculateArea(state, state.oddArea, coord << 1 & 0xfefefefefefefefeL);
                 // 右
-                calculateArea(state, state.oddArea, coord >>> 1 & 0x7f7f7f7f7f7f7f7fL);
+                calculateArea(state, state.oddArea, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL);
             } else {
                 // 偶数領域に着手
                 state.evenArea ^= coord;
                 --state.evenCount;
                 // 上
-                calculateArea(state, state.evenArea, coord << 8);
+                calculateArea(state, state.evenArea, (coord & 0x00ffffffffffffffL) << 8);
+                // 左
+                calculateArea(state, state.evenArea, (coord << 1) & 0xfefefefefefefefeL);
                 // 下
                 calculateArea(state, state.evenArea, coord >>> 8);
-                // 左
-                calculateArea(state, state.evenArea, coord << 1 & 0xfefefefefefefefeL);
                 // 右
-                calculateArea(state, state.evenArea, coord >>> 1 & 0x7f7f7f7f7f7f7f7fL);
+                calculateArea(state, state.evenArea, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL);
             }
         }
     }
@@ -213,11 +215,7 @@ public class BitConverter {
         state.emptyCount = depth;
         state.region = checkRegion(player, opponent, index);
 
-        //enumerateOddEven(state, coord);
-        increaseFlipped(state, flipped | coord);
-
         state.convertBuffer();
-
         return state;
     }
 }

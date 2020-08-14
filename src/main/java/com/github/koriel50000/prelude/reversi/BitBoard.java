@@ -184,11 +184,18 @@ public class BitBoard {
         return mobility;
     }
 
-    public BitState convertState(long player, long opponent, long coord) {
+    private BitState convertStatePrivate(long player, long opponent, long coord) {
         int index = Bits.indexOf(coord);
         long flipped = computeFlipped(player, opponent, index);
 
-        BitState state = converter.convertState(player, opponent, flipped, coord, index, depth);
+        return converter.convertState(player, opponent, flipped, coord, index, depth);
+    }
+
+    /**
+     * 盤面の特徴量を返す
+     */
+    public BitState convertState(long player, long opponent, long coord) {
+        BitState state = convertStatePrivate(player, opponent, coord);
         availableStates.put(coord, state);
         return state;
     }
@@ -199,7 +206,7 @@ public class BitBoard {
     public void makeMove(long player, long opponent, long coord) {
         BitState state = availableStates.get(coord);
         if (state == null) {
-            state = convertState(player, opponent, coord);
+            state = convertStatePrivate(player, opponent, coord);
         } else {
             availableStates.clear();
         }

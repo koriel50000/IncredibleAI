@@ -54,10 +54,7 @@ public class RolloutPolicy {
             BitState state = bitBoard.convertState(player, opponent, coord);
             FloatBuffer expectedBuffer = reversi.convertState(Reversi.Coord.valueOf(coord));
             try {
-                int region = state.region;
-                int expectedRegion = reversi.region;
                 FloatBuffer buffer = state.getBuffer();
-                assertEquals(expectedRegion, region, "region");
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {
                 LineBuffer buffer = new LineBuffer();
