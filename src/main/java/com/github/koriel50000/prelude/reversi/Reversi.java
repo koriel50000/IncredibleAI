@@ -106,7 +106,7 @@ public class Reversi {
      */
     public void makeMove(Coord coord) {
         List<Coord> flipped = computeFlipped(coord);
-        converter.setFlipped(flipped);
+        converter.setFlipped(flipped, coord);
 
         board.put(coord, currentColor); // 石を打つ
         for (Coord coord_ : flipped) {

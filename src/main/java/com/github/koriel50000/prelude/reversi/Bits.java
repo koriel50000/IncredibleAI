@@ -155,11 +155,10 @@ public final class Bits {
         }
     }
 
-    public static void printMatrix(int[][] matrix, boolean padding) {
-        int offset = padding ? 1 : 0;
+    public static void printMatrix(int[] matrix) {
         for (int y = 0; y < 8; y++) {
             for (int x = 0; x < 8; x++) {
-                System.out.print(matrix[y + offset][x + offset]);
+                System.out.print(matrix[y * 8 + x]);
             }
             System.out.println();
         }

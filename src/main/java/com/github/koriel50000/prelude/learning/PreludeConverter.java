@@ -51,10 +51,15 @@ public class PreludeConverter {
         reverse[Coord.valueOf(5, 5).index()] = 1;
     }
 
-    public void setFlipped(List<Coord> flipped) {
-        for (Coord coord : flipped) {
-            reverse[coord.index()]++;
+    public void setFlipped(List<Coord> flipped, Coord coord) {
+        increaseFlipped(reverse, flipped, coord);
+    }
+
+    private void increaseFlipped(int[] reverse, List<Coord> flipped, Coord coord) {
+        for (Coord coord_ : flipped) {
+            reverse[coord_.index()]++;
         }
+        reverse[coord.index()]++;
     }
 
     /**
@@ -91,13 +96,10 @@ public class PreludeConverter {
             for (int x = y + 1; x < COLUMNS; x++) {
                 // 転置行列と左上から比較して、初めての違いが自石のときtrue、それ以外はfalse
                 if (tmp[y][x] != tmp[x][y]) {
-                    System.out.println(String.format("expected: %d", y * COLUMNS + x));
-                    Bits.printMatrix(tmp, false);
                     return tmp[y][x] == color.value().ordinal(); // FIXME
                 }
             }
         }
-        System.out.println(String.format("expected: %d", 64));
         return false;
     }
 
@@ -110,14 +112,6 @@ public class PreludeConverter {
             region += 1;
         }
         return region;
-    }
-
-    private int[] increaseFlipped(List<Coord> flipped) {
-        int[] reverse_ = Arrays.copyOf(reverse, reverse.length);
-        for (Coord coord : flipped) {
-            reverse_[coord.index()]++;
-        }
-        return reverse_;
     }
 
     /**
@@ -250,7 +244,8 @@ public class PreludeConverter {
     public FloatBuffer convertState(Board board, List<Coord> flipped, Coord coord, Color color) {
         region = checkRegion(board, coord, color);
         enumerateArea(board);
-        int[] reverse_ = increaseFlipped(flipped);
+        int[] reverse_ = Arrays.copyOf(reverse, reverse.length);
+        increaseFlipped(reverse_, flipped, coord);
 
         FloatBuffer buffer = FloatBuffer.allocate(COLUMNS * ROWS * CHANNELS);
 
@@ -273,10 +268,10 @@ public class PreludeConverter {
 //            } else if (oddevenArea[coord_.index()] == AREA_EVEN) {
 //                putBuffer(buffer, coord_, 6); // 偶数領域
 //            }
-//            int reverseCount = (reverse_[coord_.index()] < 6) ? reverse_[coord_.index()] : 6; // 6以上は6プレーン目とする
-//            if (reverseCount > 0) {
-//                putBuffer(buffer, coord_, 9 + reverseCount); // 反転数
-//            }
+            int reverseCount = (reverse_[coord_.index()] < 6) ? reverse_[coord_.index()] : 6; // 6以上は6プレーン目とする
+            if (reverseCount > 0) {
+                putBuffer(buffer, coord_, 9 + reverseCount); // 反転数
+            }
         }
 //        if (!earlyTurn) {
 //            fillBuffer(buffer, 7); // 序盤でない

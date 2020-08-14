@@ -64,7 +64,6 @@ public class BitConverter {
         long oDiff = (opponent_ & mask) ^ (tOpponent_ & mask);
         int pPos = Bits.countLeadingZeros(pDiff);
         int oPos = Bits.countLeadingZeros(oDiff);
-        System.out.println(String.format("actual: %d %d", pPos, oPos));
         return pPos <= oPos && (player_ & Bits.coordAt(pPos)) != 0;
     }
 
@@ -98,6 +97,10 @@ public class BitConverter {
             } else if ((state.flippedBoard5 & coord) != 0) {
                 state.flippedBoard5 ^= coord;
                 state.flippedBoard6 ^= coord;
+            } else if ((state.flippedBoard6 & coord) != 0) {
+                // nothing
+            } else {
+                state.flippedBoard1 ^= coord;
             }
 
             flipped ^= coord;
@@ -205,7 +208,7 @@ public class BitConverter {
         state.region = checkRegion(player, opponent, index);
 
         //enumerateOddEven(state, coord);
-        increaseFlipped(state, flipped);
+        increaseFlipped(state, flipped | coord);
 
         state.convertBuffer();
 

@@ -162,24 +162,24 @@ public class BitState {
 //            } else if ((evenArea & coord_) != 0) {
 //                putBuffer(buffer, coord_, 6); // 偶数領域
 //            }
-//            if ((flippedBoard1 & coord_) != 0) {
-//                putBuffer(buffer, coord_, 10); // 反転数1
-//            }
-//            if ((flippedBoard2 & coord_) != 0) {
-//                putBuffer(buffer, coord_, 11); // 反転数2
-//            }
-//            if ((flippedBoard3 & coord_) != 0) {
-//                putBuffer(buffer, coord_, 12); // 反転数3
-//            }
-//            if ((flippedBoard4 & coord_) != 0) {
-//                putBuffer(buffer, coord_, 13); // 反転数4
-//            }
-//            if ((flippedBoard5 & coord_) != 0) {
-//                putBuffer(buffer, coord_, 14); // 反転数5
-//            }
-//            if ((flippedBoard6 & coord_) != 0) {
-//                putBuffer(buffer, coord_, 15); // 反転数6
-//            }
+            if ((flippedBoard1 & coord_) != 0) {
+                putBuffer(buffer, coord_, 10); // 反転数1
+            }
+            if ((flippedBoard2 & coord_) != 0) {
+                putBuffer(buffer, coord_, 11); // 反転数2
+            }
+            if ((flippedBoard3 & coord_) != 0) {
+                putBuffer(buffer, coord_, 12); // 反転数3
+            }
+            if ((flippedBoard4 & coord_) != 0) {
+                putBuffer(buffer, coord_, 13); // 反転数4
+            }
+            if ((flippedBoard5 & coord_) != 0) {
+                putBuffer(buffer, coord_, 14); // 反転数5
+            }
+            if ((flippedBoard6 & coord_) != 0) {
+                putBuffer(buffer, coord_, 15); // 反転数6
+            }
             coord_ >>>= 1;
         }
 //        if (!earlyTurn) {

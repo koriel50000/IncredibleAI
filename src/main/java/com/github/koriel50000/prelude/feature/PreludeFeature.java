@@ -40,7 +40,6 @@ public class PreludeFeature implements Feature {
 
         while (coords != 0) {
             long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
-            Bits.printMatrix(coord);
 
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
