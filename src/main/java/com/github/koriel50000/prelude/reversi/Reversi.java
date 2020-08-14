@@ -360,14 +360,14 @@ public class Reversi {
             if (this == OUT_OF_BOUNDS) {
                 throw new ArrayIndexOutOfBoundsException();
             }
-            return valueOf(9 - x, y);
+            return valueOf(x, 9 - y);
         }
 
         public Coord flipLtRt() {
             if (this == OUT_OF_BOUNDS) {
                 throw new ArrayIndexOutOfBoundsException();
             }
-            return valueOf(x, 9 - y);
+            return valueOf(9 - x, y);
         }
 
         public Coord flip() {

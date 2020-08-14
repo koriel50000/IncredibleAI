@@ -40,6 +40,7 @@ public class PreludeFeature implements Feature {
 
         while (coords != 0) {
             long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
+            Bits.printMatrix(coord);
 
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
@@ -47,6 +48,7 @@ public class PreludeFeature implements Feature {
             try {
                 int region = state.region;
                 int expectedRegion = reversi.region;
+                System.out.println(String.format("region: %d %d", expectedRegion, region));
                 FloatBuffer buffer = state.getBuffer();
                 assertEquals(expectedRegion, region, "region");
                 assertEquals(expectedBuffer, buffer, "buffer");

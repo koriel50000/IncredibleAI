@@ -63,33 +63,28 @@ public class PreludeConverter {
     private boolean isSymmetric(int diagonal, Board board, Color color) {
         int[][] tmp = new int[ROWS][COLUMNS];
         for (Coord coord : Coord.values()) {
-            int x_ = coord.x;
-            int y_ = coord.y;
+            Coord coord_;
             switch (diagonal) {
                 case 8:
                     // 変換なし
-                    x_ = x_;
-                    y_ = y_;
+                    coord_ = coord;
                     break;
                 case 10:
                     // 左右反転
-                    x_ = 7 - x_;
-                    y_ = y_;
+                    coord_ = coord.flipLtRt();
                     break;
                 case 12:
                     // 上下反転
-                    x_ = x_;
-                    y_ = 7 - y_;
+                    coord_ = coord.flipUpDn();
                     break;
                 case 14:
                     // 上下左右反転
-                    x_ = 7 - x_;
-                    y_ = 7 - y_;
+                    coord_ = coord.flip();
                     break;
                 default:
                     throw new IllegalArgumentException("no match: " + diagonal);
             }
-            tmp[y_][x_] = board.get(coord).ordinal();
+            tmp[coord_.y - 1][coord_.x - 1] = board.get(coord).ordinal();
         }
 
         for (int y = 0; y < ROWS; y++) {
@@ -278,14 +273,14 @@ public class PreludeConverter {
 //            } else if (oddevenArea[coord_.index()] == AREA_EVEN) {
 //                putBuffer(buffer, coord_, 6); // 偶数領域
 //            }
-            int reverseCount = (reverse_[coord_.index()] < 6) ? reverse_[coord_.index()] : 6; // 6以上は6プレーン目とする
-            if (reverseCount > 0) {
-                putBuffer(buffer, coord_, 9 + reverseCount); // 反転数
-            }
+//            int reverseCount = (reverse_[coord_.index()] < 6) ? reverse_[coord_.index()] : 6; // 6以上は6プレーン目とする
+//            if (reverseCount > 0) {
+//                putBuffer(buffer, coord_, 9 + reverseCount); // 反転数
+//            }
         }
-        if (!earlyTurn) {
-            fillBuffer(buffer, 7); // 序盤でない
-        }
+//        if (!earlyTurn) {
+//            fillBuffer(buffer, 7); // 序盤でない
+//        }
         if (board.getEmptyStones() % 2 == 1) {
             fillBuffer(buffer, 8); // 空白数が奇数
         }

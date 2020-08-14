@@ -58,16 +58,27 @@ public class ReversiTest {
         }
 
         Direction[] dirs = Direction.values();
-        Coord coord = Coord.valueOf(1, 1);
+        Coord coord1 = Coord.valueOf(1, 1);
         assertAll(
-                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord.move(dirs[0])),
-                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord.move(dirs[1])),
-                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord.move(dirs[2])),
-                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord.move(dirs[3])),
-                () -> assertEquals(Coord.valueOf(2, 1), coord.move(dirs[4])),
-                () -> assertEquals(Coord.valueOf(2, 2), coord.move(dirs[5])),
-                () -> assertEquals(Coord.valueOf(1, 2), coord.move(dirs[6])),
-                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord.move(dirs[7]))
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[0])),
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[1])),
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[2])),
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[3])),
+                () -> assertEquals(Coord.valueOf(2, 1), coord1.move(dirs[4])),
+                () -> assertEquals(Coord.valueOf(2, 2), coord1.move(dirs[5])),
+                () -> assertEquals(Coord.valueOf(1, 2), coord1.move(dirs[6])),
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[7]))
+        );
+
+        Coord coord2 = Coord.valueOf(1, 2);
+        assertAll(
+                () -> assertEquals(Coord.valueOf(8, 2), coord2.flipLtRt()),
+                () -> assertEquals(Coord.valueOf(1, 7), coord2.flipUpDn()),
+                () -> assertEquals(Coord.valueOf(8, 7), coord2.flip()),
+                () -> assertEquals(Coord.valueOf(2, 1), coord2.transposed()),
+                () -> assertEquals(Coord.valueOf(2, 8), coord2.flipLtRtTransposed()),
+                () -> assertEquals(Coord.valueOf(7, 1), coord2.flipUpDnTransposed()),
+                () -> assertEquals(Coord.valueOf(7, 8), coord2.flipTransposed())
         );
     }
 
