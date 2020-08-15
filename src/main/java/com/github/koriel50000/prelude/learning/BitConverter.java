@@ -208,12 +208,12 @@ public class BitConverter {
      */
     public BitState convertState(long player, long opponent, long flipped, long coord, int index, int depth) {
         BitState state = new BitState(currentState);
+        state.region = checkRegion(player, opponent, index);
+        state.emptyCount = depth;
         state.player = player;
         state.opponent = opponent;
         state.flipped = flipped;
         state.coord = coord;
-        state.emptyCount = depth;
-        state.region = checkRegion(player, opponent, index);
 
         state.convertBuffer();
         return state;

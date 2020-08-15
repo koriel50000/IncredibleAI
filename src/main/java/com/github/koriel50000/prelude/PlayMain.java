@@ -5,10 +5,11 @@ import com.github.koriel50000.prelude.feature.PreludeFeature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
-import com.github.koriel50000.prelude.reversi.Reversi;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
+import com.github.koriel50000.prelude.reversi.Reversi;
 
-import static com.github.koriel50000.prelude.reversi.Reversi.*;
+import static com.github.koriel50000.prelude.reversi.Reversi.Color;
+import static com.github.koriel50000.prelude.reversi.Reversi.Coord;
 
 public class PlayMain {
 
@@ -52,8 +53,8 @@ public class PlayMain {
             boolean passed = false;
             // Assert
             boolean blackTurn = bitBoard.currentColor == BitBoard.BLACK;
-            boolean expectedBlackTurn = reversi.getCurrentColor() == Reversi.Color.Black;
-            assertEquals(expectedBlackTurn, blackTurn,  "currentColor");
+            boolean expectedBlackTurn = reversi.getCurrentColor() == Color.Black;
+            assertEquals(expectedBlackTurn, blackTurn, "currentColor");
 
             if (blackTurn) {
                 // Assert
@@ -79,7 +80,7 @@ public class PlayMain {
             } else {
                 // Assert
                 long coords = bitBoard.availableMoves(bitBoard.whiteBoard, bitBoard.blackBoard);
-                long expectedCoords = Reversi.Coord.toCoords(reversi.availableMoves());
+                long expectedCoords = Coord.toCoords(reversi.availableMoves());
                 try {
                     assertEquals(expectedCoords, coords, "availableMoves");
                 } catch (AssertionError e) {
@@ -92,7 +93,7 @@ public class PlayMain {
                     long coord = whiteFeature.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
 
                     bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
-                    reversi.makeMove(Reversi.Coord.valueOf(coord));
+                    reversi.makeMove(Coord.valueOf(coord));
                 } else {
                     System.out.println("Pass!");
                     passed = true;

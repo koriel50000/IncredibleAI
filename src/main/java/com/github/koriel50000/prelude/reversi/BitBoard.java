@@ -32,6 +32,9 @@ public class BitBoard {
         availableStates = new HashMap<>();
     }
 
+    /**
+     * 盤面を初期化する
+     */
     public void clear() {
         blackBoard = 0x0000000810000000L;
         whiteBoard = 0x0000001008000000L;
@@ -43,6 +46,9 @@ public class BitBoard {
         availableStates.clear();
     }
 
+    /**
+     * 反転する石の位置を返す
+     */
     public long computeFlipped(long player, long opponent, int index) {
         // http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
         //
@@ -106,7 +112,7 @@ public class BitBoard {
     }
 
     /**
-     * 着手可能なリストを返す
+     * 着手可能な石の位置を返す
      */
     public long availableMoves(long player, long opponent) {
         long emptyBoard = ~(player | opponent);
@@ -201,7 +207,7 @@ public class BitBoard {
     }
 
     /**
-     * 指定された場所に石を打つ
+     * 指定された位置に石を打つ
      */
     public void makeMove(long player, long opponent, long coord) {
         BitState state = availableStates.get(coord);

@@ -117,16 +117,12 @@ public class BitState {
         buffer.put(values);
     }
 
-    public void convertBuffer() {
+    void convertBuffer() {
         putBuffer(buffer, player, 0); // 着手前に自石
         putBuffer(buffer, opponent, 1); // 着手前に相手石
         putBuffer(buffer, ~(player | opponent), 2); // 着手前に空白
         putBuffer(buffer, coord, 3); // 着手
         putBuffer(buffer, flipped | coord, 4); // 変化した石
-//        System.out.println("odd");
-//        Bits.printMatrix(oddArea);
-//        System.out.println("even");
-//        Bits.printMatrix(evenArea);
         if (oddArea != 0) {
             putBuffer(buffer, oddArea, 5); // 奇数領域
         }

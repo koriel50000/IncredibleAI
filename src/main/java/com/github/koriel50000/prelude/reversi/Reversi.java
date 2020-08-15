@@ -3,7 +3,10 @@ package com.github.koriel50000.prelude.reversi;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
 
 import java.nio.FloatBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
 
 public class Reversi {
 
@@ -64,6 +67,9 @@ public class Reversi {
         return false;
     }
 
+    /**
+     * 反転する石の位置を返す
+     */
     private List<Coord> computeFlipped(Coord coord) {
         List<Coord> flipped = new ArrayList<>();
         for (Direction dir : Direction.values()) {
@@ -80,7 +86,7 @@ public class Reversi {
     }
 
     /**
-     * 着手可能なリストを返す
+     * 着手可能な石の位置を返す
      */
     public List<Coord> availableMoves() {
         List<Coord> coords = new ArrayList<>();
@@ -92,6 +98,9 @@ public class Reversi {
         return Collections.unmodifiableList(coords);
     }
 
+    /**
+     * 指定した着手から盤面の特徴量に変換する
+     */
     public FloatBuffer convertState(Coord coord) {
         List<Coord> flipped = computeFlipped(coord);
         FloatBuffer buffer = converter.convertState(board, flipped, coord, currentColor);
@@ -99,11 +108,11 @@ public class Reversi {
     }
 
     /**
-     * 指定された場所に石を打つ
+     * 指定された位置に石を打つ
      */
     public void makeMove(Coord coord) {
         List<Coord> flipped = computeFlipped(coord);
-        converter.setFlipped(flipped, coord);
+        converter.increaseFlipped(flipped, coord);
 
         board.put(coord, currentColor); // 石を打つ
         for (Coord coord_ : flipped) {
@@ -256,6 +265,29 @@ public class Reversi {
                 return Stone.BORDER;
             }
             return board[coord.index()];
+        }
+
+        private Board flipBoard(Function<Coord, Coord> flip) {
+            Board newBoard = new Board();
+            for (Coord coord : Coord.values()) {
+                newBoard.board[coord.index()] = board[flip.apply(coord).index()];
+            }
+            for (int i = 0; i < stones.length; i++) {
+                newBoard.stones[i] = stones[i];
+            }
+            return newBoard;
+        }
+
+        public Board flipUpDn() {
+            return flipBoard((coord) -> coord.flipUpDn());
+        }
+
+        public Board flipLtRt() {
+            return flipBoard((coord) -> coord.flipLtRt());
+        }
+
+        public Board flip() {
+            return flipBoard((coord) -> coord.flip());
         }
     }
 

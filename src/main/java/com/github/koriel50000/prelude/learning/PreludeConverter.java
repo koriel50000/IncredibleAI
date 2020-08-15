@@ -1,20 +1,17 @@
 package com.github.koriel50000.prelude.learning;
 
-import com.github.koriel50000.prelude.reversi.Bits;
-
 import java.nio.FloatBuffer;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.github.koriel50000.prelude.reversi.Reversi.*;
 
 public class PreludeConverter {
 
-    public static final int AREA_EMPTY = 0;
-    public static final int AREA_ODD = 1;
-    public static final int AREA_EVEN = 2;
-    public static final int AREA_UNKNOWN = 3;
-    public static final int AREA_NOT_EMPTY = 4;
+    private static final int AREA_EMPTY = 0;
+    private static final int AREA_ODD = 1;
+    private static final int AREA_EVEN = 2;
+    private static final int AREA_UNKNOWN = 3;
+    private static final int AREA_NOT_EMPTY = 4;
 
     private static final int[] REGION = new int[]{
             8, 0, 0, 0, 2, 2, 2, 10,
@@ -35,13 +32,16 @@ public class PreludeConverter {
 
     private int[] reverse;
 
+    public PreludeConverter() {
+        oddevenArea = new int[COLUMNS * ROWS];
+        reverse = new int[COLUMNS * ROWS];
+    }
+
     public void clear() {
         region = 0;
-        oddevenArea = new int[COLUMNS * ROWS];
         oddCount = 0;
         evenCount = 1;
         earlyTurn = true;
-        reverse = new int[COLUMNS * ROWS];
         for (Coord coord : Coord.values()) {
             reverse[coord.index()] = 0;
         }
@@ -51,52 +51,37 @@ public class PreludeConverter {
         reverse[Coord.valueOf(5, 5).index()] = 1;
     }
 
-    public void setFlipped(List<Coord> flipped, Coord coord) {
-        increaseFlipped(flipped, coord);
-    }
-
-    private void increaseFlipped(List<Coord> flipped, Coord coord) {
-        for (Coord coord_ : flipped) {
-            reverse[coord_.index()]++;
-        }
-        reverse[coord.index()]++;
-    }
-
     /**
      * 対角位置の対称変換が必要か
      */
     private boolean isSymmetric(int diagonal, Board board, Color color) {
-        int[][] tmp = new int[ROWS][COLUMNS];
-        for (Coord coord : Coord.values()) {
-            Coord coord_;
-            switch (diagonal) {
-                case 8:
-                    // 変換なし
-                    coord_ = coord;
-                    break;
-                case 10:
-                    // 左右反転
-                    coord_ = coord.flipLtRt();
-                    break;
-                case 12:
-                    // 上下反転
-                    coord_ = coord.flipUpDn();
-                    break;
-                case 14:
-                    // 上下左右反転
-                    coord_ = coord.flip();
-                    break;
-                default:
-                    throw new IllegalArgumentException("no match: " + diagonal);
-            }
-            tmp[coord_.y - 1][coord_.x - 1] = board.get(coord).ordinal();
+        Board board_;
+        switch (diagonal) {
+            case 8:
+                // 変換なし
+                board_ = board;
+                break;
+            case 10:
+                // 左右反転
+                board_ = board.flipLtRt();
+                break;
+            case 12:
+                // 上下反転
+                board_ = board.flipUpDn();
+                break;
+            case 14:
+                // 上下左右反転
+                board_ = board.flip();
+                break;
+            default:
+                throw new IllegalArgumentException("no match: " + diagonal);
         }
 
         for (int y = 0; y < ROWS; y++) {
             for (int x = y + 1; x < COLUMNS; x++) {
                 // 転置行列と左上から比較して、初めての違いが自石のときtrue、それ以外はfalse
-                if (tmp[y][x] != tmp[x][y]) {
-                    return tmp[y][x] == color.value().ordinal(); // FIXME
+                if (board_.get(x, y) != board_.get(y, x)) {
+                    return board_.get(x, y) == color.value();
                 }
             }
         }
@@ -106,12 +91,11 @@ public class PreludeConverter {
     /**
      * 領域を判定する
      */
-    private int checkRegion(Board board, Coord coord, Color color) {
-        int region = REGION[coord.index()];
+    private void checkRegion(Board board, Coord coord, Color color) {
+        region = REGION[coord.index()];
         if (region >= 8 && isSymmetric(region, board, color)) {
             region += 1;
         }
-        return region;
     }
 
     /**
@@ -242,7 +226,7 @@ public class PreludeConverter {
      * 石を置いたときの状態を返す
      */
     public FloatBuffer convertState(Board board, List<Coord> flipped, Coord coord, Color color) {
-        region = checkRegion(board, coord, color);
+        checkRegion(board, coord, color);
         enumerateArea(board);
 
         FloatBuffer buffer = FloatBuffer.allocate(COLUMNS * ROWS * CHANNELS);
@@ -284,5 +268,15 @@ public class PreludeConverter {
 
         buffer.clear();
         return buffer;
+    }
+
+    /**
+     * 反転数を加算する
+     */
+    public void increaseFlipped(List<Coord> flipped, Coord coord) {
+        for (Coord coord_ : flipped) {
+            reverse[coord_.index()]++;
+        }
+        reverse[coord.index()]++;
     }
 }
