@@ -93,6 +93,7 @@ public class PlayMain {
                     long coord = whiteFeature.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
 
                     bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
+                    reversi.convertState(Coord.valueOf(coord));
                     reversi.makeMove(Coord.valueOf(coord));
                 } else {
                     System.out.println("Pass!");

@@ -119,25 +119,26 @@ public class BitConverter {
      * 領域を再帰的にたどって反転領域を返す
      */
     private long flippedArea(long area, long coord, long flipped) {
+        area &= ~flipped;
         if ((area & coord) == 0) {
             return flipped;
         }
         flipped |= coord;
         // 上
-        flipped = flippedArea(area & ~flipped, (coord & 0x00ffffffffffffffL) << 8, flipped);
-        // 左
-        flipped = flippedArea(area & ~flipped, (coord & 0x7f7f7f7f7f7f7f7fL) << 1, flipped);
+        flipped = flippedArea(area, coord << 8, flipped);
         // 下
-        flipped = flippedArea(area & ~flipped, coord >>> 8, flipped);
+        flipped = flippedArea(area, coord >>> 8, flipped);
+        // 左
+        flipped = flippedArea(area, (coord & 0x7f7f7f7f7f7f7f7fL) << 1, flipped);
         // 右
-        flipped = flippedArea(area & ~flipped, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL, flipped);
+        flipped = flippedArea(area, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL, flipped);
         return flipped;
     }
 
     /**
      * 偶数領域・奇数領域を集計する
      */
-    private void calculateArea(BitState state, long area, long coord) {
+    private long calculateArea(BitState state, long area, long coord) {
         if ((area & coord) != 0) {
             long flipped = flippedArea(area, coord, 0L);
             int oddeven = Bits.populationCount(flipped);
@@ -150,7 +151,9 @@ public class BitConverter {
                 state.evenArea &= ~flipped;
                 state.oddCount++;
             }
+            area ^= flipped;
         }
+        return area;
     }
 
     /**
@@ -180,25 +183,27 @@ public class BitConverter {
                 state.oddArea ^= coord;
                 --state.oddCount;
                 // 上
-                calculateArea(state, state.oddArea, (coord & 0x00ffffffffffffffL) << 8);
-                // 左
-                calculateArea(state, state.oddArea, (coord & 0x7f7f7f7f7f7f7f7fL) << 1);
+                long area = state.oddArea;
+                area = calculateArea(state, area, coord << 8);
                 // 下
-                calculateArea(state, state.oddArea, coord >>> 8);
+                area = calculateArea(state, area, coord >>> 8);
+                // 左
+                area = calculateArea(state, area, (coord & 0x7f7f7f7f7f7f7f7fL) << 1);
                 // 右
-                calculateArea(state, state.oddArea, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL);
+                calculateArea(state, area, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL);
             } else {
                 // 偶数領域に着手
                 state.evenArea ^= coord;
                 --state.evenCount;
                 // 上
-                calculateArea(state, state.evenArea, (coord & 0x00ffffffffffffffL) << 8);
-                // 左
-                calculateArea(state, state.evenArea, (coord << 1) & 0xfefefefefefefefeL);
+                long area = state.evenArea;
+                area = calculateArea(state, area, coord << 8);
                 // 下
-                calculateArea(state, state.evenArea, coord >>> 8);
+                area = calculateArea(state, area, coord >>> 8);
+                // 左
+                area = calculateArea(state, area, (coord & 0x7f7f7f7f7f7f7f7fL) << 1);
                 // 右
-                calculateArea(state, state.evenArea, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL);
+                calculateArea(state, area, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL);
             }
         }
     }

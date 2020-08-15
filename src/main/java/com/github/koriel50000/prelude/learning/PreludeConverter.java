@@ -24,7 +24,7 @@ public class PreludeConverter {
             12, 4, 4, 4, 6, 6, 6, 14
     };
 
-    private int region;
+    public int region;
     private int[] oddevenArea;
     private int oddCount;
     private int evenCount;

@@ -98,12 +98,15 @@ public class Reversi {
         return Collections.unmodifiableList(coords);
     }
 
+    public int region;
+
     /**
      * 指定した着手から盤面の特徴量に変換する
      */
     public FloatBuffer convertState(Coord coord) {
         List<Coord> flipped = computeFlipped(coord);
         FloatBuffer buffer = converter.convertState(board, flipped, coord, currentColor);
+        region = converter.region;
         return buffer;
     }
 

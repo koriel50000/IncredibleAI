@@ -43,10 +43,12 @@ public class PreludeFeature implements Feature {
 
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
+            int region = state.region;
             FloatBuffer expectedBuffer = reversi.convertState(Reversi.Coord.valueOf(coord));
+            int expectedRegion = reversi.region;
             try {
                 FloatBuffer buffer = state.getBuffer();
-                //assertEquals(expectedRegion, region, "region");
+                assertEquals(expectedRegion, region, "region");
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {
                 throw e;
