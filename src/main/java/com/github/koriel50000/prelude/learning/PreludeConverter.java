@@ -261,7 +261,6 @@ public class PreludeConverter {
         if (board.getEmptyStones() % 2 == 1) {
             fillBuffer(buffer, 8); // 空白数が奇数
         }
-        System.out.println(String.format("expected: odd=%d even=%d", oddCount, evenCount));
         if (oddCount == 1 || oddCount % 2 == 0) {
             fillBuffer(buffer, 9); // 奇数領域が1個または偶数
         }
