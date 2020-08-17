@@ -2,12 +2,19 @@ package com.github.koriel50000.prelude.reversi;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * Bit Twiddling
+ *
+ * @see http://www012.upp.so-net.ne.jp/eshibata/pdfs/tiger.pdf
+ */
 public final class Bits {
 
     private static int[] indexTable;
 
     /**
      * 最上位ビットのインデックスを0として、ビット位置のハッシュテーブルを作成する
+     *
+     * @see https://koonies.hatenadiary.org/entry/20090708/nlz3#f-0bb3099a
      */
     static {
         indexTable = new int[64];
@@ -21,6 +28,8 @@ public final class Bits {
 
     /**
      * 立っている("1"の)ビットの数を返す
+     *
+     * @see Long#bitCount(long)
      */
     public static int populationCount(long bits) {
         bits = (bits & 0x5555555555555555L) + ((bits >>> 1) & 0x5555555555555555L);
@@ -34,6 +43,8 @@ public final class Bits {
 
     /**
      * ビット列の並び順を反転して返す
+     *
+     * @see Long#reverse(long)
      */
     public static long reverseBits(long bits) {
         bits = bits >>> 32 | bits << 32;
@@ -47,6 +58,8 @@ public final class Bits {
 
     /**
      * もっとも右端の立っている("1"の)ビット列を返す
+     *
+     * @see Long#lowestOneBit(long)
      */
     public static long getRightmostBit(long bits) {
         return bits & -bits;
@@ -54,6 +67,8 @@ public final class Bits {
 
     /**
      * 最上位ビット(MSB: Most Significant Bit)から連続する"0"のビットの数を返す
+     *
+     * @see Long#numberOfLeadingZeros(long)
      */
     public static int countLeadingZeros(long bits) {
         bits |= bits >>> 1;
@@ -67,6 +82,8 @@ public final class Bits {
 
     /**
      * 最下位ビット(LSB: Least Significant Bit)から連続する"0"のビットの数を返す
+     *
+     * @see Long#numberOfTrailingZeros(long)
      */
     public static int countTrailingZeros(long bits) {
         if (bits == 0) {
