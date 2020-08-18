@@ -105,4 +105,53 @@ public class ReversiTest {
                 () -> assertEquals(1, dirs[7].dy)
         );
     }
+
+    @Test
+    void testBoard() {
+        Board board = new Board();
+        board.clear();
+        board.put(Coord.valueOf(3,2), Color.Black);
+
+        Board actualLtRt = board.flipLtRt();
+        assertAll(
+                () -> assertEquals(3, actualLtRt.getBlackStones()),
+                () -> assertEquals(2, actualLtRt.getWhiteStones()),
+                () -> assertEquals(59, actualLtRt.getEmptyStones())
+        );
+        assertAll(
+                () -> assertEquals(Stone.WHITE, actualLtRt.get(5,4)),
+                () -> assertEquals(Stone.BLACK, actualLtRt.get(4,4)),
+                () -> assertEquals(Stone.BLACK, actualLtRt.get(5,5)),
+                () -> assertEquals(Stone.WHITE, actualLtRt.get(5,4)),
+                () -> assertEquals(Stone.BLACK, actualLtRt.get(6,2))
+        );
+
+        Board actualUpDn = board.flipUpDn();
+        assertAll(
+                () -> assertEquals(3, actualUpDn.getBlackStones()),
+                () -> assertEquals(2, actualUpDn.getWhiteStones()),
+                () -> assertEquals(59, actualUpDn.getEmptyStones())
+        );
+        assertAll(
+                () -> assertEquals(Stone.WHITE, actualUpDn.get(4,5)),
+                () -> assertEquals(Stone.BLACK, actualUpDn.get(5,5)),
+                () -> assertEquals(Stone.BLACK, actualUpDn.get(4,4)),
+                () -> assertEquals(Stone.WHITE, actualUpDn.get(5,4)),
+                () -> assertEquals(Stone.BLACK, actualUpDn.get(3,7))
+        );
+
+        Board actual = board.flip();
+        assertAll(
+                () -> assertEquals(3, actual.getBlackStones()),
+                () -> assertEquals(2, actual.getWhiteStones()),
+                () -> assertEquals(59, actual.getEmptyStones())
+        );
+        assertAll(
+                () -> assertEquals(Stone.WHITE, actual.get(5,5)),
+                () -> assertEquals(Stone.BLACK, actual.get(5,4)),
+                () -> assertEquals(Stone.BLACK, actual.get(4,5)),
+                () -> assertEquals(Stone.WHITE, actual.get(4,4)),
+                () -> assertEquals(Stone.BLACK, actual.get(6,7))
+        );
+    }
 }
