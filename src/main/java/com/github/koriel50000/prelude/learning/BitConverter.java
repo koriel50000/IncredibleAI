@@ -196,7 +196,7 @@ public class BitConverter {
 
         // 上
         int pos = (index - 8) & 0x3f;
-        long mask = maskDnRt >>> pos | maskUpLt << (63 - pos);
+        long mask = maskDnRt >>> pos | maskUpLt << (63 - pos); // FIXME 端を越えたときの考慮は？
         long coord_ = coord << 8;
         if ((emptyArea & mask) == coord_) {
             oneArea |= coord_;
