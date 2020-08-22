@@ -3,9 +3,7 @@ package com.github.koriel50000.prelude.reversi;
 import com.github.koriel50000.prelude.learning.PreludeConverter;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 public class Reversi {
@@ -228,10 +226,10 @@ public class Reversi {
             for (Coord coord : Coord.values()) {
                 board[coord.index()] = Stone.EMPTY;
             }
-            board[Coord.valueOf(4, 4).index()] = Stone.WHITE;
-            board[Coord.valueOf(5, 4).index()] = Stone.BLACK;
-            board[Coord.valueOf(4, 5).index()] = Stone.BLACK;
-            board[Coord.valueOf(5, 5).index()] = Stone.WHITE;
+            board[Coord.valueOf("D4").index()] = Stone.WHITE;
+            board[Coord.valueOf("E4").index()] = Stone.BLACK;
+            board[Coord.valueOf("D5").index()] = Stone.BLACK;
+            board[Coord.valueOf("E5").index()] = Stone.WHITE;
             stones[Stone.EMPTY.ordinal()] = 60;
             stones[Stone.BLACK.ordinal()] = 2;
             stones[Stone.WHITE.ordinal()] = 2;
@@ -361,15 +359,19 @@ public class Reversi {
         }
 
         private static Coord[] values;
+        private static Map<String, Coord> symbolMap;
 
         static {
             OUT_OF_BOUNDS = new Coord(-1, -1, "OB");
             values = new Coord[COLUMNS * ROWS];
+            symbolMap = new HashMap<>();
             int i = 0;
             for (int y = 1; y <= 8; y++) {
                 for (int x = 1; x <= 8; x++) {
                     String symbol = String.format("%c%d", 'A' + (x - 1), y);
-                    values[i++] = new Coord(x, y, symbol);
+                    Coord coord = new Coord(x, y, symbol);
+                    values[i++] = coord;
+                    symbolMap.put(symbol, coord);
                 }
             }
         }
@@ -437,30 +439,43 @@ public class Reversi {
             return valueOf(9 - y, 9 - x);
         }
 
+        public boolean isCorner() {
+            return (x == 1 && y == 1) || (x == 1 && y == 8) ||
+                    (x == 8 && y == 1) || (x == 8 && y == 8);
+        }
+
         public boolean isCircum() {
             return x == 1 || x == 8 || y == 1 || y == 8;
         }
 
-        public boolean idEdge() {
-            return false; // TODO
+        public boolean isEdge() {
+            return isCircum() && !isCorner();
         }
 
-        public boolean isCorner() {
-            return false; // TODO
+        @Override
+        public String toString() {
+            return symbol;
         }
 
         public static Coord[] values() {
             return values;
         }
 
-        public static Coord valueOf(int x, int y) {
+        private static Coord valueOf(int x, int y) {
             if (x < 1 || COLUMNS < x || y < 1 || ROWS < y) {
                 return OUT_OF_BOUNDS;
             }
             return values[(y - 1) * 8 + (x - 1)];
         }
 
-        public static Coord valueOf(int index) {
+        public static Coord valueOf(String symbol) {
+            if (!symbolMap.containsKey(symbol)) {
+                throw new ArrayIndexOutOfBoundsException();
+            }
+            return symbolMap.get(symbol);
+        }
+
+        private static Coord valueOf(int index) {
             if (0 <= index && index < values.length) {
                 return values[index];
             }
@@ -472,21 +487,12 @@ public class Reversi {
             return valueOf(index);
         }
 
-        public static Coord valueOf(String symbol) {
-            return null; // TODO
-        }
-
         public static long toCoords(List<Coord> moves) {
             long coords = 0L;
             for (Coord move : moves) {
                 coords |= Bits.coordAt(move.x - 1, move.y - 1);
             }
             return coords;
-        }
-
-        @Override
-        public String toString() {
-            return symbol;
         }
     }
 

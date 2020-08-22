@@ -37,48 +37,54 @@ public class ReversiTest {
     void testCoord() {
         int expectedIndex = 0;
         long expectedCoord = 0x8000000000000000L;
-        for (int y = 0; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
-                Coord actual1 = Coord.valueOf(x, y);
-                if (x == 0 || x == 9 || y == 0 | y == 9) {
-                    assertEquals(Coord.OUT_OF_BOUNDS, actual1);
-                } else {
-                    assertEquals(x, actual1.x);
-                    assertEquals(y, actual1.y);
-                    assertEquals(expectedIndex, actual1.index());
-                    assertEquals(x == 1 || x == 8 || y == 1 || y == 8, actual1.isCircum());
-                    Coord actual2 = Coord.valueOf(expectedIndex);
-                    Coord actual3 = Coord.valueOf(expectedCoord);
-                    assertEquals(actual1, actual2);
-                    assertEquals(actual1, actual3);
-                    expectedIndex++;
-                    expectedCoord >>>= 1;
-                }
+        for (int y = 1; y <= 8; y++) {
+            for (int x = 1; x <= 8; x++) {
+                Coord actual1 = Coord.valueOf(String.format("%c%d", 'A' + (x - 1), y));
+                assertEquals(x, actual1.x);
+                assertEquals(y, actual1.y);
+                assertEquals(expectedIndex, actual1.index());
+                assertEquals(x == 1 || x == 8 || y == 1 || y == 8, actual1.isCircum());
+                Coord actual2 = Coord.valueOf(expectedCoord);
+                assertEquals(actual1, actual2);
+                expectedIndex++;
+                expectedCoord >>>= 1;
             }
         }
 
         Direction[] dirs = Direction.values();
-        Coord coord1 = Coord.valueOf(1, 1);
+        Coord coord1 = Coord.valueOf("A1");
         assertAll(
                 () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[0])),
                 () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[1])),
                 () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[2])),
                 () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[3])),
-                () -> assertEquals(Coord.valueOf(2, 1), coord1.move(dirs[4])),
-                () -> assertEquals(Coord.valueOf(2, 2), coord1.move(dirs[5])),
-                () -> assertEquals(Coord.valueOf(1, 2), coord1.move(dirs[6])),
+                () -> assertEquals(Coord.valueOf("B1"), coord1.move(dirs[4])),
+                () -> assertEquals(Coord.valueOf("B2"), coord1.move(dirs[5])),
+                () -> assertEquals(Coord.valueOf("A2"), coord1.move(dirs[6])),
                 () -> assertEquals(Coord.OUT_OF_BOUNDS, coord1.move(dirs[7]))
         );
 
-        Coord coord2 = Coord.valueOf(1, 2);
+        Coord coord2 = Coord.valueOf("H8");
         assertAll(
-                () -> assertEquals(Coord.valueOf(8, 2), coord2.flipLtRt()),
-                () -> assertEquals(Coord.valueOf(1, 7), coord2.flipUpDn()),
-                () -> assertEquals(Coord.valueOf(8, 7), coord2.flip()),
-                () -> assertEquals(Coord.valueOf(2, 1), coord2.transposed()),
-                () -> assertEquals(Coord.valueOf(2, 8), coord2.flipLtRtTransposed()),
-                () -> assertEquals(Coord.valueOf(7, 1), coord2.flipUpDnTransposed()),
-                () -> assertEquals(Coord.valueOf(7, 8), coord2.flipTransposed())
+                () -> assertEquals(Coord.valueOf("G8"), coord2.move(dirs[0])),
+                () -> assertEquals(Coord.valueOf("G7"), coord2.move(dirs[1])),
+                () -> assertEquals(Coord.valueOf("H7"), coord2.move(dirs[2])),
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord2.move(dirs[3])),
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord2.move(dirs[4])),
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord2.move(dirs[5])),
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord2.move(dirs[6])),
+                () -> assertEquals(Coord.OUT_OF_BOUNDS, coord2.move(dirs[7]))
+        );
+
+        Coord coord3 = Coord.valueOf("A2");
+        assertAll(
+                () -> assertEquals(Coord.valueOf("H2"), coord3.flipLtRt()),
+                () -> assertEquals(Coord.valueOf("A7"), coord3.flipUpDn()),
+                () -> assertEquals(Coord.valueOf("H7"), coord3.flip()),
+                () -> assertEquals(Coord.valueOf("B1"), coord3.transposed()),
+                () -> assertEquals(Coord.valueOf("B8"), coord3.flipLtRtTransposed()),
+                () -> assertEquals(Coord.valueOf("G1"), coord3.flipUpDnTransposed()),
+                () -> assertEquals(Coord.valueOf("G8"), coord3.flipTransposed())
         );
     }
 
@@ -110,7 +116,7 @@ public class ReversiTest {
     void testBoard() {
         Board board = new Board();
         board.clear();
-        board.put(Coord.valueOf(3,2), Color.Black);
+        board.put(Coord.valueOf("C2"), Color.Black);
 
         Board actualLtRt = board.flipLtRt();
         assertAll(

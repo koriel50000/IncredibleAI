@@ -48,10 +48,10 @@ public class BitBoard {
 
     /**
      * 反転する石の位置を返す
+     *
+     * @see http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
      */
     public long computeFlipped(long player, long opponent, int index) {
-        // http://www.amy.hi-ho.ne.jp/okuhara/flipcuda.htm
-        //
         // OM.x = O;
         // OM.yzw = O & 0x7e7e7e7e7e7e7e7eUL;
         // mask = (ulong4) (0x0080808080808080UL, 0x7f00000000000000UL, 0x0102040810204000UL, 0x0040201008040201UL) >> (63 - pos);

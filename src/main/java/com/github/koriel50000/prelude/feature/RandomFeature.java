@@ -23,12 +23,12 @@ public class RandomFeature implements Feature {
     }
 
     @Override
-    public long evaluate(long playerBoard, long opponentBoard, long moves) {
+    public long evaluate(long playerBoard, long opponentBoard, long coords) {
         List<Long> moveList = new ArrayList<>();
-        while (moves != 0) {
-            long coord = Bits.getRightmostBit(moves);  // 一番右のビットのみ取り出す
+        while (coords != 0) {
+            long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
             moveList.add(coord);
-            moves ^= coord;  // 一番右のビットを0にする
+            coords ^= coord;  // 一番右のビットを0にする
         }
         long move = moveList.get(random.nextInt(moveList.size()));
         return move;

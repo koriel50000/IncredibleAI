@@ -45,10 +45,10 @@ public class PreludeConverter {
         for (Coord coord : Coord.values()) {
             reverse[coord.index()] = 0;
         }
-        reverse[Coord.valueOf(4, 4).index()] = 1;
-        reverse[Coord.valueOf(5, 4).index()] = 1;
-        reverse[Coord.valueOf(4, 5).index()] = 1;
-        reverse[Coord.valueOf(5, 5).index()] = 1;
+        reverse[Coord.valueOf("D4").index()] = 1;
+        reverse[Coord.valueOf("E4").index()] = 1;
+        reverse[Coord.valueOf("D5").index()] = 1;
+        reverse[Coord.valueOf("E5").index()] = 1;
     }
 
     /**

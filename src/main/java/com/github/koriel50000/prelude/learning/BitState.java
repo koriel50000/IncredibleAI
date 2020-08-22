@@ -129,6 +129,15 @@ public class BitState {
         if (evenArea != 0) {
             putBuffer(buffer, evenArea, 6); // 偶数領域
         }
+        if (!earlyTurn) {
+            fillBuffer(buffer, 7); // 序盤でない
+        }
+        if (emptyCount % 2 == 1) {
+            fillBuffer(buffer, 8); // 空白数が奇数
+        }
+        if (oddCount == 1 || oddCount % 2 == 0) {
+            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
+        }
         if (flippedBoard1 != 0) {
             putBuffer(buffer, flippedBoard1,10); // 反転数1
         }
@@ -146,15 +155,6 @@ public class BitState {
         }
         if (flippedBoard6 != 0) {
             putBuffer(buffer, flippedBoard6,15); // 反転数6
-        }
-        if (!earlyTurn) {
-            fillBuffer(buffer, 7); // 序盤でない
-        }
-        if (emptyCount % 2 == 1) {
-            fillBuffer(buffer, 8); // 空白数が奇数
-        }
-        if (oddCount == 1 || oddCount % 2 == 0) {
-            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
         }
         buffer.clear();
     }
