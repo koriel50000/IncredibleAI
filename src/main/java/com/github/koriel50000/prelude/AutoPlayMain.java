@@ -1,6 +1,7 @@
 package com.github.koriel50000.prelude;
 
 import com.github.koriel50000.prelude.feature.Feature;
+import com.github.koriel50000.prelude.feature.PreludeFeature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
 import com.github.koriel50000.prelude.feature.ReferenceFeature;
 import com.github.koriel50000.prelude.reversi.*;
@@ -19,9 +20,10 @@ public class AutoPlayMain {
 
     private void autoplay() {
         long seed = System.currentTimeMillis();
-        Feature referenceFeature = new ReferenceFeature(bitBoard, reversi, seed);
+        //Feature referenceFeature = new ReferenceFeature(bitBoard, reversi, seed);
+        Feature preludeFeature = new PreludeFeature(bitBoard, reversi, seed);
         Feature randomFeature = new RandomFeature(seed);
-        referenceFeature.init();
+        preludeFeature.init();
         randomFeature.init();
 
         int win = 0;
@@ -32,7 +34,7 @@ public class AutoPlayMain {
         Score score;
 
         for (int i = 0; i < 50; i++) {
-            score = play(referenceFeature, randomFeature);
+            score = play(preludeFeature, randomFeature);
 
             switch (score.getWinner()) {
                 case "black":
@@ -52,7 +54,7 @@ public class AutoPlayMain {
                     break;
             }
 
-            score = play(randomFeature, referenceFeature);
+            score = play(randomFeature, preludeFeature);
 
             switch (score.getWinner()) {
                 case "black":
@@ -76,7 +78,7 @@ public class AutoPlayMain {
         System.out.println(String.format("win:%d loss:%d draw:%d", win, loss, draw));
         System.out.println(String.format("win_stone:%d loss_stone:%d", winStones, lossStones));
 
-        referenceFeature.destroy();
+        preludeFeature.destroy();
         randomFeature.destroy();
     }
 

@@ -163,7 +163,6 @@ public final class Bits {
     }
 
     public static void printMatrix(long matrix) {
-        System.out.println(String.format("%016d", matrix));
         for (int i = 7; i >= 0; --i) {
             long row = matrix >>> (i * 8) & 0xff;
             String bits = Long.toBinaryString(row);
@@ -172,10 +171,30 @@ public final class Bits {
         }
     }
 
-    public static void printMatrix(int[] matrix) {
-        for (int y = 0; y < 8; y++) {
-            for (int x = 0; x < 8; x++) {
-                System.out.print(matrix[y * 8 + x]);
+    public static void printMatrix(LineBuffer buffer, long player, long opponent) {
+        for (int j = 7; j >= 0; --j) {
+            long pRow = player >>> (j * 8) & 0xff;
+            long oRow = opponent >>> (j * 8) & 0xff;
+            for (int i = 0; i < 8; i++) {
+                long mask = 0x80 >>> i;
+                String ch;
+                if ((pRow & mask) != 0) {
+                    ch ="p";
+                } else if ((oRow & mask) != 0) {
+                    ch = "o";
+                } else {
+                    ch = ".";
+                }
+                buffer.print(ch);
+            }
+            buffer.println();
+        }
+    }
+
+    public static void printMatrix(Reversi.Board board) {
+        for (int y = 1; y <= 8; y++) {
+            for (int x = 1; x <= 8; x++) {
+                System.out.print(board.get(x, y));
             }
             System.out.println();
         }

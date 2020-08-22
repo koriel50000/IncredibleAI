@@ -66,6 +66,7 @@ public class BitConverter {
         long oDiff = (opponent_ & mask) ^ (tOpponent_ & mask);
         int pPos = Bits.countLeadingZeros(pDiff);
         int oPos = Bits.countLeadingZeros(oDiff);
+
         return pPos <= oPos && (player_ & Bits.coordAt(pPos)) != 0;
     }
 

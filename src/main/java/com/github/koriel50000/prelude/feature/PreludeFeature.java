@@ -3,12 +3,15 @@ package com.github.koriel50000.prelude.feature;
 import com.github.koriel50000.prelude.learning.BitState;
 import com.github.koriel50000.prelude.reversi.*;
 import com.github.koriel50000.prelude.learning.CNNModel;
+import org.apache.commons.lang3.ArrayUtils;
 
 import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import static com.github.koriel50000.prelude.reversi.Reversi.*;
 
 public class PreludeFeature implements Feature {
 
@@ -43,12 +46,12 @@ public class PreludeFeature implements Feature {
 
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
-            int region = state.region;
-            FloatBuffer expectedBuffer = reversi.convertState(Reversi.Coord.valueOf(coord));
-            int expectedRegion = reversi.region;
+            //int region = state.region;
+            FloatBuffer expectedBuffer = reversi.convertState(Coord.valueOf(coord));
+            //int expectedRegion = reversi.region;
             try {
                 FloatBuffer buffer = state.getBuffer();
-                assertEquals(expectedRegion, region, "region");
+                //assertEquals(expectedRegion, region, "region");
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {
                 throw e;
@@ -68,7 +71,7 @@ public class PreludeFeature implements Feature {
 
         List<Long> coords = new ArrayList<>();
         float maximumValue = Float.NEGATIVE_INFINITY;
-        float delta = 0.001f; // FIXME 近い値を考慮
+        float delta = 0.01f; // FIXME 近い値を考慮
         for (Eval evel : evals) {
             long coord = evel.getCoord();
             float value = evel.getValue();
@@ -79,7 +82,22 @@ public class PreludeFeature implements Feature {
             maximumValue = value;
         }
 
+        printEvals(evals);
+        printCoords(coords);
+
         return coords.get(random.nextInt(coords.size()));
+    }
+
+    private void printEvals(List<Eval> evals) {
+        System.out.println(ArrayUtils.toString(evals));
+    }
+
+    private void printCoords(List<Long> coords) {
+        List<Coord> coords_ = new ArrayList<>();
+        for (long coord : coords) {
+            coords_.add(Coord.valueOf(coord));
+        }
+        System.out.println(ArrayUtils.toString(coords_));
     }
 
     private void assertEquals(FloatBuffer expected, FloatBuffer actual, String message) {
@@ -140,6 +158,11 @@ public class PreludeFeature implements Feature {
         @Override
         public int compareTo(Eval eval) {
             return Float.compare(value, eval.value);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("%s:%.2f", Coord.valueOf(coord), value);
         }
     }
 }

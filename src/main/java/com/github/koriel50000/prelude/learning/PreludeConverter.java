@@ -77,8 +77,8 @@ public class PreludeConverter {
                 throw new IllegalArgumentException("no match: " + diagonal);
         }
 
-        for (int y = 0; y < ROWS; y++) {
-            for (int x = y + 1; x < COLUMNS; x++) {
+        for (int y = 1; y <= ROWS; y++) {
+            for (int x = y + 1; x <= COLUMNS; x++) {
                 // 転置行列と左上から比較して、初めての違いが自石のときtrue、それ以外はfalse
                 if (board_.get(x, y) != board_.get(y, x)) {
                     return board_.get(x, y) == color.value();

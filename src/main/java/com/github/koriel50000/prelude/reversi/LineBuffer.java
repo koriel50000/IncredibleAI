@@ -4,14 +4,14 @@ import java.util.*;
 
 public class LineBuffer {
 
-    private Map<Integer, List<StringBuilder>> offsetBuffer;
+    private Map<Integer, List<StringBuilder>> offsetMap;
 
     private int currentOffset;
     private List<StringBuilder> currentBuffer;
     private StringBuilder currentLine;
 
     public LineBuffer() {
-        offsetBuffer = new HashMap<>();
+        offsetMap = new HashMap<>();
     }
 
     void print(String str) {
@@ -34,40 +34,46 @@ public class LineBuffer {
     }
 
     public void flush() {
-        List<Integer> sortedKeys = new ArrayList<>(offsetBuffer.keySet());
+        List<Integer> sortedKeys = new ArrayList<>(offsetMap.keySet());
         Collections.sort(sortedKeys);
 
-        boolean hasNext = true;
-        for (int index = 0; hasNext; index++) {
+        int index = 0;
+        while (true) {
+            boolean eol = true;
             StringBuilder line = new StringBuilder();
             for (Integer offset : sortedKeys) {
-                List<StringBuilder> buffer = offsetBuffer.get(offset);
+                List<StringBuilder> buffer = offsetMap.get(offset);
                 if (index < buffer.size()) {
-                    while (line.length() < offset) {
-                        line.append(' ');
+                    StringBuilder offsetLine = buffer.get(index);
+                    eol = (index == buffer.size() - 1) && (offsetLine.length() == 0);
+                    if (!eol) {
+                        while (line.length() < offset) {
+                            line.append(' ');
+                        }
+                        line.append(offsetLine);
                     }
-                    line.append(buffer.get(index));
                 }
             }
-            hasNext = line.length() > 0;
-            if (hasNext) {
-                System.out.println(line.toString());
+            if (eol) {
+                break;
             }
+            System.out.println(line.toString());
+            index++;
         }
 
-        offsetBuffer.clear();
+        offsetMap.clear();
     }
 
     public LineBuffer offset(int offset) {
-        if (!offsetBuffer.containsKey(offset)) {
+        if (!offsetMap.containsKey(offset)) {
             currentLine = new StringBuilder();
             currentBuffer = new ArrayList<>();
             currentBuffer.add(currentLine);
-            offsetBuffer.put(offset, currentBuffer);
+            offsetMap.put(offset, currentBuffer);
             currentOffset = offset;
         } else {
             currentOffset = offset;
-            currentBuffer = offsetBuffer.get(offset);
+            currentBuffer = offsetMap.get(offset);
             currentLine = currentBuffer.get(currentBuffer.size() - 1);
         }
         return this;
