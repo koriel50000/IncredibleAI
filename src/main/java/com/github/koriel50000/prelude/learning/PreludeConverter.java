@@ -26,17 +26,17 @@ public class PreludeConverter {
             12, 4, 4, 4, 6, 6, 6, 14
     };
 
-    public int region;
+    private int region;
     private int[] oddevenArea;
     private int oddCount;
     private int evenCount;
     private int emptyCount;
     private boolean earlyTurn;
-    private int[] reverse;
+    private int[] flippedBoard;
 
     public PreludeConverter() {
         oddevenArea = new int[COLUMNS * ROWS];
-        reverse = new int[COLUMNS * ROWS];
+        flippedBoard = new int[COLUMNS * ROWS];
     }
 
     public void clear() {
@@ -45,12 +45,12 @@ public class PreludeConverter {
         evenCount = 1;
         earlyTurn = true;
         for (Coord coord : Coord.values()) {
-            reverse[coord.index()] = 0;
+            flippedBoard[coord.index()] = 0;
         }
-        reverse[Coord.valueOf("D4").index()] = 1;
-        reverse[Coord.valueOf("E4").index()] = 1;
-        reverse[Coord.valueOf("D5").index()] = 1;
-        reverse[Coord.valueOf("E5").index()] = 1;
+        flippedBoard[Coord.valueOf("D4").index()] = 1;
+        flippedBoard[Coord.valueOf("E4").index()] = 1;
+        flippedBoard[Coord.valueOf("D5").index()] = 1;
+        flippedBoard[Coord.valueOf("E5").index()] = 1;
     }
 
     /**
@@ -253,8 +253,9 @@ public class PreludeConverter {
             } else if (oddevenArea[coord_.index()] == AREA_EVEN) {
                 putBuffer(buffer, coord_, 6); // 偶数領域
             }
-            int reverseCount = (reverse[coord_.index()] < 6) ? reverse[coord_.index()] : 6; // 6以上は6プレーン目とする
+            int reverseCount = flippedBoard[coord_.index()];
             if (reverseCount > 0) {
+                reverseCount = (reverseCount > 6) ? 6 : reverseCount; // 6以上は6プレーン目とする
                 putBuffer(buffer, coord_, 9 + reverseCount); // 反転数
             }
         }
@@ -269,8 +270,6 @@ public class PreludeConverter {
         }
 
         buffer.clear();
-        System.out.println(String.format("expected empty:%d odd:%d even:%d", emptyCount, oddCount, evenCount));
-        Bits.printMatrix(oddevenArea);
         return buffer;
     }
 
@@ -279,8 +278,8 @@ public class PreludeConverter {
      */
     public void increaseFlipped(List<Coord> flipped, Coord coord) {
         for (Coord coord_ : flipped) {
-            reverse[coord_.index()]++;
+            flippedBoard[coord_.index()]++;
         }
-        reverse[coord.index()]++;
+        flippedBoard[coord.index()]++;
     }
 }

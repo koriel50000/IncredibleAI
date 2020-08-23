@@ -1,12 +1,12 @@
 package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
-import com.github.koriel50000.prelude.reversi.LineBuffer;
-
-import static com.github.koriel50000.prelude.reversi.BitBoard.*;
 
 import java.nio.FloatBuffer;
 import java.util.Arrays;
+
+import static com.github.koriel50000.prelude.reversi.BitBoard.*;
+
 
 public class BitState {
 
@@ -140,28 +140,23 @@ public class BitState {
             fillBuffer(buffer, 9); // 奇数領域が1個または偶数
         }
         if (flippedBoard1 != 0) {
-            putBuffer(buffer, flippedBoard1,10); // 反転数1
+            putBuffer(buffer, flippedBoard1, 10); // 反転数1
         }
         if (flippedBoard2 != 0) {
-            putBuffer(buffer, flippedBoard2,11); // 反転数2
+            putBuffer(buffer, flippedBoard2, 11); // 反転数2
         }
         if (flippedBoard3 != 0) {
-            putBuffer(buffer, flippedBoard3,12); // 反転数3
+            putBuffer(buffer, flippedBoard3, 12); // 反転数3
         }
         if (flippedBoard4 != 0) {
-            putBuffer(buffer, flippedBoard4,13); // 反転数4
+            putBuffer(buffer, flippedBoard4, 13); // 反転数4
         }
         if (flippedBoard5 != 0) {
-            putBuffer(buffer, flippedBoard5,14); // 反転数5
+            putBuffer(buffer, flippedBoard5, 14); // 反転数5
         }
         if (flippedBoard6 != 0) {
-            putBuffer(buffer, flippedBoard6,15); // 反転数6
+            putBuffer(buffer, flippedBoard6, 15); // 反転数6
         }
         buffer.clear();
-
-        System.out.println(String.format("actual empty:%d odd:%d even:%d", emptyCount, oddCount, evenCount));
-        LineBuffer areaBuffer = new LineBuffer();
-        Bits.printMatrix(areaBuffer.offset(0), oddArea, evenArea, "1", "2", "0");
-        areaBuffer.flush();
     }
 }

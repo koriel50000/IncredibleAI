@@ -46,7 +46,7 @@ public final class Bits {
      *
      * @see Long#reverse(long)
      */
-    public static long reverseBits(long bits) {
+    public static long reverse(long bits) {
         bits = bits >>> 32 | bits << 32;
         bits = (bits >>> 16) & 0x0000ffff0000ffffL | (bits & 0x0000ffff0000ffffL) << 16;
         bits = (bits >>> 8) & 0x00ff00ff00ff00ffL | (bits & 0x00ff00ff00ff00ffL) << 8;
@@ -61,8 +61,7 @@ public final class Bits {
      *
      * @see Long#rotateRight(long, int)
      */
-    public static long rotateBits(long bits, int distance) {
-        distance &= 0x3f;
+    public static long rotate(long bits, int distance) {
         return (bits >>> distance) | (bits << -distance);
     }
 
@@ -169,7 +168,7 @@ public final class Bits {
      * 8x8行列の上下左右反転した行列を返す
      */
     public static long flip(long matrix) {
-        return reverseBits(matrix);
+        return reverse(matrix);
     }
 
     public static void printMatrix(long matrix) {

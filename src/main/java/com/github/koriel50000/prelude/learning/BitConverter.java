@@ -1,7 +1,6 @@
 package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
-import com.github.koriel50000.prelude.reversi.LineBuffer;
 
 public class BitConverter {
 
@@ -190,52 +189,34 @@ public class BitConverter {
 
     private void calculateSingleArea(BitState state, long coord) {
         long emptyArea = (state.oddArea | state.evenArea) & ~coord;
-        int index = Bits.indexOf(coord);
+        int pos = Bits.indexOf(coord);
 
-        long crossMask = 0xc080000000000081L;
-        long oneArea = 0L;
-
-        LineBuffer buffer = new LineBuffer();
-        Bits.printMatrix(buffer.offset(0), emptyArea);
+        long mask = Bits.rotate(0xc080000000000081L, pos);
+        long oneArea = 0L; // FIXME 2マス以上の領域は？
 
         // 上
-        long mask = Bits.rotateBits(crossMask, index - 8) & 0xffffffffffffff00L;
         long coord_ = coord << 8;
-        if ((emptyArea & mask ^ coord_) == 0) {
+        if ((emptyArea & (mask << 8) ^ coord_) == 0) {
             oneArea |= coord_;
         }
-        Bits.printMatrix(buffer.offset(15), coord_, mask, "2", "1", "0");
         // 下
-        mask = Bits.rotateBits(crossMask, index + 8) & 0x00ffffffffffffffL;
         coord_ = coord >>> 8;
-        if ((emptyArea & mask ^ coord_) == 0) {
+        if ((emptyArea & (mask >>> 8) ^ coord_) == 0) {
             oneArea |= coord_;
         }
-        Bits.printMatrix(buffer.offset(30), coord_, mask, "2", "1", "0");
         // 左
-        mask = Bits.rotateBits(crossMask, index - 1) & 0xfefefefefefefefeL;
         coord_ = coord << 1;
-        if ((emptyArea & mask ^ coord_) == 0) {
+        if ((emptyArea & (mask << 1 & 0xfefefefefefefefeL) ^ coord_) == 0) {
             oneArea |= coord_;
         }
-        Bits.printMatrix(buffer.offset(45), coord_, mask, "2", "1", "0");
         // 右
-        mask = Bits.rotateBits(crossMask, index + 1) & 0x7f7f7f7f7f7f7f7fL;
         coord_ = coord >>> 1;
-        if ((emptyArea & mask ^ coord_) == 0) {
+        if ((emptyArea & (mask >>> 1 & 0x7f7f7f7f7f7f7f7fL) ^ coord_) == 0) {
             oneArea |= coord_;
         }
-        Bits.printMatrix(buffer.offset(60), coord_, mask, "2", "1", "0");
-
-        Bits.printMatrix(buffer.offset(75), oneArea);
-        buffer.flush();
 
         if (oneArea != 0) {
             // FIXME oneAreaが2つ以上あった場合は？
-            LineBuffer oneBuffer = new LineBuffer().offset(0);
-            oneBuffer.println("oneArea");
-            Bits.printMatrix(oneBuffer, oneArea);
-            oneBuffer.flush();
             if (Bits.populationCount(oneArea) > 1) {
                 throw new ArrayIndexOutOfBoundsException();
             }
@@ -273,12 +254,12 @@ public class BitConverter {
      * 空白領域を偶数領域・奇数領域に分けて数え上げる
      */
     private void enumerateOddEven(BitState state, long coord) {
+        state.earlyTurn = state.earlyTurn && (coord & 0xff818181818181ffL) == 0;
         if (state.earlyTurn && (state.oddCount + state.evenCount) == 1) {
             calculateSingleArea(state, coord);
         } else {
             calculateMultiArea(state, coord);
         }
-        state.earlyTurn = state.earlyTurn && (coord & 0xff818181818181ffL) == 0;
     }
 
     /**

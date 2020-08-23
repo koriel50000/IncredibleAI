@@ -82,8 +82,8 @@ public class PreludeFeature implements Feature {
             maximumValue = value;
         }
 
-        printEvals(evals);
-        printCoords(coords);
+//        printEvals(evals);
+//        printCoords(coords);
 
         return coords.get(random.nextInt(coords.size()));
     }
