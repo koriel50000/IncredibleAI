@@ -57,6 +57,16 @@ public final class Bits {
     }
 
     /**
+     * ビット列を右方向にローテートして返す
+     *
+     * @see Long#rotateRight(long, int)
+     */
+    public static long rotateBits(long bits, int distance) {
+        distance &= 0x3f;
+        return (bits >>> distance) | (bits << -distance);
+    }
+
+    /**
      * もっとも右端の立っている("1"の)ビット列を返す
      *
      * @see Long#lowestOneBit(long)
@@ -163,27 +173,34 @@ public final class Bits {
     }
 
     public static void printMatrix(long matrix) {
+        LineBuffer buffer = new LineBuffer();
+        printMatrix(buffer.offset(0), matrix);
+        buffer.flush();
+    }
+
+    public static void printMatrix(LineBuffer buffer, long matrix) {
         for (int i = 7; i >= 0; --i) {
             long row = matrix >>> (i * 8) & 0xff;
             String bits = Long.toBinaryString(row);
             String line = StringUtils.leftPad(bits, 8, '0');
-            System.out.println(line);
+            buffer.println(line);
         }
     }
 
-    public static void printMatrix(LineBuffer buffer, long player, long opponent) {
+    public static void printMatrix(LineBuffer buffer, long mtx1, long mtx2,
+                                   String ch1, String ch2, String ch0) {
         for (int j = 7; j >= 0; --j) {
-            long pRow = player >>> (j * 8) & 0xff;
-            long oRow = opponent >>> (j * 8) & 0xff;
+            long row1 = mtx1 >>> (j * 8) & 0xff;
+            long row2 = mtx2 >>> (j * 8) & 0xff;
             for (int i = 0; i < 8; i++) {
                 long mask = 0x80 >>> i;
                 String ch;
-                if ((pRow & mask) != 0) {
-                    ch ="p";
-                } else if ((oRow & mask) != 0) {
-                    ch = "o";
+                if ((row1 & mask) != 0) {
+                    ch = ch1;
+                } else if ((row2 & mask) != 0) {
+                    ch = ch2;
                 } else {
-                    ch = ".";
+                    ch = ch0;
                 }
                 buffer.print(ch);
             }
@@ -191,10 +208,10 @@ public final class Bits {
         }
     }
 
-    public static void printMatrix(Reversi.Board board) {
-        for (int y = 1; y <= 8; y++) {
-            for (int x = 1; x <= 8; x++) {
-                System.out.print(board.get(x, y));
+    public static void printMatrix(int[] board) {
+        for (int y = 0; y < 8; y++) {
+            for (int x = 0; x < 8; x++) {
+                System.out.print(board[y * 8 + x]);
             }
             System.out.println();
         }

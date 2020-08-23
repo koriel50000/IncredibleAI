@@ -1,6 +1,7 @@
 package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
+import com.github.koriel50000.prelude.reversi.LineBuffer;
 
 import static com.github.koriel50000.prelude.reversi.BitBoard.*;
 
@@ -157,5 +158,10 @@ public class BitState {
             putBuffer(buffer, flippedBoard6,15); // 反転数6
         }
         buffer.clear();
+
+        System.out.println(String.format("actual empty:%d odd:%d even:%d", emptyCount, oddCount, evenCount));
+        LineBuffer areaBuffer = new LineBuffer();
+        Bits.printMatrix(areaBuffer.offset(0), oddArea, evenArea, "1", "2", "0");
+        areaBuffer.flush();
     }
 }

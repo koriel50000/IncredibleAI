@@ -63,8 +63,14 @@ public class PlayMain {
                 try {
                     assertEquals(expectedCoords, coords, "availableMoves");
                 } catch (AssertionError e) {
-                    Bits.printMatrix(expectedCoords);
-                    Bits.printMatrix(coords);
+                    LineBuffer errorBuffer = new LineBuffer();
+                    errorBuffer.offset(0);
+                    errorBuffer.println("expected");
+                    Bits.printMatrix(errorBuffer, expectedCoords);
+                    errorBuffer.offset(15);
+                    errorBuffer.println("actual");
+                    Bits.printMatrix(errorBuffer, coords);
+                    errorBuffer.flush();
                     throw e;
                 }
 
@@ -84,8 +90,14 @@ public class PlayMain {
                 try {
                     assertEquals(expectedCoords, coords, "availableMoves");
                 } catch (AssertionError e) {
-                    Bits.printMatrix(expectedCoords);
-                    Bits.printMatrix(coords);
+                    LineBuffer errorBuffer = new LineBuffer();
+                    errorBuffer.offset(0);
+                    errorBuffer.println("expected");
+                    Bits.printMatrix(errorBuffer, expectedCoords);
+                    errorBuffer.offset(15);
+                    errorBuffer.println("actual");
+                    Bits.printMatrix(errorBuffer, coords);
+                    errorBuffer.flush();
                     throw e;
                 }
 

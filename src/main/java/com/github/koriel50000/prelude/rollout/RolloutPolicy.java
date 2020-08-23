@@ -59,8 +59,8 @@ public class RolloutPolicy {
             } catch (AssertionError e) {
                 LineBuffer buffer = new LineBuffer();
                 reversi.printBoard(buffer.offset(0));
+                Bits.printMatrix(buffer.offset(30), coord);
                 buffer.flush();
-                Bits.printMatrix(coord);
                 throw e;
             }
 

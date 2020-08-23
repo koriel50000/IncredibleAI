@@ -110,10 +110,14 @@ public class PreludeFeature implements Feature {
             actual_.get(matrix);
             long actualMatrix = matrixTo(matrix);
             if (expectedMatrix != actualMatrix) {
-                System.out.println("expected");
-                Bits.printMatrix(expectedMatrix);
-                System.out.println("actual");
-                Bits.printMatrix(actualMatrix);
+                LineBuffer buffer = new LineBuffer();
+                buffer.offset(0);
+                buffer.println("expected");
+                Bits.printMatrix(buffer, expectedMatrix);
+                buffer.offset(15);
+                buffer.println("actual");
+                Bits.printMatrix(buffer, actualMatrix);
+                buffer.flush();
                 assert (expectedMatrix == actualMatrix) : String.format("'%s' not match. channel=%d", message, channel);
             }
         }

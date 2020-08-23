@@ -47,6 +47,16 @@ public class BitsTest {
     }
 
     @Test
+    void rotateBits() {
+        assertAll(
+                () -> assertEquals(0x0000000000000000L, Bits.rotateBits(0x0000000000000000L, 0)),
+                () -> assertEquals(0x1154000000000000L, Bits.rotateBits(0xaa00000000000008L, 7)),
+                () -> assertEquals(0x4000a0000000a001L, Bits.rotateBits(0x00005000a0005000L, 31)),
+                () -> assertEquals(0x0000000000000001L, Bits.rotateBits(0x8000000000000000L, 63))
+        );
+    }
+
+    @Test
     void getRightmostBit() {
         assertAll(
                 () -> assertEquals(0x0000000000000000L, Bits.getRightmostBit(0x0000000000000000L)),

@@ -23,12 +23,12 @@ public class LineBuffer {
         print(Integer.toString(y));
     }
 
-    void println() {
+    public void println() {
         currentLine = new StringBuilder();
         currentBuffer.add(currentLine);
     }
 
-    void println(String str) {
+    public void println(String str) {
         print(str);
         println();
     }

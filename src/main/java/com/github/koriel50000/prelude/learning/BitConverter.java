@@ -1,6 +1,7 @@
 package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
+import com.github.koriel50000.prelude.reversi.LineBuffer;
 
 public class BitConverter {
 
@@ -188,46 +189,53 @@ public class BitConverter {
     }
 
     private void calculateSingleArea(BitState state, long coord) {
-        long emptyArea = state.oddArea | state.evenArea & ~coord;
+        long emptyArea = (state.oddArea | state.evenArea) & ~coord;
         int index = Bits.indexOf(coord);
 
-        long maskUpLt = 0x0000000000000103L;
-        long maskDnRt = 0xc080000000000000L;
+        long crossMask = 0xc080000000000081L;
         long oneArea = 0L;
 
+        LineBuffer buffer = new LineBuffer();
+        Bits.printMatrix(buffer.offset(0), emptyArea);
+
         // 上
-        int pos = (index - 8) & 0x3f;
-        long mask = maskDnRt >>> pos | maskUpLt << (63 - pos); // FIXME 端を越えたときの考慮は？
+        long mask = Bits.rotateBits(crossMask, index - 8) & 0xffffffffffffff00L;
         long coord_ = coord << 8;
-        if ((emptyArea & mask) == coord_) {
+        if ((emptyArea & mask ^ coord_) == 0) {
             oneArea |= coord_;
         }
+        Bits.printMatrix(buffer.offset(15), coord_, mask, "2", "1", "0");
         // 下
-        pos = (index + 8) & 0x3f;
-        mask = maskDnRt >>> pos | maskUpLt << (63 - pos);
+        mask = Bits.rotateBits(crossMask, index + 8) & 0x00ffffffffffffffL;
         coord_ = coord >>> 8;
-        if ((emptyArea & mask) == coord_) {
+        if ((emptyArea & mask ^ coord_) == 0) {
             oneArea |= coord_;
         }
+        Bits.printMatrix(buffer.offset(30), coord_, mask, "2", "1", "0");
         // 左
-        pos = (index - 1) & 0x3f;
-        mask = maskDnRt >>> pos | maskUpLt << (63 - pos);
-        coord_ = coord << 8;
-        if ((emptyArea & mask) == coord_) {
+        mask = Bits.rotateBits(crossMask, index - 1) & 0xfefefefefefefefeL;
+        coord_ = coord << 1;
+        if ((emptyArea & mask ^ coord_) == 0) {
             oneArea |= coord_;
         }
+        Bits.printMatrix(buffer.offset(45), coord_, mask, "2", "1", "0");
         // 右
-        pos = (index + 1) & 0x3f;
-        mask = maskDnRt >>> pos | maskUpLt << (63 - pos);
-        coord_ = coord << 8;
-        if ((emptyArea & mask) == coord_) {
+        mask = Bits.rotateBits(crossMask, index + 1) & 0x7f7f7f7f7f7f7f7fL;
+        coord_ = coord >>> 1;
+        if ((emptyArea & mask ^ coord_) == 0) {
             oneArea |= coord_;
         }
+        Bits.printMatrix(buffer.offset(60), coord_, mask, "2", "1", "0");
+
+        Bits.printMatrix(buffer.offset(75), oneArea);
+        buffer.flush();
 
         if (oneArea != 0) {
             // FIXME oneAreaが2つ以上あった場合は？
-            System.out.println("oneArea");
-            Bits.printMatrix(oneArea);
+            LineBuffer oneBuffer = new LineBuffer().offset(0);
+            oneBuffer.println("oneArea");
+            Bits.printMatrix(oneBuffer, oneArea);
+            oneBuffer.flush();
             if (Bits.populationCount(oneArea) > 1) {
                 throw new ArrayIndexOutOfBoundsException();
             }

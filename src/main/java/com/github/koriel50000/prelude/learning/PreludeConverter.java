@@ -1,5 +1,7 @@
 package com.github.koriel50000.prelude.learning;
 
+import com.github.koriel50000.prelude.reversi.Bits;
+
 import java.nio.FloatBuffer;
 import java.util.List;
 
@@ -28,8 +30,8 @@ public class PreludeConverter {
     private int[] oddevenArea;
     private int oddCount;
     private int evenCount;
+    private int emptyCount;
     private boolean earlyTurn;
-
     private int[] reverse;
 
     public PreludeConverter() {
@@ -150,6 +152,7 @@ public class PreludeConverter {
 
         oddCount = 0;
         evenCount = 0;
+        emptyCount = board.getEmptyStones();
         for (Coord coord : Coord.values()) {
             if (oddevenArea[coord.index()] != AREA_NOT_EMPTY) {
                 int oddeven = calculateOddEven(oddevenArea, coord);
@@ -258,7 +261,7 @@ public class PreludeConverter {
         if (!earlyTurn) {
             fillBuffer(buffer, 7); // 序盤でない
         }
-        if (board.getEmptyStones() % 2 == 1) {
+        if (emptyCount % 2 == 1) {
             fillBuffer(buffer, 8); // 空白数が奇数
         }
         if (oddCount == 1 || oddCount % 2 == 0) {
@@ -266,6 +269,8 @@ public class PreludeConverter {
         }
 
         buffer.clear();
+        System.out.println(String.format("expected empty:%d odd:%d even:%d", emptyCount, oddCount, evenCount));
+        Bits.printMatrix(oddevenArea);
         return buffer;
     }
 
