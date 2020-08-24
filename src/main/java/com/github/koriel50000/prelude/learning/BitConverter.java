@@ -189,9 +189,9 @@ public class BitConverter {
 
     private void calculateSingleArea(BitState state, long coord) {
         long emptyArea = (state.oddArea | state.evenArea) & ~coord;
-        int pos = Bits.indexOf(coord);
+        int index = Bits.indexOf(coord);
 
-        long mask = Bits.rotate(0xc080000000000081L, pos);
+        long mask = Bits.rotate(0xc080000000000081L, index);
         long oneArea = 0L; // FIXME 2マス以上の領域は？
 
         // 上
