@@ -9,9 +9,9 @@ import java.nio.FloatBuffer;
 
 public class CNNModel {
 
-    private static final int ROWS = 8;
     private static final int COLUMNS = 8;
-    private static final int CHANNEL = 16;
+    private static final int ROWS = 8;
+    private static final int CHANNELS = 16;
 
     private Graph graph;
     private Session session;
@@ -53,7 +53,7 @@ public class CNNModel {
         //       shape: (-1, 1)
         //       name: StatefulPartitionedCall:0
         // Method name is: tensorflow/serving/predict
-        try (Tensor<Float> state = Tensor.create(new long[]{1, ROWS * COLUMNS * CHANNEL}, stateBuffer);
+        try (Tensor<Float> state = Tensor.create(new long[]{1, ROWS * COLUMNS * CHANNELS}, stateBuffer);
              Tensor predictions = session.runner()
                      .feed("serving_default_inputs", state)
                      .fetch("StatefulPartitionedCall")

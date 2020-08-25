@@ -46,18 +46,15 @@ public class PreludeFeature implements Feature {
 
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
-            //int region = state.region;
+            FloatBuffer buffer = state.getBuffer();
             FloatBuffer expectedBuffer = reversi.convertState(Coord.valueOf(coord));
-            //int expectedRegion = reversi.region;
             try {
-                FloatBuffer buffer = state.getBuffer();
-                //assertEquals(expectedRegion, region, "region");
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {
                 throw e;
             }
 
-            float value = model.calculatePredicatedValue(state.getBuffer());
+            float value = model.calculatePredicatedValue(buffer);
             evals.add(new Eval(coord, value));
 
             coords ^= coord;  // 一番右のビットを0にする
@@ -131,10 +128,6 @@ public class PreludeFeature implements Feature {
             }
         }
         return bits;
-    }
-
-    private void assertEquals(Object expected, Object actual, String message) {
-        assert expected.equals(actual) : String.format("'%s' not match. %s %s", message, expected, actual);
     }
 
     private static class Eval implements Comparable<Eval> {

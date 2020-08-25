@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * Bit Twiddling
  *
- * @see http://www012.upp.so-net.ne.jp/eshibata/pdfs/tiger.pdf
+ * @see <a href="http://www012.upp.so-net.ne.jp/eshibata/pdfs/tiger.pdf"/>
  */
 public final class Bits {
 
@@ -14,7 +14,7 @@ public final class Bits {
     /**
      * 最上位ビットのインデックスを0として、ビット位置のハッシュテーブルを作成する
      *
-     * @see https://koonies.hatenadiary.org/entry/20090708/nlz3#f-0bb3099a
+     * @see <a href="https://koonies.hatenadiary.org/entry/20090708/nlz3#f-0bb3099a"/>
      */
     static {
         indexTable = new int[64];

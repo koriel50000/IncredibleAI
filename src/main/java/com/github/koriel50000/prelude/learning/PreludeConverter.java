@@ -1,7 +1,5 @@
 package com.github.koriel50000.prelude.learning;
 
-import com.github.koriel50000.prelude.reversi.Bits;
-
 import java.nio.FloatBuffer;
 import java.util.List;
 
@@ -165,10 +163,7 @@ public class PreludeConverter {
         }
     }
 
-    /**
-     * 着手をプロットする
-     */
-    private void putBuffer(FloatBuffer buffer, Coord coord, int channel) {
+    private void put(FloatBuffer buffer, Coord coord, int channel) {
         Coord coord_;
         switch (region) {
             case 0:
@@ -218,7 +213,7 @@ public class PreludeConverter {
         buffer.put(offset + coord_.index(), 1);
     }
 
-    private void fillBuffer(FloatBuffer buffer, int channel) {
+    private void fill(FloatBuffer buffer, int channel) {
         int offset = channel * ROWS * COLUMNS;
         for (int i = 0; i < ROWS * COLUMNS; i++) {
             buffer.put(offset + i, 1);
@@ -226,7 +221,7 @@ public class PreludeConverter {
     }
 
     /**
-     * 石を置いたときの状態を返す
+     * 石を置いたときの特徴量を返す
      */
     public FloatBuffer convertState(Board board, List<Coord> flipped, Coord coord, Color color) {
         checkRegion(board, coord, color);
@@ -236,40 +231,40 @@ public class PreludeConverter {
 
         for (Coord coord_ : Coord.values()) {
             if (board.get(coord_) == color.value()) {
-                putBuffer(buffer, coord_, 0); // 着手前に自石
+                put(buffer, coord_, 0); // 着手前に自石
             } else if (board.get(coord_) == color.opponentValue()) {
-                putBuffer(buffer, coord_, 1); // 着手前に相手石
+                put(buffer, coord_, 1); // 着手前に相手石
             } else {
-                putBuffer(buffer, coord_, 2); // 着手前に空白
+                put(buffer, coord_, 2); // 着手前に空白
             }
             if (coord_ == coord) {
-                putBuffer(buffer, coord_, 3); // 着手
-                putBuffer(buffer, coord_, 4); // 変化した石
+                put(buffer, coord_, 3); // 着手
+                put(buffer, coord_, 4); // 変化した石
             } else if (flipped.contains(coord_)) {
-                putBuffer(buffer, coord_, 4); // 変化した石
+                put(buffer, coord_, 4); // 変化した石
             }
             if (oddevenArea[coord_.index()] == AREA_ODD) {
-                putBuffer(buffer, coord_, 5); // 奇数領域
+                put(buffer, coord_, 5); // 奇数領域
             } else if (oddevenArea[coord_.index()] == AREA_EVEN) {
-                putBuffer(buffer, coord_, 6); // 偶数領域
+                put(buffer, coord_, 6); // 偶数領域
             }
             int reverseCount = flippedBoard[coord_.index()];
             if (reverseCount > 0) {
                 reverseCount = (reverseCount > 6) ? 6 : reverseCount; // 6以上は6プレーン目とする
-                putBuffer(buffer, coord_, 9 + reverseCount); // 反転数
+                put(buffer, coord_, 9 + reverseCount); // 反転数
             }
         }
         if (!earlyTurn) {
-            fillBuffer(buffer, 7); // 序盤でない
+            fill(buffer, 7); // 序盤でない
         }
         if (emptyCount % 2 == 1) {
-            fillBuffer(buffer, 8); // 空白数が奇数
+            fill(buffer, 8); // 空白数が奇数
         }
         if (oddCount == 1 || oddCount % 2 == 0) {
-            fillBuffer(buffer, 9); // 奇数領域が1個または偶数
+            fill(buffer, 9); // 奇数領域が1個または偶数
         }
 
-        buffer.clear();
+        buffer.clear(); // positionを0、limitをcapacityに戻す
         return buffer;
     }
 
