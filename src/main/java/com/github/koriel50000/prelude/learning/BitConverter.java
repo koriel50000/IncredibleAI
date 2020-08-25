@@ -263,7 +263,7 @@ public class BitConverter {
     }
 
     /**
-     * 石を置いたときの状態を返す
+     * 石を置いたときの特徴量を返す
      */
     public BitState convertState(long player, long opponent, long flipped, long coord, int index, int depth) {
         BitState state = new BitState(currentState);
