@@ -29,7 +29,7 @@ public class BitState {
     public long flipped;
     public long coord;
 
-    private float[] buffer;
+    private float[] buffer = new float[COLUMNS * ROWS * CHANNELS];
 
     BitState() {
         region = 0;
@@ -45,8 +45,6 @@ public class BitState {
         flippedBoard4 = 0x0000000000000000L;
         flippedBoard5 = 0x0000000000000000L;
         flippedBoard6 = 0x0000000000000000L;
-
-        buffer = new float[COLUMNS * ROWS * CHANNELS];
     }
 
     BitState(BitState state) {
@@ -63,8 +61,6 @@ public class BitState {
         this.flippedBoard4 = state.flippedBoard4;
         this.flippedBoard5 = state.flippedBoard5;
         this.flippedBoard6 = state.flippedBoard6;
-
-        buffer = new float[COLUMNS * ROWS * CHANNELS];
     }
 
     public FloatBuffer getBuffer() {
