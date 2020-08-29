@@ -99,29 +99,39 @@ public class PreludeConverter {
     }
 
     /**
-     * 空白を再帰的にたどって偶数領域か奇数領域かに分割する
+     * 反転数を増分する
      */
-    private int calculateOddEvenRecursive(int[] area, Coord coord, int count) {
+    public void increaseFlipped(List<Coord> flipped, Coord coord) {
+        for (Coord coord_ : flipped) {
+            flippedBoard[coord_.index()]++;
+        }
+        flippedBoard[coord.index()]++;
+    }
+
+    /**
+     * 再帰的にたどって領域を分割する
+     */
+    private int partitionRecursive(int[] area, Coord coord, int count) {
         area[coord.index()] = AREA_UNKNOWN;
         count += 1;
         for (Direction dir : Direction.corssValues()) {
             Coord coord_ = coord.move(dir);
             if (coord_ != Coord.OUT_OF_BOUNDS && area[coord_.index()] == AREA_EMPTY) {
-                count = calculateOddEvenRecursive(area, coord_, count);
+                count = partitionRecursive(area, coord_, count);
             }
         }
         return count;
     }
 
     /**
-     * 空白を偶数領域か奇数領域かに分割する
+     * 領域を分割する
      */
-    private int calculateOddEven(int[] area, Coord coord) {
+    private int partition(int[] area, Coord coord) {
         if (area[coord.index()] == AREA_ODD || area[coord.index()] == AREA_EVEN) {
-            return -1; // すでに分類済み
+            return -1; // すでに分割済み
         }
 
-        int count = calculateOddEvenRecursive(area, coord, 0);
+        int count = partitionRecursive(area, coord, 0);
         int oddeven = (count % 2 == 1) ? AREA_ODD : AREA_EVEN;
 
         for (Coord coord_ : Coord.values()) {
@@ -133,9 +143,9 @@ public class PreludeConverter {
     }
 
     /**
-     * 偶数/奇数/空白の領域を集計する
+     * 偶数領域・奇数領域を集計する
      */
-    private void enumerateArea(Board board) {
+    private void enumerateOddEven(Board board) {
         earlyTurn = true;
         for (Coord coord : Coord.values()) {
             if (board.get(coord) == Stone.EMPTY) {
@@ -153,7 +163,7 @@ public class PreludeConverter {
         emptyCount = board.getEmptyStones();
         for (Coord coord : Coord.values()) {
             if (oddevenArea[coord.index()] != AREA_NOT_EMPTY) {
-                int oddeven = calculateOddEven(oddevenArea, coord);
+                int oddeven = partition(oddevenArea, coord);
                 if (oddeven == AREA_ODD) {
                     oddCount += 1;
                 } else if (oddeven == AREA_EVEN) {
@@ -225,7 +235,7 @@ public class PreludeConverter {
      */
     public FloatBuffer convertState(Board board, List<Coord> flipped, Coord coord, Color color) {
         checkRegion(board, coord, color);
-        enumerateArea(board);
+        enumerateOddEven(board);
 
         FloatBuffer buffer = FloatBuffer.allocate(COLUMNS * ROWS * CHANNELS);
 
@@ -266,15 +276,5 @@ public class PreludeConverter {
 
         buffer.clear(); // positionを0、limitをcapacityに戻す
         return buffer;
-    }
-
-    /**
-     * 反転数を加算する
-     */
-    public void increaseFlipped(List<Coord> flipped, Coord coord) {
-        for (Coord coord_ : flipped) {
-            flippedBoard[coord_.index()]++;
-        }
-        flippedBoard[coord.index()]++;
     }
 }
