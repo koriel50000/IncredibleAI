@@ -52,7 +52,6 @@ public class BitBoard {
      * @see <a href="http://primenumber.hatenadiary.jp/entry/2016/12/26/063226"/>
      */
     public long computeFlipped(long player, long opponent, int index) {
-        //
         // OM.x = O;
         // OM.yzw = O & 0x7e7e7e7e7e7e7e7eUL;
         // mask = (ulong4) (0x0080808080808080UL, 0x7f00000000000000UL, 0x0102040810204000UL, 0x0040201008040201UL) >> (63 - pos);
