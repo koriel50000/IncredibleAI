@@ -2,6 +2,9 @@ package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
+
 public class BitConverter {
 
     private static final int[] REGION = new int[]{
@@ -139,6 +142,58 @@ public class BitConverter {
         part = partitionRecursive(area, (coord & 0x7f7f7f7f7f7f7f7fL) << 1, part);
         // 右
         part = partitionRecursive(area, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL, part);
+        return part;
+    }
+
+    private static class Segment {
+
+        private long lx;
+        private long rx;
+        private int delta;
+
+        private Segment(long lx, long rx, int delta) {
+            this.lx = lx;
+            this.rx = rx;
+            this.delta = delta;
+        }
+
+        private static Segment create(long area, long seed, int delta) {
+            long lx = leftmostArea(area, seed);
+            long rx = rightmostArea(area, seed);
+            return new Segment(lx, rx, delta);
+        }
+    }
+
+    /**
+     * 塗りつぶしで領域を分割する
+     *
+     * @see <a href="https://www.hiramine.com/programming/graphics/2d_seedfill.html"/>
+     */
+    private long partitionScan(long area, long coord) {
+        Deque<Segment> segments = new ArrayDeque<Segment>();
+        segments.addFirst(Segment.create(area, coord, 0));
+
+        long part = 0L;
+        while (segments.size() > 0) {
+            Segment seg = segments.removeFirst();
+            part |= Bits.fill(seg.lx, seg.rx);
+            // 上側
+            long seed = seg.rx << 8;
+            while (seed < seg.lx) {
+                long rx = rightmostArea(area, seed);
+                if (seg.delta <= 0 && seg.lx <= rx && rx <= seg.rx) {
+                    segments.addFirst(Segment.create(area, seed, -1));
+                }
+            }
+            // 下側
+            seed = seg.rx >>> 8;
+            while (seed < seg.lx) {
+                long rx = rightmostArea(area, seed);
+                if (seg.delta >= 0 && seg.lx <= rx && rx <= seg.rx) {
+                    segments.addFirst(Segment.create(area, seed, 1));
+                }
+            }
+        }
         return part;
     }
 
