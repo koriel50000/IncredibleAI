@@ -78,10 +78,10 @@ public final class Bits {
      * シード(seed)の前後の連続した"1"のビット列を返す
      */
     public static long scanLine(long bits, long seed) {
-        long upper = bits & ~(seed - 1);
-        long lower = 0L;
-        // TODO
-        return bits;
+        int index = indexOf(seed);
+        long lower = (bits << index) >> index;
+        long upper = (bits ^ (bits + seed)) >>> 1;
+        return upper & lower;
     }
 
     /**

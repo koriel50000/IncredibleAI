@@ -145,6 +145,11 @@ public class BitConverter {
         return part;
     }
 
+    private static class Segment {
+        private int y;
+        private long part;
+    }
+
     /**
      * 塗りつぶしで領域を分割する
      *
