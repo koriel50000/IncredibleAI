@@ -145,53 +145,42 @@ public class BitConverter {
         return part;
     }
 
-    private static class Segment {
-
-        private long lx;
-        private long rx;
-        private int delta;
-
-        private Segment(long lx, long rx, int delta) {
-            this.lx = lx;
-            this.rx = rx;
-            this.delta = delta;
-        }
-
-        private static Segment create(long area, long seed, int delta) {
-            long lx = leftmostArea(area, seed);
-            long rx = rightmostArea(area, seed);
-            return new Segment(lx, rx, delta);
-        }
-    }
-
     /**
      * 塗りつぶしで領域を分割する
      *
      * @see <a href="https://www.hiramine.com/programming/graphics/2d_seedfill.html"/>
      */
     private long partitionScan(long area, long coord) {
-        Deque<Segment> segments = new ArrayDeque<Segment>();
-        segments.addFirst(Segment.create(area, coord, 0));
+        Deque<Long> segments = new ArrayDeque<>();
+        long mask = 0xff00000000000000L >>> (Bits.indexOf(coord) & 0x07);
+        long part = Bits.scanLine(area & mask, coord);
+        area ^= part;
+        segments.addFirst(part);
 
-        long part = 0L;
         while (segments.size() > 0) {
-            Segment seg = segments.removeFirst();
-            part |= Bits.fill(seg.lx, seg.rx);
+            long seg = segments.removeFirst();
+            mask = 0xff00000000000000L >>> (Bits.indexOf(Bits.getRightmostBit(seg)) & 0x07);
+            long areaUp = area & (mask << 8);
+            long areaDn = area & (mask >>> 8);
             // 上側
-            long seed = seg.rx << 8;
-            while (seed < seg.lx) {
-                long rx = rightmostArea(area, seed);
-                if (seg.delta <= 0 && seg.lx <= rx && rx <= seg.rx) {
-                    segments.addFirst(Segment.create(area, seed, -1));
-                }
+            long segUp = area & (seg << 8);
+            while (segUp != 0) {
+                long seed = Bits.getRightmostBit(segUp);
+                long fill = Bits.scanLine(areaUp, seed);
+                part |= fill;
+                area ^= fill;
+                segments.addFirst(fill);
+                segUp ^= fill;
             }
             // 下側
-            seed = seg.rx >>> 8;
-            while (seed < seg.lx) {
-                long rx = rightmostArea(area, seed);
-                if (seg.delta >= 0 && seg.lx <= rx && rx <= seg.rx) {
-                    segments.addFirst(Segment.create(area, seed, 1));
-                }
+            long segDn = area & (seg >>> 8);
+            while (segDn != 0) {
+                long seed = Bits.getRightmostBit(segDn);
+                long fill = Bits.scanLine(areaDn, seed);
+                part |= fill;
+                area ^= fill;
+                segments.addFirst(fill);
+                segDn ^= fill;
             }
         }
         return part;
@@ -202,7 +191,8 @@ public class BitConverter {
      */
     private long partition(BitState state, long area, long coord) {
         if ((area & coord) != 0) {
-            long part = partitionRecursive(area, coord, 0L);
+            //long part = partitionRecursive(area, coord, 0L);
+            long part = partitionScan(area, coord);
             if (Bits.populationCount(part) % 2 == 0) {
                 state.oddArea &= ~part;
                 state.evenArea |= part;

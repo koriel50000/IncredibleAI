@@ -75,6 +75,16 @@ public final class Bits {
     }
 
     /**
+     * シード(seed)の前後の連続した"1"のビット列を返す
+     */
+    public static long scanLine(long bits, long seed) {
+        long upper = bits & ~(seed - 1);
+        long lower = 0L;
+        // TODO
+        return bits;
+    }
+
+    /**
      * 最上位ビット(MSB: Most Significant Bit)から連続する"0"のビットの数を返す
      *
      * @see Long#numberOfLeadingZeros(long)
