@@ -80,6 +80,7 @@ public final class Bits {
     public static long scanLine(long bits, long seed, boolean rightmost) {
         long lower = 0L;
         if (!rightmost) {
+            // seedより下位ビット(seed含まない)の連続ビットを求める
             int index = indexOf(seed);
             long tmp = (bits << index) >> index;
             tmp &= tmp >> 1;
@@ -90,7 +91,8 @@ public final class Bits {
             tmp &= tmp >> 32;
             lower = tmp & (seed - 1);
         }
-        long upper = (bits ^ (bits + seed)) & ~bits;
+        // 桁上がりを利用してseedより上位ビット(seed含む)の連続ビットを求める
+        long upper = (bits ^ (bits + seed)) & bits;
         return upper | lower;
     }
 

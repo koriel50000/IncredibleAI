@@ -75,8 +75,12 @@ public class BitsTest {
                 () -> assertEquals(0x00000007f0000000L, Bits.scanLine(test, 0x0000000400000000L, false)),
                 () -> assertEquals(0x0000400000000000L, Bits.scanLine(test, 0x0000400000000000L, false)),
                 () -> assertEquals(0xe000000000000000L, Bits.scanLine(test, 0x8000000000000000L, false)),
-                () -> assertEquals(0x0000000000000001L, Bits.scanLine(test, 0x0000000000000001L, false))
-        );
+                () -> assertEquals(0x0000000000000001L, Bits.scanLine(test, 0x0000000000000001L, false)),
+                () -> assertEquals(0x00000007f0000000L, Bits.scanLine(test, 0x0000000010000000L, true)),
+                () -> assertEquals(0x0000400000000000L, Bits.scanLine(test, 0x0000400000000000L, true)),
+                () -> assertEquals(0xe000000000000000L, Bits.scanLine(test, 0x2000000000000000L, true)),
+                () -> assertEquals(0x0000000000000001L, Bits.scanLine(test, 0x0000000000000001L, true))
+                );
 
     }
 
