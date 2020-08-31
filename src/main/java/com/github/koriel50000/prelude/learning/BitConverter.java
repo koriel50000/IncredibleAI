@@ -163,14 +163,14 @@ public class BitConverter {
      */
     private long partitionScan(long area, long coord) {
         Deque<Segment> segments = new ArrayDeque<>();
-        int y = Bits.indexOf(coord) & 0x07;
+        int y = Bits.indexOf(coord) & 0x38;
         long part = Bits.scanLine(area & 0xff00000000000000L >>> y, coord, false);
         area ^= part;
         segments.addFirst(new Segment(y, part));
 
         while (segments.size() > 0) {
             Segment seg = segments.removeFirst();
-            long areaUp = area & 0xffL << (56 - seg.y);
+            long areaUp = area & 0xffL << (64 - seg.y);
             long areaDn = area & 0xff00000000000000L >>> (seg.y + 8);
             boolean rightmost;
             // 上側
@@ -207,8 +207,6 @@ public class BitConverter {
     private long partition(BitState state, long area, long coord) {
         if ((area & coord) != 0) {
             long part = partitionScan(area, coord);
-            long expectedPart = partitionRecursive(area, coord, 0L);
-            assert expectedPart == part : String.format("'%s' not match. %s %s", "part", expectedPart, part);
             if (Bits.populationCount(part) % 2 == 0) {
                 state.oddArea &= ~part;
                 state.evenArea |= part;
