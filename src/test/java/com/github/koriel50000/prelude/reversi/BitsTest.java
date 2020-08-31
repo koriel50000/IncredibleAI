@@ -67,6 +67,20 @@ public class BitsTest {
     }
 
     @Test
+    void scanLine() {
+        long test = 0xED094617f366F271L;
+        assertAll(
+                () -> assertEquals(0x00000007f0000000L, Bits.scanLine(test, 0x0000000080000000L, false)),
+                () -> assertEquals(0x00000007f0000000L, Bits.scanLine(test, 0x0000000010000000L, false)),
+                () -> assertEquals(0x00000007f0000000L, Bits.scanLine(test, 0x0000000400000000L, false)),
+                () -> assertEquals(0x0000400000000000L, Bits.scanLine(test, 0x0000400000000000L, false)),
+                () -> assertEquals(0xe000000000000000L, Bits.scanLine(test, 0x8000000000000000L, false)),
+                () -> assertEquals(0x0000000000000001L, Bits.scanLine(test, 0x0000000000000001L, false))
+        );
+
+    }
+
+    @Test
     void countLeadingZeros() {
         assertAll(
                 () -> assertEquals(64, Bits.countLeadingZeros(0x0000000000000000L)),

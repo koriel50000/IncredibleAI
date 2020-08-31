@@ -77,11 +77,21 @@ public final class Bits {
     /**
      * シード(seed)の前後の連続した"1"のビット列を返す
      */
-    public static long scanLine(long bits, long seed) {
-        int index = indexOf(seed);
-        long lower = (bits << index) >> index;
-        long upper = (bits ^ (bits + seed)) >>> 1;
-        return upper & lower;
+    public static long scanLine(long bits, long seed, boolean rightmost) {
+        long lower = 0L;
+        if (!rightmost) {
+            int index = indexOf(seed);
+            long tmp = (bits << index) >> index;
+            tmp &= tmp >> 1;
+            tmp &= tmp >> 2;
+            tmp &= tmp >> 4;
+            tmp &= tmp >> 8;
+            tmp &= tmp >> 16;
+            tmp &= tmp >> 32;
+            lower = tmp & (seed - 1);
+        }
+        long upper = (bits ^ (bits + seed)) & ~bits;
+        return upper | lower;
     }
 
     /**

@@ -146,8 +146,14 @@ public class BitConverter {
     }
 
     private static class Segment {
+
         private int y;
         private long part;
+
+        Segment(int y, long part) {
+            this.y = y;
+            this.part = part;
+        }
     }
 
     /**
@@ -156,36 +162,41 @@ public class BitConverter {
      * @see <a href="https://www.hiramine.com/programming/graphics/2d_seedfill.html"/>
      */
     private long partitionScan(long area, long coord) {
-        Deque<Long> segments = new ArrayDeque<>();
-        long mask = 0xff00000000000000L >>> (Bits.indexOf(coord) & 0x07);
-        long part = Bits.scanLine(area & mask, coord);
+        Deque<Segment> segments = new ArrayDeque<>();
+        int index = Bits.indexOf(coord);
+        int y = index & 0x07;
+        boolean rightmost = false;
+        long part = Bits.scanLine(area, coord, rightmost);
         area ^= part;
-        segments.addFirst(part);
+        segments.addFirst(new Segment(y, part));
 
         while (segments.size() > 0) {
-            long seg = segments.removeFirst();
-            mask = 0xff00000000000000L >>> (Bits.indexOf(Bits.getRightmostBit(seg)) & 0x07);
-            long areaUp = area & (mask << 8);
-            long areaDn = area & (mask >>> 8);
+            Segment seg = segments.removeFirst();
+            long areaUp = area & (0xffL << (56 - seg.y));
+            long areaDn = area & (0xff00000000000000L >>> (seg.y + 8));
             // 上側
-            long segUp = area & (seg << 8);
+            long segUp = area & (seg.part << 8);
+            rightmost = false;
             while (segUp != 0) {
                 long seed = Bits.getRightmostBit(segUp);
-                long fill = Bits.scanLine(areaUp, seed);
+                long fill = Bits.scanLine(areaUp, seed, rightmost);
                 part |= fill;
                 area ^= fill;
-                segments.addFirst(fill);
+                segments.addFirst(new Segment(seg.y - 8, fill));
                 segUp ^= fill;
+                rightmost = true;
             }
             // 下側
-            long segDn = area & (seg >>> 8);
+            long segDn = area & (seg.part >>> 8);
+            rightmost = false;
             while (segDn != 0) {
                 long seed = Bits.getRightmostBit(segDn);
-                long fill = Bits.scanLine(areaDn, seed);
+                long fill = Bits.scanLine(areaDn, seed, rightmost);
                 part |= fill;
                 area ^= fill;
-                segments.addFirst(fill);
+                segments.addFirst(new Segment(seg.y + 8, part));
                 segDn ^= fill;
+                rightmost = true;
             }
         }
         return part;
