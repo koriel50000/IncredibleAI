@@ -162,14 +162,15 @@ public class BitConverter {
      * @see <a href="https://www.hiramine.com/programming/graphics/2d_seedfill.html"/>
      */
     private long partitionScan(long area, long coord) {
-        Deque<Segment> segments = new ArrayDeque<>();
+        Segment[] segments = new Segment[32]; // たぶん十分なはず
+        int pos = 0;
         int y = Bits.indexOf(coord) & 0x38;
         long part = Bits.scanLine(area & 0xff00000000000000L >>> y, coord, false);
         area ^= part;
-        segments.addFirst(new Segment(y, part));
+        segments[pos++] = new Segment(y, part);
 
-        while (segments.size() > 0) {
-            Segment seg = segments.removeFirst();
+        while (pos > 0) {
+            Segment seg = segments[--pos];
             long areaUp = area & 0xffL << (64 - seg.y);
             long areaDn = area & 0xff00000000000000L >>> (seg.y + 8);
             boolean rightmost;
@@ -178,24 +179,24 @@ public class BitConverter {
             long segUp = area & (seg.part << 8);
             while (segUp != 0) {
                 long seed = Bits.getRightmostBit(segUp);
-                long fill = Bits.scanLine(areaUp, seed, rightmost);
+                long line = Bits.scanLine(areaUp, seed, rightmost);
                 rightmost = true;
-                part |= fill;
-                area ^= fill;
-                segments.addFirst(new Segment(seg.y - 8, fill));
-                segUp ^= fill;
+                part |= line;
+                area ^= line;
+                segments[pos++] = new Segment(seg.y - 8, line);
+                segUp ^= line;
             }
             // 下側
             rightmost = false;
             long segDn = area & (seg.part >>> 8);
             while (segDn != 0) {
                 long seed = Bits.getRightmostBit(segDn);
-                long fill = Bits.scanLine(areaDn, seed, rightmost);
+                long line = Bits.scanLine(areaDn, seed, rightmost);
                 rightmost = true;
-                part |= fill;
-                area ^= fill;
-                segments.addFirst(new Segment(seg.y + 8, fill));
-                segDn ^= fill;
+                part |= line;
+                area ^= line;
+                segments[pos++]  = new Segment(seg.y + 8, line);
+                segDn ^= line;
             }
         }
         return part;

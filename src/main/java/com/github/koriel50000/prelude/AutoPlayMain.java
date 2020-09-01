@@ -3,10 +3,12 @@ package com.github.koriel50000.prelude;
 import com.github.koriel50000.prelude.feature.Feature;
 import com.github.koriel50000.prelude.feature.PreludeFeature;
 import com.github.koriel50000.prelude.feature.RandomFeature;
-import com.github.koriel50000.prelude.feature.ReferenceFeature;
-import com.github.koriel50000.prelude.reversi.*;
+import com.github.koriel50000.prelude.reversi.BitBoard;
+import com.github.koriel50000.prelude.reversi.LineBuffer;
+import com.github.koriel50000.prelude.reversi.Reversi;
+import com.github.koriel50000.prelude.reversi.Score;
 
-import static com.github.koriel50000.prelude.reversi.Reversi.*;
+import static com.github.koriel50000.prelude.reversi.Reversi.Coord;
 
 public class AutoPlayMain {
 

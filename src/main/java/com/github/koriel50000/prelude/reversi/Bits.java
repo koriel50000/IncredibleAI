@@ -78,21 +78,21 @@ public final class Bits {
      * シード(seed)の前後の連続した"1"のビット列を返す
      */
     public static long scanLine(long bits, long seed, boolean rightmost) {
-        long lower = 0L;
-        if (!rightmost) {
-            // seedより下位ビット(seed含まない)の連続ビットを求める
-            int index = indexOf(seed);
-            long tmp = (bits << index) >> index;
-            tmp &= tmp >> 1;
-            tmp &= tmp >> 2;
-            tmp &= tmp >> 4;
-            tmp &= tmp >> 8;
-            tmp &= tmp >> 16;
-            tmp &= tmp >> 32;
-            lower = tmp & (seed - 1);
-        }
         // 桁上がりを利用してseedより上位ビット(seed含む)の連続ビットを求める
         long upper = (bits ^ (bits + seed)) & bits;
+        if (rightmost) {
+            return upper;
+        }
+        // seedより下位ビット(seed含まない)の連続ビットを求める
+        int index = indexOf(seed);
+        long tmp = (bits << index) >> index;
+        tmp &= tmp >> 1;
+        tmp &= tmp >> 2;
+        tmp &= tmp >> 4;
+        tmp &= tmp >> 8;
+        tmp &= tmp >> 16;
+        tmp &= tmp >> 32;
+        long lower = tmp & (seed - 1);
         return upper | lower;
     }
 
