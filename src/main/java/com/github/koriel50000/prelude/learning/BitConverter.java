@@ -2,9 +2,6 @@ package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
-
 public class BitConverter {
 
     private static final int[] REGION = new int[]{
@@ -147,12 +144,12 @@ public class BitConverter {
 
     private static class Segment {
 
-        private int y;
-        private long part;
+        int y;
+        long line;
 
-        Segment(int y, long part) {
+        Segment(int y, long line) {
             this.y = y;
-            this.part = part;
+            this.line = line;
         }
     }
 
@@ -176,7 +173,7 @@ public class BitConverter {
             boolean rightmost;
             // 上側
             rightmost = false;
-            long segUp = area & (seg.part << 8);
+            long segUp = area & (seg.line << 8);
             while (segUp != 0) {
                 long seed = Bits.getRightmostBit(segUp);
                 long line = Bits.scanLine(areaUp, seed, rightmost);
@@ -188,14 +185,14 @@ public class BitConverter {
             }
             // 下側
             rightmost = false;
-            long segDn = area & (seg.part >>> 8);
+            long segDn = area & (seg.line >>> 8);
             while (segDn != 0) {
                 long seed = Bits.getRightmostBit(segDn);
                 long line = Bits.scanLine(areaDn, seed, rightmost);
                 rightmost = true;
                 part |= line;
                 area ^= line;
-                segments[pos++]  = new Segment(seg.y + 8, line);
+                segments[pos++] = new Segment(seg.y + 8, line);
                 segDn ^= line;
             }
         }
