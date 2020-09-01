@@ -3,8 +3,7 @@ package com.github.koriel50000.prelude.reversi;
 import com.github.koriel50000.prelude.learning.BitConverter;
 import com.github.koriel50000.prelude.learning.BitState;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
 public class BitBoard {
 
@@ -25,11 +24,11 @@ public class BitBoard {
     private Score score;
 
     private BitConverter converter;
-    private Map<Long, BitState> availableStates;
+    private BitState[] availableStates;
 
     public BitBoard() {
         converter = new BitConverter();
-        availableStates = new HashMap<>();
+        availableStates = new BitState[64];
     }
 
     /**
@@ -43,7 +42,7 @@ public class BitBoard {
         passedBefore = false;
         score = null;
         converter.clear();
-        availableStates.clear();
+        Arrays.fill(availableStates, null);
     }
 
     /**
@@ -202,7 +201,7 @@ public class BitBoard {
      */
     public BitState convertState(long player, long opponent, long coord) {
         BitState state = convertStatePrivate(player, opponent, coord);
-        availableStates.put(coord, state);
+        availableStates[Bits.indexOf(coord)] = state;
         return state;
     }
 
@@ -210,11 +209,11 @@ public class BitBoard {
      * 指定された位置に石を打つ
      */
     public void makeMove(long player, long opponent, long coord) {
-        BitState state = availableStates.get(coord);
+        BitState state = availableStates[Bits.indexOf(coord)];
         if (state == null) {
             state = convertStatePrivate(player, opponent, coord);
         } else {
-            availableStates.clear();
+            Arrays.fill(availableStates, null);
         }
         converter.setState(state);
 
@@ -232,8 +231,7 @@ public class BitBoard {
         // 先手・後手両方パスで終了
         // 先手・後手どちらかが完勝したら終了
         if (depth == 0 || (passed && passedBefore) ||
-                Bits.populationCount(whiteBoard) == 0 || Bits.populationCount(blackBoard) == 0)
-        {
+                Bits.populationCount(whiteBoard) == 0 || Bits.populationCount(blackBoard) == 0) {
             String winner;
             int blackCount = Bits.populationCount(blackBoard);
             int whiteCount = Bits.populationCount(whiteBoard);
@@ -261,7 +259,7 @@ public class BitBoard {
         passedBefore = passed;
     }
 
-    private static final String[] STONES = { ".", "@", "O" };
+    private static final String[] STONES = {".", "@", "O"};
 
     private int stoneColor(int x, int y) {
         long coord = Bits.coordAt(x - 1, y - 1);
