@@ -47,6 +47,19 @@ def evaluate_records(sess, move_record, eval_record):
         num_total += 1
         if predicted_value == value:
             num_correct += 1
+        # 評価値がdelta範囲内で降順、同値は着手のindexで昇順に並び替え
+        # 正答率は評価値の上位3つで計算する
+        # 1 2 3 : 1.0
+        # 1 3 2 : 0.9
+        # 1 x x : 0.8
+        # 2 1 3 : 0.7
+        # 2 3 1 : 0.6
+        # 2 x x : 0.4
+        # 3 1 2 : 0.3
+        # 3 2 1 : 0.2
+        # 3 x x : 0.1
+        # x x x : 0.0 上記以外は0.0
+        # まずはこれでやってみる
 
         coord = converter.move_to_coord(actual_move)
         reversi.make_move(coord)
@@ -64,7 +77,8 @@ def evaluating_model(sess, path, filenames, begin, end):
             eval_record = [x.strip() for x in fin.readlines()]
 
         evaluate_records(sess, move_record, eval_record)
-
+        # 全体の正答率
+        # depth毎の正答率
         if i % 10 == 0:
             print("{0}: {1}".format(i, file))
             print(float(num_correct) / num_total)

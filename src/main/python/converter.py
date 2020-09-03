@@ -182,7 +182,8 @@ def put_state(state, region, x, y, channel):
 def convert_state(reversi, coord, dtype=np.uint8):
     board, next_board, reverse, next_reverse, turn = reversi.make_move(coord)
 
-    region = check_region(next_board, coord, turn)
+    #region = check_region(next_board, coord, turn)
+    region = check_region(board, coord, turn)
 
     oddeven_area, early_stage, empty_count, odd_count, even_count = enumerate_area(board)
 
