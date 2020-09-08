@@ -4,14 +4,14 @@ import datasets
 from tensorflow import keras
 
 # 定数宣言
-input_rows = 8
 input_cols = 8
-input_channel = 16
+input_rows = 8
+input_channels = 16
 
 
 # モデル定義
-inputs = keras.Input(shape=(input_rows * input_cols * input_channel,), name='inputs')
-x = keras.layers.Reshape((input_rows, input_cols, input_channel))(inputs)
+inputs = keras.Input(shape=(input_cols * input_rows * input_channels,), name='inputs')
+x = keras.layers.Reshape((input_cols, input_rows, input_channels))(inputs)
 x = keras.layers.Conv2D(64, 5, padding='SAME', activation='relu', use_bias=False)(x)
 x = keras.layers.Conv2D(64, 3, padding='SAME', activation='relu', use_bias=False)(x)
 x = keras.layers.Conv2D(64, 3, padding='SAME', activation='relu', use_bias=False)(x)
@@ -56,10 +56,16 @@ def calculate_predicted_value(state):
     return predictions_[0][0]
 
 
+#
+# 学習済みモデルを保存する
+#
 def save_model(export_dir):
     keras.models.save_model(model, export_dir)
 
 
+#
+# チェックポイントを読み込む
+#
 def load_checkpoint(checkpoint_dir, step, epoch):
     filename = 'train1k{:02d}_{:02d}'.format(step, epoch)
     model.load_weights(checkpoint_dir + filename)

@@ -5,6 +5,9 @@ from datetime import datetime
 
 import cnn_model
 
+# 定数宣言
+EPOCH_SIZE = 10
+
 
 #
 # メイン
@@ -15,13 +18,13 @@ def main(args):
     start_step = 0
     end_step = 100
     initial_epoch = 0
-    epoch_size = 10
 
+    # チェックポイントから学習を再開する
     if start_step != 0 or initial_epoch != 0:
         cnn_model.load_checkpoint("../resources/checkpoint/",
                                   start_step,
                                   initial_epoch)
-    if initial_epoch == 10:
+    if initial_epoch == EPOCH_SIZE:
         start_step += 1
         initial_epoch = 0
 
@@ -30,7 +33,7 @@ def main(args):
                                  '../resources/checkpoint/',
                                  step,
                                  initial_epoch,
-                                 epoch_size)
+                                 EPOCH_SIZE)
         initial_epoch = 0
         print(datetime.now())
 

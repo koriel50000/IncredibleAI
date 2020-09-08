@@ -72,6 +72,7 @@ def is_symmetric(diagonal, board, turn):
                 x_, y_ = 9 - x, 9 - y  # 上下左右反転
 
             if board[y_][x_] != board[x_][y_]:
+                # FIXME
                 return board[y_][x_] != turn
     return False
 
