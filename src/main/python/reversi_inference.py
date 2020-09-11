@@ -27,11 +27,66 @@ def calculate_predicted_value(state):
 
 
 #
+# 正答率を計算する
+#
+def calculate_accuracies(index, values, predicted_values):
+    global total_accuracy, move_accuracies
+
+    # 評価値がepsilon範囲内で降順、同値は棋譜の着手順
+    # 正答率は評価値の上位3つで計算する
+    # 1 2 3 : 1.0
+    # 1 3 2 : 0.9
+    # 1 x x : 0.8
+    # 2 1 3 : 0.7
+    # 2 3 1 : 0.6
+    # 2 x x : 0.4
+    # 3 1 2 : 0.3
+    # 3 2 1 : 0.2
+    # 3 x x : 0.1
+    # x x x : 0.0 上記以外は0.0
+    # まずはこれでやってみる
+    epsilon = 0.001
+
+    # for value in values:
+    #     print(' {0:.2f}'.format(value), end='')
+    # print()
+    # for value in predicted_values:
+    #     print(' {0:.2f}'.format(value), end='')
+    # print()
+    # print()
+    if len(values) > 
+    if predicted_values[0] == values[0]:
+        if predicted_values[1] == values[2]:
+            accuracy = 1.0
+        elif predicted_values[2] == values[1]:
+            accuracy = 0.9
+        else:
+            accuracy = 0.8
+    elif predicted_values[1] == values[1]:
+        if predicted_values[1] == values[2]:
+            accuracy = 0.7
+        elif predicted_values[2] == values[1]:
+            accuracy = 0.6
+        else:
+            accuracy = 0.4
+    elif predicted_values[2] == values[2]:
+        if predicted_values[1] == values[2]:
+            accuracy = 0.3
+        elif predicted_values[2] == values[1]:
+            accuracy = 0.2
+        else:
+            accuracy = 0.1
+    else:
+        accuracy = 0.0
+
+    total_accuracy = 0.0
+    move_accuracies[index] = 0.0
+
+
+#
 # 棋譜を評価する
 #
 def evaluating_records(move_record, eval_record):
-    global total_accuracy, move_accuracies
-
     reversi.initialize()
 
     for index, actual_move in enumerate(converter.convert_moves(move_record)):
@@ -49,51 +104,7 @@ def evaluating_records(move_record, eval_record):
             # probs = np.r_[pprobs, nprobs]
             # view_probs = ["{0:.2f}".format(x) for x in probs]
 
-        epsilon = 0.001
-
-        for value in values:
-            print(' {0:.2f}'.format(value), end='')
-        print()
-        for value in predicted_values:
-            print(' {0:.2f}'.format(value), end='')
-        print()
-        print()
-        # 評価値がepsilon範囲内で降順、同値は棋譜の着手順
-        # 正答率は評価値の上位3つで計算する
-        # 1 2 3 : 1.0
-        # 1 3 2 : 0.9
-        # 1 x x : 0.8
-        # 2 1 3 : 0.7
-        # 2 3 1 : 0.6
-        # 2 x x : 0.4
-        # 3 1 2 : 0.3
-        # 3 2 1 : 0.2
-        # 3 x x : 0.1
-        # x x x : 0.0 上記以外は0.0
-        # まずはこれでやってみる
-        if predicted_values[0] == values[0]:
-            if predicted_values[1] == values[2]:
-                accuracy = 1.0
-            elif predicted_values[2] == values[1]:
-                accuracy = 0.9
-            else:
-                accuracy = 0.8
-        elif predicted_values[1] == values[1]:
-            if predicted_values[1] == values[2]:
-                accuracy = 0.7
-            elif predicted_values[2] == values[1]:
-                accuracy = 0.6
-            else:
-                accuracy = 0.4
-        elif predicted_values[2] == values[2]:
-            if predicted_values[1] == values[2]:
-                accuracy = 0.3
-            elif predicted_values[2] == values[1]:
-                accuracy = 0.2
-            else:
-                accuracy = 0.1
-        else:
-            accuracy = 0.0
+        calculate_accuracies(index, values, predicted_values)
 
         coord = converter.move_to_coord(actual_move)
         reversi.make_move(coord)
