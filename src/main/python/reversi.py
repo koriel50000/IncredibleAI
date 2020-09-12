@@ -16,13 +16,14 @@ number_of_stones = [0, 0, 0]
 temp_number_of_stones = [0, 0, 0]
 current_turn = 0
 turn_count = 0
+passedBefore = False
 
 
 #
 # 盤面を初期化する
 #
 def initialize():
-    global board, reverse, number_of_stones, current_turn, turn_count
+    global board, reverse, number_of_stones, current_turn, turn_count, passedBefore
 
     for y in range(10):
         for x in range(10):
@@ -43,6 +44,7 @@ def initialize():
     number_of_stones[WHITE] = 2
     current_turn = BLACK
     turn_count = 1
+    passedBefore = False
 
 
 #
@@ -60,15 +62,15 @@ def get_current_turn():
 #
 # 方向を指定して石が打てるかを判定する
 #
-def can_move_direction(turn, coord, dir):
+def can_move_direction(coord, direction):
     x, y = coord
-    dx, dy = dir
+    dx, dy = direction
     x += dx
     y += dy
-    while board[y][x] == opponent_turn(turn):  # 相手石ならば継続
+    while board[y][x] == opponent_turn(current_turn):  # 相手石ならば継続
         x += dx
         y += dy
-        if board[y][x] == turn:  # 自石ならば終了
+        if board[y][x] == current_turn:  # 自石ならば終了
             return True
     return False
 
@@ -76,11 +78,11 @@ def can_move_direction(turn, coord, dir):
 #
 # 指定した位置に石が打てるかを判定する
 #
-def can_move(turn, coord):
+def can_move(coord):
     x, y = coord
     if board[y][x] == EMPTY:
-        for dir in DIRECTIONS:
-            if can_move_direction(turn, coord, dir):
+        for direction in DIRECTIONS:
+            if can_move_direction(coord, direction):
                 return True
     return False
 
@@ -88,12 +90,12 @@ def can_move(turn, coord):
 #
 # 着手可能なリストを返す
 #
-def available_moves(turn):
+def available_moves():
     coords = []
     for y in range(1, 8 + 1):
         for x in range(1, 8 + 1):
             coord = (x, y)
-            if can_move(turn, coord):
+            if can_move(coord):
                 coords.append(coord)
     return coords
 
@@ -116,11 +118,11 @@ def make_move(coord):
     number_of_stones[turn] += 1  # 自石を増やす
     number_of_stones[EMPTY] -= 1  # 空白を減らす
 
-    for dir in DIRECTIONS:
-        if not can_move_direction(turn, coord, dir):
+    for direction in DIRECTIONS:
+        if not can_move_direction(coord, direction):
             continue
         x, y = coord
-        dx, dy = dir
+        dx, dy = direction
         x += dx
         y += dy
         while board[y][x] == opponent_turn(turn):  # 相手石ならば継続
@@ -137,12 +139,12 @@ def make_move(coord):
 #
 # ゲームの終了を判定する
 #
-def has_completed():
+def has_completed(passed):
     if number_of_stones[EMPTY] == 0:  # 空白がなくなったら終了
         return True
-    elif number_of_stones[BLACK] == 0 or number_of_stones[WHITE] == 0:  # 先手・後手どちらかが完勝したら終了
+    elif passed and passedBefore:  # 先手・後手両方パスで終了
         return True
-    elif len(available_moves(BLACK)) == 0 and len(available_moves(WHITE)) == 0:  # 先手・後手両方パスで終了
+    elif number_of_stones[BLACK] == 0 or number_of_stones[WHITE] == 0:  # 先手・後手どちらかが完勝したら終了
         return True
     else:
         return False  # 上記以外はゲーム続行
@@ -151,11 +153,12 @@ def has_completed():
 #
 # 手番を進める
 #
-def next_turn():
-    global current_turn, turn_count
+def next_turn(passed):
+    global current_turn, turn_count, passedBefore
 
     current_turn = opponent_turn(current_turn)  # 手番を変更
     turn_count += 1
+    passedBefore = passed
 
 
 #

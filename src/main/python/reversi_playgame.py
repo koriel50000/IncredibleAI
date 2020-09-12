@@ -43,10 +43,11 @@ def optimum_choice(evals):
 # 差し手を評価する
 #
 def prelude_feature(coords):
+    ndigits = 3  # 評価値は小数点第三位を四捨五入
     evals = []
     for coord in coords:
         state = converter.convert_state(reversi, coord, dtype=np.float32)
-        value = calculate_predicted_value(state)
+        value = round(calculate_predicted_value(state), ndigits)
         evals.append({'coord': coord, 'value': value})
 
     return optimum_choice(evals)
@@ -71,25 +72,31 @@ def play(black_feature, white_feature):
     reversi.initialize()
     
     while True:
-        turn = reversi.get_current_turn()
-
         reversi.print_board()
         reversi.print_status()
 
-        coords = reversi.available_moves(turn)
-        if len(coords) > 0:
-            if turn == reversi.BLACK:
+        passed = False
+        if reversi.get_current_turn() == reversi.BLACK:
+            coords = reversi.available_moves()
+            if len(coords) > 0:
                 coord = black_feature(coords)
+                reversi.make_move(coord)
             else:
-                coord = white_feature(coords)
-            reversi.make_move(coord)
+                print("Pass!")
+                passed = True
         else:
-            print("Pass!")
-        
+            coords = reversi.available_moves()
+            if len(coords) > 0:
+                coord = white_feature(coords)
+                reversi.make_move(coord)
+            else:
+                print("Pass!")
+                passed = True
+
         # ゲーム終了を判定
-        if reversi.has_completed():
+        if reversi.has_completed(passed):
             break
-        reversi.next_turn()
+        reversi.next_turn(passed)
 
     reversi.print_board()
     reversi.print_score()
@@ -101,7 +108,8 @@ def play(black_feature, white_feature):
 def main(args):
     # TODO 先手・後手を選択
 
-    play(prelude_feature, manual_feature)
+    # play(prelude_feature, manual_feature)
+    play(prelude_feature, random_feature)
 
     return 0
 

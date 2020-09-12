@@ -50,8 +50,8 @@ def calculate_accuracies(index, evals, predicted_evals):
     # 0.0 : x x x | x x | x 上記以外は0.0
     # まずはこれでやってみる
 
-    evals.sort(reverse=True, key=lambda x: x['value'])
-    predicted_evals.sort(reverse=True, key=lambda x: x['value'])
+    evals.sort(key=lambda x: x['value'], reverse=True)
+    predicted_evals.sort(key=lambda x: x['value'], reverse=True)
 
     # for entry in evals:
     #     move = converter.coord_to_move(entry['coord'])
