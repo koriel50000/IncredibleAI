@@ -38,9 +38,9 @@ def move_to_coord(move):
 #
 # 位置を着手に変換する
 #
-# def coord_to_move(coord):
-#     x, y = coord
-#     return "{0}{1}".format(chr(ord("A") + x - 1), y)
+def coord_to_move(coord):
+    x, y = coord
+    return "{0}{1}".format(chr(ord("A") + x - 1), y)
 
 
 #

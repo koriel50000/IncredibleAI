@@ -4,6 +4,7 @@ import sys
 import glob
 import os.path
 import zipfile
+import math
 
 import reversi
 import converter
@@ -13,6 +14,7 @@ from tensorflow import keras
 model = keras.models.load_model("../resources/model/")
 
 # global変数宣言
+total_count = 0
 total_accuracy = 0.0
 move_accuracies = [0.0] * 60
 
@@ -29,115 +31,130 @@ def calculate_predicted_value(state):
 #
 # 正答率を計算する
 #
-def calculate_accuracies(index, values, predicted_values):
-    global total_accuracy, move_accuracies
+def calculate_accuracies(index, evals, predicted_evals):
+    global total_count, total_accuracy, move_accuracies
 
-    # TODO 評価値を並び替え
-
-    # 評価値がepsilon範囲内で降順、同値は棋譜の着手順
     # 正答率は評価値の上位3つで計算する
     # 1.0 : 1 2 3 | 1 2 | 1
     # 0.9 : 1 2 x
     # 0.8 : 1 3 2
     # 0.7 : 1 3 x
-    # 0.5 : 1 x x | 1 x
-    # 0.7 : 2 1 3 | 2 1
-    # 0.6 : 2 1 x
+    # 0.5 : 1 x x
+    # 0.7 : 2 1 3
+    # 0.6 : 2 1 x | 2 1
     # 0.5 : 2 3 1
     # 0.4 : 2 3 x
-    # 0.2 : 2 x x | 2 x
+    # 0.2 : 2 x x
     # 0.2 : 3 1 2
     # 0.1 : 3 2 1
     # 0.0 : x x x | x x | x 上記以外は0.0
     # まずはこれでやってみる
-    epsilon = 0.001
 
-    # for value in values:
-    #     print(' {0:.2f}'.format(value), end='')
+    evals.sort(reverse=True, key=lambda x: x['value'])
+    predicted_evals.sort(reverse=True, key=lambda x: x['value'])
+
+    # for entry in evals:
+    #     move = converter.coord_to_move(entry['coord'])
+    #     value = entry['value']
+    #     print(' {0}:{1:.2f}'.format(move, value), end='')
     # print()
-    # for value in predicted_values:
-    #     print(' {0:.2f}'.format(value), end='')
+    # for entry in predicted_evals:
+    #     move = converter.coord_to_move(entry['coord'])
+    #     value = entry['value']
+    #     print(' {0}:{1:.2f}'.format(move, value), end='')
     # print()
     # print()
-    count = len(values)
+
+    count = len(evals)
     if count == 1:
-        if predicted_values[0] == values[0]:  # 1
-            accuracy = 1.0
-        else:
-            # 一致しないことはありえない
-            raise Exception("Error!")
+        accuracy = 1.0
+
     elif count == 2:
-        if predicted_values[0] == values[0]:  # 1 -
-            if predicted_values[1] == values[1]:  # 1 2
-                accuracy = 1.0
-            else:  # 1 x
-                accuracy = 0.8
-        elif predicted_values[0] == values[1]:
-            if predicted_values[1] == values[0]:
-                accuracy = 0.7
-            else:
-                accuracy = 0.4
-        else:
-            accuracy = 0.0
+        first = evals[0]['coord']
+        predicted_first = predicted_evals[0]['coord']
+        if predicted_first == first:  # 1 2
+            accuracy = 1.0
+        else:  # 2 1
+            accuracy = 0.6
+
     else:
-        if predicted_values[0] == values[0]:  # 1 - -
-            if predicted_values[1] == values[2]:  # 1
-                accuracy = 1.0
-            elif predicted_values[2] == values[1]:
-                accuracy = 0.9
-            else:
-                accuracy = 0.8
-        elif predicted_values[0] == values[1]:  # 2 x x
-            if predicted_values[1] == values[0]:
-                accuracy = 0.7
-            elif predicted_values[2] == values[2]:
-                accuracy = 0.6
-            else:
-                accuracy = 0.4
-        elif predicted_values[0] == values[2]:  # 3 x x
-            if predicted_values[1] == values[0]:
-                accuracy = 0.3
-            elif predicted_values[2] == values[1]:
+        first = evals[0]['coord']
+        predicted_first = predicted_evals[0]['coord']
+        second = evals[1]['coord']
+        predicted_second = predicted_evals[1]['coord']
+        third = evals[2]['coord']
+        predicted_third = predicted_evals[2]['coord']
+
+        if predicted_first == first:  # 1 - -
+            if predicted_second == second:  # 1 2 -
+                if predicted_third == third:  # 1 2 3
+                    accuracy = 1.0
+                else:  # 1 2 x
+                    accuracy = 0.9
+            elif predicted_second == third:  # 1 3 -
+                if predicted_third == second:  # 1 3 2
+                    accuracy = 0.8
+                else:  # 1 3 x
+                    accuracy = 0.7
+            else:  # 1 x x
+                accuracy = 0.5
+        elif predicted_first == second:  # 2 - -
+            if predicted_second == first:  # 2 1 -
+                if predicted_third == third:  # 2 1 3
+                    accuracy = 0.7
+                else:  # 2 1 x
+                    accuracy = 0.6
+            elif predicted_second == third:  # 2 3 -
+                if predicted_third == first:  # 2 3 1
+                    accuracy = 0.5
+                else:  # 2 3 x
+                    accuracy = 0.4
+            else:  # 2 x x
                 accuracy = 0.2
-            else:
+        elif predicted_first == third:  # 3 - -
+            if predicted_second == first and predicted_third == second:  # 3 1 2
+                accuracy = 0.2
+            elif predicted_second == second and predicted_third == first:  # 3 2 1
                 accuracy = 0.1
-        else:
+            else:  # 上記以外は0.0
+                accuracy = 0.0
+        else:  # 上記以外は0.0
             accuracy = 0.0
 
-    total_accuracy = 0.0
-    move_accuracies[index] = 0.0
+    total_count += 1
+    total_accuracy += accuracy
+    move_accuracies[index] += accuracy
 
 
 #
 # 棋譜を評価する
 #
-def evaluating_records(move_record, eval_record):
+def evaluating_records(move_record, eval_records):
     reversi.initialize()
 
     for index, actual_move in enumerate(converter.convert_moves(move_record)):
-        print("index:{0} move:{1}".format(index + 1, actual_move))
-        turn = reversi.get_current_turn()
+        # print("index:{0} move:{1}".format(index, actual_move))
         while True:
-            moves = reversi.available_moves(turn)
-            if len(moves) > 0:
+            turn = reversi.get_current_turn()
+            coords = reversi.available_moves(turn)
+            if len(coords) > 0:
                 break
             print("Pass!")
             reversi.next_turn()
 
-        values = []
-        predicted_values = []
-        evals = converter.convert_evals(eval_record[index])
+        evals = converter.convert_evals(eval_records[index])
+
+        ndigits = 3  # 評価値は小数点第三位を四捨五入
+        predicted_evals = []
         for entry in evals:
             coord = entry['coord']
             value = entry['value']
+            entry['value'] = round(value, ndigits)
             state = converter.convert_state(reversi, coord)
-            predicted_value = calculate_predicted_value(state)(state)
-            values.append(value)
-            predicted_values.append(predicted_value)
-            # probs = np.r_[pprobs, nprobs]
-            # view_probs = ["{0:.2f}".format(x) for x in probs]
+            predicted_value = round(calculate_predicted_value(state), ndigits)
+            predicted_evals.append({'coord': coord, 'value': predicted_value})
 
-        calculate_accuracies(index, values, predicted_values)
+        calculate_accuracies(index, evals, predicted_evals)
 
         coord = converter.move_to_coord(actual_move)
         reversi.make_move(coord)
@@ -152,20 +169,20 @@ def evaluating_model(path, filenames):
         file = os.path.join(path, filename)
         with open(file, "r") as fin:
             move_record = fin.readline().strip()
-            eval_record = [x.strip() for x in fin.readlines()]
+            eval_records = [x.strip() for x in fin.readlines()]
 
-        evaluating_records(move_record, eval_record)
+        evaluating_records(move_record, eval_records)
 
         # 全体の正答率
-        if i % 10 == 0:
-            print("{0}: {1}".format(i, file))
-            print("total_accuracy: {0}".format(total_accuracy))
+        print("{0}: {1}".format(i, file))
+        print("total_accuracy: {0}".format(total_accuracy / total_count))
 
     # 全体の正答率
-    print("total_accuracy: {0}".format(total_accuracy))
+    print("total_accuracy: {0}".format(total_accuracy / total_count))
     # depth毎の正答率
-    for i in range(len(move_accuracies)):
-        print("move_accuracies[{0}]: {1}".format(i, move_accuracies[i]))
+    size = len(move_accuracies)
+    for i in range(size):
+        print("move_accuracies[{0}]: {1}".format(i, move_accuracies[i] * size / total_count))
 
 
 #
@@ -176,15 +193,14 @@ def main(args):
     with zipfile.ZipFile(os.path.join(path, "kifu102245.zip")) as records_zip:
 
         namelist = records_zip.namelist()
-        step = 1000
-        for i, pos in enumerate(range(100000, 102000, step)):
-            filenames = namelist[pos: pos + step]
-            records_zip.extractall(path, filenames)
 
-            evaluating_model(path, filenames)
+        filenames = namelist[100000: 100100]
+        records_zip.extractall(path, filenames)
 
-            for file in glob.glob(os.path.join(path, "kifu*.txt")):
-                os.remove(file)
+        evaluating_model(path, filenames)
+
+        for file in glob.glob(os.path.join(path, "kifu*.txt")):
+            os.remove(file)
 
     return 0
 
