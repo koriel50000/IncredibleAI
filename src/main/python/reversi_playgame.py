@@ -63,22 +63,16 @@ def play(black_feature, white_feature):
         reversi.print_status()
 
         passed = False
-        if reversi.current_color == reversi.BLACK:
-            coords = reversi.available_moves()
-            if len(coords) > 0:
+        coords = reversi.available_moves()
+        if len(coords) > 0:
+            if reversi.current_color == reversi.BLACK:
                 coord = black_feature(coords)
-                reversi.make_move(coord)
             else:
-                print("Pass!")
-                passed = True
-        else:
-            coords = reversi.available_moves()
-            if len(coords) > 0:
                 coord = white_feature(coords)
-                reversi.make_move(coord)
-            else:
-                print("Pass!")
-                passed = True
+            reversi.make_move(coord)
+        else:
+            print("Pass!")
+            passed = True
 
         # ゲーム終了を判定
         if reversi.has_completed(passed):

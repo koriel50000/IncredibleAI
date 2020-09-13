@@ -92,12 +92,12 @@ def compute_flipped(coord):
         if not can_move_direction(coord, direction):
             continue
         dx, dy = direction
-        x += dx
-        y += dy
-        while board[y][x] == opponent_turn(current_color):  # 相手石ならば継続
-            flipped.append((x, y))  # 反転位置を追加
-            x += dx
-            y += dy
+        x_ = x + dx
+        y_ = y + dy
+        while board[y_][x_] == opponent_turn(current_color):  # 相手石ならば継続
+            flipped.append((x_, y_))  # 反転位置を追加
+            x_ += dx
+            y_ += dy
 
     return flipped
 

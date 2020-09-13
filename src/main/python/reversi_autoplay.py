@@ -49,20 +49,21 @@ def play(black_feature, white_feature):
     reversi.clear()
 
     while True:
-        turn = reversi.get_current_turn()
-
-        coords = reversi.available_moves(turn)
+        passed = False
+        coords = reversi.available_moves()
         if len(coords) > 0:
-            if turn == reversi.BLACK:
+            if reversi.current_color == reversi.BLACK:
                 coord = black_feature(coords)
             else:
                 coord = white_feature(coords)
             reversi.make_move(coord)
+        else:
+            passed = True
 
         # ゲーム終了を判定
-        if reversi.has_completed():
+        if reversi.has_completed(passed):
             break
-        reversi.next_turn()
+        reversi.next_turn(passed)
 
     winner, black, white = reversi.print_score()
 

@@ -7,24 +7,12 @@ import zipfile
 
 import reversi
 import converter
-# import cnn_model
-from tensorflow import keras
-
-model = keras.models.load_model("../resources/model/")
+import cnn_model
 
 # global変数宣言
 total_count = 0
 total_accuracy = 0.0
 move_accuracies = [0.0] * 60
-
-
-#
-# 予測値を計算する
-#
-def calculate_predicted_value(state):
-    state_ = state.reshape(1, -1)
-    predictions_ = model.predict(state_)
-    return predictions_[0][0]
 
 
 #
@@ -150,7 +138,7 @@ def evaluating_records(move_record, eval_records):
             value = entry['value']
             entry['value'] = round(value, ndigits)
             state = reversi.convert_state(coord)
-            predicted_value = round(calculate_predicted_value(state), ndigits)
+            predicted_value = round(cnn_model.calculate_predicted_value(state), ndigits)
             predicted_evals.append({'coord': coord, 'value': predicted_value})
 
         calculate_accuracies(index, evals, predicted_evals)
@@ -186,7 +174,7 @@ def evaluating_model(path, filenames):
 # メイン
 #
 def main(args):
-    # cnn_model.load_model("../resources/model/")
+    cnn_model.load_model("../resources/model/")
 
     path = "../resources/records/"
     with zipfile.ZipFile(os.path.join(path, "kifu102245.zip")) as records_zip:
