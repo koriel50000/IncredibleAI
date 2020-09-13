@@ -3,9 +3,14 @@
 import numpy as np
 import statistics as stat
 
-import reversi
-
 # 定数宣言
+COLUMNS = 8
+ROWS = 8
+CHANNELS = 16
+
+BOARD_EMPTY = 0
+BOARD_BORDER = 3
+
 AREA_EMPTY = 0
 AREA_ODD = 1
 AREA_EVEN = 2
@@ -23,12 +28,12 @@ REGION = ((8, 0, 0, 0, 2, 2, 2, 10),
 
 # global変数宣言
 region = 0
-oddeven_area = [[0 for x_ in range(reversi.COLUMNS + 2)] for y_ in range(reversi.ROWS + 2)]
+oddeven_area = [[0 for x_ in range(COLUMNS + 2)] for y_ in range(ROWS + 2)]
 odd_count = 0
 even_count = 0
 empty_count = 0
 early_turn = True
-flipped_board = [[0 for x_ in range(reversi.COLUMNS + 2)] for y_ in range(reversi.ROWS + 2)]
+flipped_board = [[0 for x_ in range(COLUMNS + 2)] for y_ in range(ROWS + 2)]
 
 
 def clear():
@@ -39,8 +44,8 @@ def clear():
     even_count = 1
     empty_count = 60
     early_turn = True
-    for y in range(1, reversi.ROWS + 1):
-        for x in range(1, reversi.COLUMNS + 1):
+    for y in range(1, ROWS + 1):
+        for x in range(1, COLUMNS + 1):
             flipped_board[y][x] = 0
     flipped_board[4][4] = 1
     flipped_board[4][5] = 1
@@ -52,8 +57,8 @@ def clear():
 # 対角位置の対称変換が必要か
 #
 def is_symmetric(diagonal, board, color):
-    for y in range(1, reversi.ROWS + 1):
-        for x in range(y + 1, reversi.COLUMNS + 1):
+    for y in range(1, ROWS + 1):
+        for x in range(y + 1, COLUMNS + 1):
             x_, y_ = x, y
             if diagonal == 8:
                 x_, y_ = x, y  # 変換なし
@@ -92,9 +97,9 @@ def increase_flipped(flipped, coord):
 
     for coord_ in flipped:
         x, y = coord_
-        flipped_board[y - 1][x - 1] += 1
+        flipped_board[y][x] += 1
     x, y = coord
-    flipped_board[y - 1][x - 1] += 1
+    flipped_board[y][x] += 1
 
 
 #
@@ -122,8 +127,8 @@ def partition(area, x, y):
     count = partition_recursive(area, x, y, 0)
     oddeven = AREA_ODD if count % 2 == 1 else AREA_EVEN
 
-    for y_ in range(1, 9):
-        for x_ in range(1, 9):
+    for y_ in range(1, ROWS + 1):
+        for x_ in range(1, COLUMNS + 1):
             if area[y_][x_] == AREA_UNKNOWN:
                 area[y_][x_] = oddeven
 
@@ -139,17 +144,20 @@ def enumerate_oddeven(board):
     early_turn = True
     for y in range(10):
         for x in range(10):
-            if board[y][x] == reversi.EMPTY:
+            if board[y][x] == BOARD_EMPTY:
                 oddeven_area[y][x] = AREA_EMPTY
-            elif board[y][x] == reversi.BORDER:
+            elif board[y][x] == BOARD_BORDER:
                 oddeven_area[y][x] = AREA_NOT_EMPTY
             else:
                 oddeven_area[y][x] = AREA_NOT_EMPTY
                 if x == 1 or x == 8 or y == 1 or y == 8:
-                    early_stage = False
+                    early_turn = False
 
-    for y in range(1, reversi.ROWS + 1):
-        for x in range(1, reversi.COLUMNS + 1):
+    odd_count = 0
+    even_count = 0
+    empty_count = 0
+    for y in range(1, ROWS + 1):
+        for x in range(1, COLUMNS + 1):
             if oddeven_area[y][x] != AREA_NOT_EMPTY:
                 empty_count += 1
                 oddeven = partition(oddeven_area, x, y)
@@ -183,25 +191,25 @@ def put(state, x, y, channel):
 
 
 def fill(state, channel):
-    for y in range(reversi.ROWS):
-        for x in range(reversi.COLUMNS):
+    for y in range(ROWS):
+        for x in range(COLUMNS):
             state[channel, y, x] = 1
 
 
 #
 # 石を置いたときの状態を返す
 #
-def convert_state(board, coord, flipped, color, dtype=np.uint8):
+def convert_state(board, flipped, coord, color, dtype):
     check_region(board, coord, color)
     enumerate_oddeven(board)
 
-    state = np.zeros((reversi.CHANNELS, reversi.ROWS, reversi.COLUMNS), dtype=dtype)
+    state = np.zeros((CHANNELS, ROWS, COLUMNS), dtype=dtype)
 
-    for y in range(1, reversi.ROWS + 1):
-        for x in range(1, reversi.COLUMNS + 1):
+    for y in range(1, ROWS + 1):
+        for x in range(1, COLUMNS + 1):
             if board[y][x] == color:
                 put(state, x, y, 0)  # 着手前に自石
-            elif board[y][x] == reversi.opponent_turn(color):
+            elif board[y][x] == opponent_turn(color):
                 put(state, x, y, 1)  # 着手前に相手石
             else:
                 put(state, x, y, 2)  # 着手前に空白
@@ -264,6 +272,14 @@ def convert_evals(eval_record):
             entry['value'] = value
 
     return evals
+
+
+#
+# 相手の手番を返す
+# BLACK(1)->WHITE(2)、WHITE(2)->BLACK(1)
+#
+def opponent_turn(turn):
+    return turn ^ 3
 
 
 #

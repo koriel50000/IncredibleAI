@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import numpy as np
+
 import converter
 
 # 定数宣言
@@ -116,9 +118,9 @@ def available_moves():
 #
 # 指定した着手から盤面の特徴量に変換する
 #
-def convert_state(coord):
+def convert_state(coord, dtype=np.float32):
     flipped = compute_flipped(coord)
-    state = converter.convert_state(board, flipped, coord, current_color)
+    state = converter.convert_state(board, flipped, coord, current_color, dtype)
     return state
 
 

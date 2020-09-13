@@ -7,6 +7,7 @@ import struct
 import zipfile
 import gzip
 import shutil
+import numpy as np
 
 import reversi
 import converter
@@ -73,10 +74,7 @@ def write_records(states_file, labels_file, move_record, eval_record):
         for entry in evals:
             coord = entry['coord']
             value = entry['value']
-            board = reversi.board
-            flipped = reversi.compute_flipped(coord)
-            turn = reversi.current_color
-            state = converter.convert_state(board, flipped, coord, turn)
+            state = reversi.convert_state(coord, dtype=np.uint8)
             write_data(states_file, labels_file, state, value)
             count += 1
         coord = converter.move_to_coord(actual_move)

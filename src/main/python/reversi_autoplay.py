@@ -2,9 +2,7 @@
 
 import sys
 import random
-import numpy as np
 
-import converter
 import reversi
 import cnn_model
 
@@ -33,7 +31,7 @@ def optimum_choice(evals):
 def prelude_feature(coords):
     evals = []
     for coord in coords:
-        state = converter.convert_state(reversi, coord, dtype=np.float32)
+        state = reversi.convert_state(coord)
         value = cnn_model.calculate_predicted_value(state)
         evals.append({'coord': coord, 'value': value})
 
@@ -75,9 +73,10 @@ def play(black_feature, white_feature):
 # メイン
 #
 def main(args):
-    step = 2
-    epoch = 10
-    cnn_model.load_checkpoint("../resources/checkpoint/", step, epoch)
+    cnn_model.load_model("../resources/model/")
+    # step = 2
+    # epoch = 10
+    # cnn_model.load_checkpoint("../resources/checkpoint/", step, epoch)
 
     win = 0
     loss = 0

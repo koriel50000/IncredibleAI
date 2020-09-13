@@ -64,6 +64,15 @@ def save_model(export_dir):
 
 
 #
+# 学習済みモデルを読み込む
+#
+def load_model(import_dir):
+    global model
+
+    model = keras.models.load_model(import_dir)
+
+
+#
 # チェックポイントを読み込む
 #
 def load_checkpoint(checkpoint_dir, step, epoch):

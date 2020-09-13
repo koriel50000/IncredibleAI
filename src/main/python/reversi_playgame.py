@@ -2,29 +2,16 @@
 
 import sys
 import random
-import numpy as np
-from tensorflow import keras
 
 import converter
 import reversi
+import cnn_model
 
 random.seed()
-
-model = keras.models.load_model("../resources/model/")
-
-
-#
-# 予測値を計算する
-#
-def calculate_predicted_value(state):
-    state_ = state.reshape(1, -1)
-    predictions_ = model.predict(state_)
-    return predictions_[0][0]
 
 
 def optimum_choice(evals):
     evals.sort(key=lambda x: x['value'], reverse=True)
-    print(evals)
 
     coords = []
     maximum_value = float("-inf")
@@ -46,8 +33,8 @@ def prelude_feature(coords):
     ndigits = 3  # 評価値は小数点第三位を四捨五入
     evals = []
     for coord in coords:
-        state = reversi.convert_state(coord, dtype=np.float32)
-        value = round(calculate_predicted_value(state), ndigits)
+        state = reversi.convert_state(coord)
+        value = round(cnn_model.calculate_predicted_value(state), ndigits)
         evals.append({'coord': coord, 'value': value})
 
     return optimum_choice(evals)
@@ -106,6 +93,11 @@ def play(black_feature, white_feature):
 # メイン
 #
 def main(args):
+    cnn_model.load_model("../resources/model/")
+    # step = 2
+    # epoch = 10
+    # cnn_model.load_checkpoint("../resources/checkpoint/", step, epoch)
+
     # TODO 先手・後手を選択
 
     # play(prelude_feature, manual_feature)

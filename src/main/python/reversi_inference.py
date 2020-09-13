@@ -4,11 +4,10 @@ import sys
 import glob
 import os.path
 import zipfile
-import math
 
 import reversi
 import converter
-
+# import cnn_model
 from tensorflow import keras
 
 model = keras.models.load_model("../resources/model/")
@@ -187,6 +186,8 @@ def evaluating_model(path, filenames):
 # メイン
 #
 def main(args):
+    # cnn_model.load_model("../resources/model/")
+
     path = "../resources/records/"
     with zipfile.ZipFile(os.path.join(path, "kifu102245.zip")) as records_zip:
 
