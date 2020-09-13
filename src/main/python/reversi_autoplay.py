@@ -48,7 +48,7 @@ def random_feature(coords):
 # ゲームを実行する
 #
 def play(black_feature, white_feature):
-    reversi.initialize()
+    reversi.clear()
 
     while True:
         turn = reversi.get_current_turn()

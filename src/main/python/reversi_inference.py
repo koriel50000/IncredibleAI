@@ -130,17 +130,17 @@ def calculate_accuracies(index, evals, predicted_evals):
 # 棋譜を評価する
 #
 def evaluating_records(move_record, eval_records):
-    reversi.initialize()
+    reversi.clear()
 
     for index, actual_move in enumerate(converter.convert_moves(move_record)):
         # print("index:{0} move:{1}".format(index, actual_move))
         while True:
-            turn = reversi.get_current_turn()
-            coords = reversi.available_moves(turn)
-            if len(coords) > 0:
+            if len(reversi.available_moves()) > 0:
                 break
             print("Pass!")
-            reversi.next_turn()
+            if reversi.has_completed(True):
+                raise Exception("Error!")  # 先手・後手両方パスで終了は考慮しない
+            reversi.next_turn(True)
 
         evals = converter.convert_evals(eval_records[index])
 
@@ -150,7 +150,7 @@ def evaluating_records(move_record, eval_records):
             coord = entry['coord']
             value = entry['value']
             entry['value'] = round(value, ndigits)
-            state = converter.convert_state(reversi, coord)
+            state = reversi.convert_state(coord)
             predicted_value = round(calculate_predicted_value(state), ndigits)
             predicted_evals.append({'coord': coord, 'value': predicted_value})
 
@@ -158,7 +158,7 @@ def evaluating_records(move_record, eval_records):
 
         coord = converter.move_to_coord(actual_move)
         reversi.make_move(coord)
-        reversi.next_turn()
+        reversi.next_turn(False)
 
 
 #
@@ -177,8 +177,6 @@ def evaluating_model(path, filenames):
         print("{0}: {1}".format(i, file))
         print("total_accuracy: {0}".format(total_accuracy / total_count))
 
-    # 全体の正答率
-    print("total_accuracy: {0}".format(total_accuracy / total_count))
     # depth毎の正答率
     size = len(move_accuracies)
     for i in range(size):

@@ -46,7 +46,7 @@ def prelude_feature(coords):
     ndigits = 3  # 評価値は小数点第三位を四捨五入
     evals = []
     for coord in coords:
-        state = converter.convert_state(reversi, coord, dtype=np.float32)
+        state = reversi.convert_state(coord, dtype=np.float32)
         value = round(calculate_predicted_value(state), ndigits)
         evals.append({'coord': coord, 'value': value})
 
@@ -69,14 +69,14 @@ def manual_feature(coords):
 # ゲームを実行する
 #
 def play(black_feature, white_feature):
-    reversi.initialize()
+    reversi.clear()
     
     while True:
         reversi.print_board()
         reversi.print_status()
 
         passed = False
-        if reversi.get_current_turn() == reversi.BLACK:
+        if reversi.current_color == reversi.BLACK:
             coords = reversi.available_moves()
             if len(coords) > 0:
                 coord = black_feature(coords)

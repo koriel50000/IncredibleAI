@@ -56,15 +56,27 @@ def write_data(states_file, labels_file, state, value):
 # 棋譜を学習データに変換する
 #
 def write_records(states_file, labels_file, move_record, eval_record):
-    reversi.initialize()
+    reversi.clear()
     
     count = 0
     for index, actual_move in enumerate(converter.convert_moves(move_record)):
+        # print("index:{0} move:{1}".format(index, actual_move))
+        while True:
+            if len(reversi.available_moves()) > 0:
+                break
+            print("Pass!")
+            if reversi.has_completed(True):
+                raise Exception("Error!")  # 先手・後手両方パスで終了は考慮しない
+            reversi.next_turn(True)
+
         evals = converter.convert_evals(eval_record[index])
         for entry in evals:
             coord = entry['coord']
             value = entry['value']
-            state = converter.convert_state(reversi, coord)
+            board = reversi.board
+            flipped = reversi.compute_flipped(coord)
+            turn = reversi.current_color
+            state = converter.convert_state(board, flipped, coord, turn)
             write_data(states_file, labels_file, state, value)
             count += 1
         coord = converter.move_to_coord(actual_move)

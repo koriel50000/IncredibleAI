@@ -41,6 +41,7 @@ public class PreludeConverter {
         region = 0;
         oddCount = 0;
         evenCount = 1;
+        emptyCount = 60;
         earlyTurn = true;
         for (Coord coord : Coord.values()) {
             flippedBoard[coord.index()] = 0;

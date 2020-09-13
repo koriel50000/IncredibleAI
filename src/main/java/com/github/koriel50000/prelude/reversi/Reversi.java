@@ -184,8 +184,8 @@ public class Reversi {
             turn = "white";
             stone = Stone.WHITE.toString();
         }
-        buffer.print(String.format("move count:%d ", turnCount));
-        buffer.println(String.format("move:%s(%s)", turn, stone));
+        buffer.print(String.format("move count:%d", turnCount));
+        buffer.println(String.format(" move:%s(%s)", turn, stone));
         buffer.println(String.format("black:%d white:%d",
                 board.getBlackStones(), board.getWhiteStones()));
         buffer.println();
@@ -195,8 +195,8 @@ public class Reversi {
      * スコアを表示する
      */
     public void printScore(LineBuffer buffer) {
-        buffer.print(String.format("move count:%d ", turnCount));
-        buffer.println(String.format("winner:%s", score.getWinner()));
+        buffer.print(String.format("move count:%d", turnCount));
+        buffer.println(String.format(" winner:%s", score.getWinner()));
         buffer.println(String.format("black:%d white:%d", score.getBlackStones(), score.getWhiteStones()));
         buffer.println();
     }
