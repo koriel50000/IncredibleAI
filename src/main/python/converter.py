@@ -57,23 +57,32 @@ def clear():
 # 対角位置の対称変換が必要か
 #
 def is_symmetric(diagonal, board, color):
+    if diagonal == 8:
+        board_ = flip_board(board, lambda x, y: (x, y))  # 変換なし
+    elif diagonal == 10:
+        board_ = flip_board(board, lambda x, y: (9 - x, y))  # 左右反転
+    elif diagonal == 12:
+        board_ = flip_board(board, lambda x, y: (x, 9 - y))  # 上下反転
+    elif diagonal == 14:
+        board_ = flip_board(board, lambda x, y: (9 - x, 9 - y))  # 上下左右反転
+    else:
+        raise Exception("Error!")
+
     for y in range(1, ROWS + 1):
         for x in range(y + 1, COLUMNS + 1):
-            x_, y_ = x, y
-            if diagonal == 8:
-                x_, y_ = x, y  # 変換なし
-            elif diagonal == 10:
-                x_, y_ = 9 - x, y  # 左右反転
-            elif diagonal == 12:
-                x_, y_ = x, 9 - y  # 上下反転
-            elif diagonal == 14:
-                x_, y_ = 9 - x, 9 - y  # 上下左右反転
-            # TODO 座標変換ではなくboard側を返還しなければならない
-
-            if board[y_][x_] != board[x_][y_]:
-                # FIXME
-                return board[y_][x_] != color
+            # 転置行列と左上から比較して、初めての違いが自石のときtrue、それ以外はfalse
+            if board_[y][x] != board[x][y]:
+                return board[y][x] == color
     return False
+
+
+def flip_board(board, flip):
+    new_board = [[0 for x_ in range(COLUMNS + 2)] for y_ in range(ROWS + 2)]
+    for y in range(1, ROWS + 1):
+        for x in range(y + 1, COLUMNS + 1):
+            x_, y_ = flip(x, y)
+            new_board[y][x] = board[y_][x_]
+    return new_board
 
 
 #

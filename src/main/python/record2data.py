@@ -26,9 +26,9 @@ def write_magic(states_file, labels_file):
     items = 60  # dummy
     write32(states_file, magic)
     write32(states_file, items)
-    write32(states_file, converter.ROWS)
-    write32(states_file, converter.COLUMNS)
-    write32(states_file, converter.CHANNEL)
+    write32(states_file, reversi.COLUMNS)
+    write32(states_file, reversi.ROWS)
+    write32(states_file, reversi.CHANNELS)
     
     magic = 0x0801
     write32(labels_file, magic)
@@ -44,9 +44,9 @@ def write_items(states_file, labels_file, total):
 
 def write_data(states_file, labels_file, state, value):
     # FIXME NHWC or NCHWとは？ NHWC(channels_last)になっていないのになぜこれで結果が出る？
-    for channel in range(0, converter.CHANNEL):
-        for y in range(0, converter.ROWS):
-            for x in range(0, converter.COLUMNS):
+    for channel in range(0, reversi.CHANNELS):
+        for y in range(0, reversi.ROWS):
+            for x in range(0, reversi.COLUMNS):
                 write8(states_file, state[channel, y, x])
     # Convert from [-1.0, 0.0, 1.0] -> [1, 255].
     value = int(round(value * 127)) + 128
@@ -79,7 +79,7 @@ def write_records(states_file, labels_file, move_record, eval_record):
             count += 1
         coord = converter.move_to_coord(actual_move)
         reversi.make_move(coord)
-        reversi.next_turn()
+        reversi.next_turn(False)
     
     return count
 

@@ -29,10 +29,11 @@ def optimum_choice(evals):
 # 差し手を評価する
 #
 def prelude_feature(coords):
+    ndigits = 3  # 評価値は小数点第三位を四捨五入
     evals = []
     for coord in coords:
         state = reversi.convert_state(coord)
-        value = cnn_model.calculate_predicted_value(state)
+        value = round(cnn_model.calculate_predicted_value(state), ndigits)
         evals.append({'coord': coord, 'value': value})
 
     return optimum_choice(evals)
