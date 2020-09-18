@@ -26,8 +26,8 @@ def write_magic(states_file, labels_file):
     items = 60  # dummy
     write32(states_file, magic)
     write32(states_file, items)
-    write32(states_file, reversi.COLUMNS)
     write32(states_file, reversi.ROWS)
+    write32(states_file, reversi.COLUMNS)
     write32(states_file, reversi.CHANNELS)
     
     magic = 0x0801
@@ -56,7 +56,7 @@ def write_data(states_file, labels_file, state, value):
 #
 # 棋譜を学習データに変換する
 #
-def write_records(states_file, labels_file, move_record, eval_record):
+def write_records(states_file, labels_file, move_record, eval_records):
     reversi.clear()
     
     count = 0
@@ -65,12 +65,12 @@ def write_records(states_file, labels_file, move_record, eval_record):
         while True:
             if len(reversi.available_moves()) > 0:
                 break
-            print("Pass!")
+            print(index + ": Pass!")
             if reversi.has_completed(True):
                 raise Exception("Error!")  # 先手・後手両方パスで終了は考慮しない
             reversi.next_turn(True)
 
-        evals = converter.convert_evals(eval_record[index])
+        evals = converter.convert_evals(eval_records[index])
         for entry in evals:
             coord = entry['coord']
             value = entry['value']
@@ -111,9 +111,9 @@ def save_datafile(prefix, path, filenames):
 
             with open(file, "r") as file:
                 move_record = file.readline().strip()
-                eval_record = [x.strip() for x in file.readlines()]
+                eval_records = [x.strip() for x in file.readlines()]
             
-            count = write_records(states_file, labels_file, move_record, eval_record)
+            count = write_records(states_file, labels_file, move_record, eval_records)
             total += count
             
             states_file.flush()
