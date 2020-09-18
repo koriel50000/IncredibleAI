@@ -1,0 +1,356 @@
+D:\workspace\IntelliJ\IncredibleAI\venv\Scripts\python.exe D:/workspace/IntelliJ/IncredibleAI/src/main/python/reversi_inference.py
+2020-09-19 05:34:15.611173: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cudart64_101.dll
+2020-09-19 05:34:37.253701: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library nvcuda.dll
+2020-09-19 05:34:37.378976: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: GeForce RTX 2060 computeCapability: 7.5
+coreClock: 1.71GHz coreCount: 30 deviceMemorySize: 6.00GiB deviceMemoryBandwidth: 312.97GiB/s
+2020-09-19 05:34:37.379560: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cudart64_101.dll
+2020-09-19 05:34:37.526436: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cublas64_10.dll
+2020-09-19 05:34:37.713598: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cufft64_10.dll
+2020-09-19 05:34:37.771719: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library curand64_10.dll
+2020-09-19 05:34:37.929689: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cusolver64_10.dll
+2020-09-19 05:34:37.986326: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cusparse64_10.dll
+2020-09-19 05:34:38.242918: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cudnn64_7.dll
+2020-09-19 05:34:38.250157: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1858] Adding visible gpu devices: 0
+2020-09-19 05:34:38.287278: I tensorflow/core/platform/cpu_feature_guard.cc:142] This TensorFlow binary is optimized with oneAPI Deep Neural Network Library (oneDNN)to use the following CPU instructions in performance-critical operations:  AVX2
+To enable them in other operations, rebuild TensorFlow with the appropriate compiler flags.
+2020-09-19 05:34:38.581797: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x2bc20f5b340 initialized for platform Host (this does not guarantee that XLA will be used). Devices:
+2020-09-19 05:34:38.583115: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): Host, Default Version
+2020-09-19 05:34:38.601479: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1716] Found device 0 with properties: 
+pciBusID: 0000:01:00.0 name: GeForce RTX 2060 computeCapability: 7.5
+coreClock: 1.71GHz coreCount: 30 deviceMemorySize: 6.00GiB deviceMemoryBandwidth: 312.97GiB/s
+2020-09-19 05:34:38.603418: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cudart64_101.dll
+2020-09-19 05:34:38.604350: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cublas64_10.dll
+2020-09-19 05:34:38.605182: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cufft64_10.dll
+2020-09-19 05:34:38.606527: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library curand64_10.dll
+2020-09-19 05:34:38.607369: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cusolver64_10.dll
+2020-09-19 05:34:38.608207: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cusparse64_10.dll
+2020-09-19 05:34:38.609602: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cudnn64_7.dll
+2020-09-19 05:34:38.612184: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1858] Adding visible gpu devices: 0
+2020-09-19 05:34:42.879800: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1257] Device interconnect StreamExecutor with strength 1 edge matrix:
+2020-09-19 05:34:42.880563: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1263]      0 
+2020-09-19 05:34:42.881029: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1276] 0:   N 
+2020-09-19 05:34:42.925633: I tensorflow/core/common_runtime/gpu/gpu_device.cc:1402] Created TensorFlow device (/job:localhost/replica:0/task:0/device:GPU:0 with 4594 MB memory) -> physical GPU (device: 0, name: GeForce RTX 2060, pci bus id: 0000:01:00.0, compute capability: 7.5)
+2020-09-19 05:34:42.993745: I tensorflow/compiler/xla/service/service.cc:168] XLA service 0x2bc4e86e4b0 initialized for platform CUDA (this does not guarantee that XLA will be used). Devices:
+2020-09-19 05:34:42.994608: I tensorflow/compiler/xla/service/service.cc:176]   StreamExecutor device (0): GeForce RTX 2060, Compute Capability 7.5
+2020-09-19 05:34:46.977481: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cublas64_10.dll
+2020-09-19 05:34:48.868776: I tensorflow/stream_executor/platform/default/dso_loader.cc:48] Successfully opened dynamic library cudnn64_7.dll
+2020-09-19 05:34:56.217374: W tensorflow/stream_executor/gpu/redzone_allocator.cc:314] Internal: Invoking GPU asm compilation is supported on Cuda non-Windows platforms only
+Relying on driver to perform ptx compilation. 
+Modify $PATH to customize ptxas location.
+This message will be only logged once.
+0: ../resources/records/kifu1685772.txt
+total_accuracy: 0.61
+1: ../resources/records/kifu1743896.txt
+total_accuracy: 0.5750000000000001
+2: ../resources/records/kifu1139270.txt
+total_accuracy: 0.6050000000000001
+Pass!
+Pass!
+3: ../resources/records/kifu1771384.txt
+total_accuracy: 0.6029166666666668
+4: ../resources/records/kifu1882201.txt
+total_accuracy: 0.5993333333333332
+Pass!
+5: ../resources/records/kifu1029694.txt
+total_accuracy: 0.5994444444444441
+6: ../resources/records/kifu827426.txt
+total_accuracy: 0.589285714285714
+7: ../resources/records/kifu2849802.txt
+total_accuracy: 0.5918749999999998
+Pass!
+8: ../resources/records/kifu856785.txt
+total_accuracy: 0.5892592592592591
+9: ../resources/records/kifu1168189.txt
+total_accuracy: 0.5896666666666663
+Pass!
+Pass!
+10: ../resources/records/kifu2631723.txt
+total_accuracy: 0.5845454545454543
+11: ../resources/records/kifu999785.txt
+total_accuracy: 0.5870833333333327
+12: ../resources/records/kifu2296581.txt
+total_accuracy: 0.5952564102564097
+13: ../resources/records/kifu1358795.txt
+total_accuracy: 0.5913095238095232
+14: ../resources/records/kifu2689504.txt
+total_accuracy: 0.5946666666666663
+15: ../resources/records/kifu152293.txt
+total_accuracy: 0.6005208333333331
+16: ../resources/records/kifu1503893.txt
+total_accuracy: 0.599411764705882
+17: ../resources/records/kifu1420141.txt
+total_accuracy: 0.5946296296296292
+18: ../resources/records/kifu1980718.txt
+total_accuracy: 0.595175438596491
+Pass!
+19: ../resources/records/kifu827531.txt
+total_accuracy: 0.5941666666666668
+20: ../resources/records/kifu1757749.txt
+total_accuracy: 0.5918253968253974
+21: ../resources/records/kifu374694.txt
+total_accuracy: 0.5988636363636369
+22: ../resources/records/kifu1122884.txt
+total_accuracy: 0.6029710144927546
+Pass!
+23: ../resources/records/kifu1658915.txt
+total_accuracy: 0.6072222222222234
+24: ../resources/records/kifu370394.txt
+total_accuracy: 0.6070666666666679
+25: ../resources/records/kifu1218566.txt
+total_accuracy: 0.6075641025641041
+Pass!
+26: ../resources/records/kifu617298.txt
+total_accuracy: 0.6073456790123473
+27: ../resources/records/kifu1609018.txt
+total_accuracy: 0.6114285714285728
+Pass!
+28: ../resources/records/kifu2626724.txt
+total_accuracy: 0.6103448275862083
+Pass!
+29: ../resources/records/kifu2215224.txt
+total_accuracy: 0.6080555555555568
+Pass!
+30: ../resources/records/kifu1024780.txt
+total_accuracy: 0.6108602150537652
+31: ../resources/records/kifu961545.txt
+total_accuracy: 0.6116145833333354
+Pass!
+32: ../resources/records/kifu693612.txt
+total_accuracy: 0.6096969696969717
+Pass!
+Pass!
+33: ../resources/records/kifu1012306.txt
+total_accuracy: 0.6131372549019629
+34: ../resources/records/kifu1613964.txt
+total_accuracy: 0.6120952380952404
+35: ../resources/records/kifu2589585.txt
+total_accuracy: 0.6124537037037061
+36: ../resources/records/kifu1479190.txt
+total_accuracy: 0.6117117117117142
+37: ../resources/records/kifu547456.txt
+total_accuracy: 0.6099122807017573
+38: ../resources/records/kifu2490425.txt
+total_accuracy: 0.6108974358974388
+39: ../resources/records/kifu1571217.txt
+total_accuracy: 0.6121250000000028
+Pass!
+40: ../resources/records/kifu613495.txt
+total_accuracy: 0.6097154471544745
+Pass!
+41: ../resources/records/kifu1899689.txt
+total_accuracy: 0.6092460317460348
+Pass!
+42: ../resources/records/kifu752232.txt
+total_accuracy: 0.6110852713178327
+43: ../resources/records/kifu2499015.txt
+total_accuracy: 0.6121590909090944
+Pass!
+44: ../resources/records/kifu179801.txt
+total_accuracy: 0.6106666666666702
+Pass!
+Pass!
+45: ../resources/records/kifu1147418.txt
+total_accuracy: 0.6116304347826124
+Pass!
+Pass!
+46: ../resources/records/kifu959697.txt
+total_accuracy: 0.6127659574468122
+47: ../resources/records/kifu2455492.txt
+total_accuracy: 0.6146875000000038
+Pass!
+Pass!
+48: ../resources/records/kifu2007077.txt
+total_accuracy: 0.6132312925170108
+49: ../resources/records/kifu614508.txt
+total_accuracy: 0.612500000000004
+Pass!
+Pass!
+Pass!
+50: ../resources/records/kifu1774761.txt
+total_accuracy: 0.6115032679738601
+51: ../resources/records/kifu376213.txt
+total_accuracy: 0.6122756410256451
+52: ../resources/records/kifu1619047.txt
+total_accuracy: 0.612295597484281
+53: ../resources/records/kifu1683979.txt
+total_accuracy: 0.6122222222222264
+Pass!
+54: ../resources/records/kifu2579406.txt
+total_accuracy: 0.6127272727272769
+Pass!
+55: ../resources/records/kifu2032699.txt
+total_accuracy: 0.6121130952380994
+Pass!
+56: ../resources/records/kifu617590.txt
+total_accuracy: 0.6122222222222266
+57: ../resources/records/kifu1877096.txt
+total_accuracy: 0.6108908045977051
+Pass!
+58: ../resources/records/kifu776580.txt
+total_accuracy: 0.6109039548022632
+59: ../resources/records/kifu2650472.txt
+total_accuracy: 0.610777777777781
+60: ../resources/records/kifu1679909.txt
+total_accuracy: 0.6101092896174888
+61: ../resources/records/kifu2008696.txt
+total_accuracy: 0.6099462365591419
+62: ../resources/records/kifu1021709.txt
+total_accuracy: 0.6104232804232824
+Pass!
+Pass!
+63: ../resources/records/kifu2821114.txt
+total_accuracy: 0.6108854166666686
+64: ../resources/records/kifu497731.txt
+total_accuracy: 0.6124615384615402
+Pass!
+65: ../resources/records/kifu625184.txt
+total_accuracy: 0.6121464646464663
+66: ../resources/records/kifu393150.txt
+total_accuracy: 0.6121641791044791
+67: ../resources/records/kifu548482.txt
+total_accuracy: 0.6115686274509815
+68: ../resources/records/kifu586259.txt
+total_accuracy: 0.6114975845410637
+Pass!
+Pass!
+69: ../resources/records/kifu592637.txt
+total_accuracy: 0.6107857142857147
+Pass!
+70: ../resources/records/kifu225702.txt
+total_accuracy: 0.6097417840375586
+71: ../resources/records/kifu527287.txt
+total_accuracy: 0.6083564814814815
+Pass!
+Pass!
+72: ../resources/records/kifu63902.txt
+total_accuracy: 0.6078082191780817
+73: ../resources/records/kifu627144.txt
+total_accuracy: 0.6072972972972965
+Pass!
+74: ../resources/records/kifu1675872.txt
+total_accuracy: 0.6069333333333319
+75: ../resources/records/kifu757101.txt
+total_accuracy: 0.6069517543859628
+Pass!
+76: ../resources/records/kifu1811677.txt
+total_accuracy: 0.606320346320344
+77: ../resources/records/kifu1136495.txt
+total_accuracy: 0.6061111111111085
+78: ../resources/records/kifu341959.txt
+total_accuracy: 0.6070253164556935
+79: ../resources/records/kifu1756338.txt
+total_accuracy: 0.6064166666666639
+80: ../resources/records/kifu1368057.txt
+total_accuracy: 0.6060288065843593
+Pass!
+81: ../resources/records/kifu1677079.txt
+total_accuracy: 0.6061382113821107
+Pass!
+82: ../resources/records/kifu1759266.txt
+total_accuracy: 0.6056224899598358
+Pass!
+Pass!
+83: ../resources/records/kifu2065685.txt
+total_accuracy: 0.6061309523809488
+84: ../resources/records/kifu2509832.txt
+total_accuracy: 0.6074117647058789
+85: ../resources/records/kifu459622.txt
+total_accuracy: 0.608352713178291
+Pass!
+86: ../resources/records/kifu13038.txt
+total_accuracy: 0.6083716475095746
+Pass!
+87: ../resources/records/kifu697685.txt
+total_accuracy: 0.609090909090905
+Pass!
+88: ../resources/records/kifu1235059.txt
+total_accuracy: 0.6090449438202207
+Pass!
+Pass!
+89: ../resources/records/kifu989296.txt
+total_accuracy: 0.6083703703703661
+90: ../resources/records/kifu2544625.txt
+total_accuracy: 0.6086996336996292
+91: ../resources/records/kifu2379003.txt
+total_accuracy: 0.6073369565217347
+92: ../resources/records/kifu1535814.txt
+total_accuracy: 0.6074731182795654
+93: ../resources/records/kifu1397142.txt
+total_accuracy: 0.6077659574468038
+94: ../resources/records/kifu1545038.txt
+total_accuracy: 0.607543859649118
+Pass!
+95: ../resources/records/kifu440316.txt
+total_accuracy: 0.6078993055555505
+96: ../resources/records/kifu1163740.txt
+total_accuracy: 0.6087113402061806
+97: ../resources/records/kifu2719411.txt
+total_accuracy: 0.6094557823129199
+Pass!
+98: ../resources/records/kifu2520618.txt
+total_accuracy: 0.6090909090909037
+99: ../resources/records/kifu1246054.txt
+total_accuracy: 0.6085499999999945
+move_accuracies[0]: 1.0
+move_accuracies[1]: 1.0
+move_accuracies[2]: 0.9750000000000003
+move_accuracies[3]: 0.9219999999999996
+move_accuracies[4]: 0.9350000000000007
+move_accuracies[5]: 0.7990000000000006
+move_accuracies[6]: 0.808
+move_accuracies[7]: 0.7560000000000003
+move_accuracies[8]: 0.8200000000000006
+move_accuracies[9]: 0.8529999999999999
+move_accuracies[10]: 0.7549999999999997
+move_accuracies[11]: 0.8600000000000003
+move_accuracies[12]: 0.6580000000000001
+move_accuracies[13]: 0.8229999999999998
+move_accuracies[14]: 0.7550000000000003
+move_accuracies[15]: 0.7339999999999999
+move_accuracies[16]: 0.7440000000000003
+move_accuracies[17]: 0.5460000000000003
+move_accuracies[18]: 0.6539999999999999
+move_accuracies[19]: 0.5420000000000003
+move_accuracies[20]: 0.5530000000000003
+move_accuracies[21]: 0.5750000000000001
+move_accuracies[22]: 0.499
+move_accuracies[23]: 0.5039999999999999
+move_accuracies[24]: 0.5299999999999999
+move_accuracies[25]: 0.474
+move_accuracies[26]: 0.43400000000000005
+move_accuracies[27]: 0.40699999999999986
+move_accuracies[28]: 0.468
+move_accuracies[29]: 0.47500000000000014
+move_accuracies[30]: 0.36
+move_accuracies[31]: 0.45
+move_accuracies[32]: 0.44000000000000006
+move_accuracies[33]: 0.43400000000000016
+move_accuracies[34]: 0.5069999999999999
+move_accuracies[35]: 0.42900000000000016
+move_accuracies[36]: 0.42600000000000016
+move_accuracies[37]: 0.43900000000000017
+move_accuracies[38]: 0.40099999999999986
+move_accuracies[39]: 0.4119999999999999
+move_accuracies[40]: 0.38199999999999995
+move_accuracies[41]: 0.4270000000000001
+move_accuracies[42]: 0.2889999999999999
+move_accuracies[43]: 0.37899999999999995
+move_accuracies[44]: 0.40800000000000014
+move_accuracies[45]: 0.4540000000000001
+move_accuracies[46]: 0.44099999999999995
+move_accuracies[47]: 0.4390000000000002
+move_accuracies[48]: 0.44000000000000006
+move_accuracies[49]: 0.43200000000000016
+move_accuracies[50]: 0.4580000000000001
+move_accuracies[51]: 0.557
+move_accuracies[52]: 0.5890000000000003
+move_accuracies[53]: 0.6329999999999999
+move_accuracies[54]: 0.665
+move_accuracies[55]: 0.783
+move_accuracies[56]: 0.775
+move_accuracies[57]: 0.8739999999999999
+move_accuracies[58]: 0.9319999999999998
+move_accuracies[59]: 1.0
+
+プロセスは終了コード 0 で完了しました

@@ -1,2 +1,2 @@
-model_checkpoint_path: "train1k04_10"
-all_model_checkpoint_paths: "train1k04_10"
+model_checkpoint_path: "train1k19_10"
+all_model_checkpoint_paths: "train1k19_10"
