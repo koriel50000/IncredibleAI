@@ -1,6 +1,5 @@
 package com.github.koriel50000.prelude.learning;
 
-import java.nio.FloatBuffer;
 import java.util.List;
 
 import static com.github.koriel50000.prelude.reversi.Reversi.*;
@@ -174,7 +173,7 @@ public class PreludeConverter {
         }
     }
 
-    private void put(FloatBuffer buffer, Coord coord, int channel) {
+    private void put(float[] buffer, Coord coord, int channel) {
         Coord coord_;
         switch (region) {
             case 0:
@@ -220,25 +219,25 @@ public class PreludeConverter {
             default:
                 throw new IllegalArgumentException("no match: " + region);
         }
-        int offset = channel * ROWS * COLUMNS;
-        buffer.put(offset + coord_.index(), 1);
+        int offset = ROWS * COLUMNS * channel;
+        buffer[offset + coord_.index()] = 1.0f;
     }
 
-    private void fill(FloatBuffer buffer, int channel) {
-        int offset = channel * ROWS * COLUMNS;
+    private void fill(float[] buffer, int channel) {
+        int offset = ROWS * COLUMNS * channel;
         for (int i = 0; i < ROWS * COLUMNS; i++) {
-            buffer.put(offset + i, 1);
+            buffer[offset + i] = 1.0f;
         }
     }
 
     /**
      * 石を置いたときの特徴量を返す
      */
-    public FloatBuffer convertState(Board board, List<Coord> flipped, Coord coord, Color color) {
+    public float[] convertState(Board board, List<Coord> flipped, Coord coord, Color color) {
         checkRegion(board, coord, color);
         enumerateOddEven(board);
 
-        FloatBuffer buffer = FloatBuffer.allocate(COLUMNS * ROWS * CHANNELS);
+        float[] buffer = new float[ROWS * COLUMNS * CHANNELS];
 
         for (Coord coord_ : Coord.values()) {
             if (board.get(coord_) == color.value()) {
@@ -275,7 +274,7 @@ public class PreludeConverter {
             fill(buffer, 9); // 奇数領域が1個または偶数
         }
 
-        buffer.clear(); // positionを0、limitをcapacityに戻す
+        //buffer.clear(); // positionを0、limitをcapacityに戻す
         return buffer;
     }
 }

@@ -220,9 +220,10 @@ public class BitConverter {
     }
 
     /**
-     * 複数領域から偶数領域・奇数領域を集計する
+     * 偶数領域・奇数領域を集計する
      */
-    private void enumerateMultiArea(BitState state, long coord) {
+    private void enumerateOddEven(BitState state, long coord) {
+        state.earlyTurn = state.earlyTurn && (coord & 0xff818181818181ffL) == 0;
         if ((state.oddArea & coord) != 0) {
             // 奇数領域に着手
             state.oddArea ^= coord;
@@ -250,83 +251,6 @@ public class BitConverter {
             // 右
             partition(state, area, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL);
         }
-    }
-
-    /**
-     * 単一領域から偶数領域・奇数領域を集計する
-     */
-    private void enumerateSingleArea(BitState state, long coord) {
-        long emptyArea = (state.oddArea | state.evenArea) & ~coord;
-        int index = Bits.indexOf(coord);
-
-        long mask = Bits.rotate(0xc080000000000081L, index);
-        long oneArea = 0L; // FIXME 2マス以上の閉領域は？
-
-        // 上
-        long coord_ = coord << 8;
-        if ((emptyArea & (mask << 8) ^ coord_) == 0) {
-            oneArea |= coord_;
-        }
-        // 下
-        coord_ = coord >>> 8;
-        if ((emptyArea & (mask >>> 8) ^ coord_) == 0) {
-            oneArea |= coord_;
-        }
-        // 左
-        coord_ = coord << 1;
-        if ((emptyArea & (mask << 1 & 0xfefefefefefefefeL) ^ coord_) == 0) {
-            oneArea |= coord_;
-        }
-        // 右
-        coord_ = coord >>> 1;
-        if ((emptyArea & (mask >>> 1 & 0x7f7f7f7f7f7f7f7fL) ^ coord_) == 0) {
-            oneArea |= coord_;
-        }
-
-        if (oneArea != 0) {
-            // FIXME oneAreaが2つ以上あった場合は？
-            if ((state.oddArea & coord) != 0) {
-                // 奇数領域に着手
-                state.oddArea ^= coord;
-                state.evenArea = 0x0000000000000000L;
-                state.oddCount = 2;
-                state.evenCount = 0;
-            } else {
-                // 偶数領域に着手
-                state.oddArea = oneArea;
-                state.evenArea ^= coord | oneArea;
-                state.oddCount = 1;
-                state.evenCount = 1;
-            }
-        } else {
-            if ((state.oddArea & coord) != 0) {
-                // 奇数領域に着手
-                state.evenArea |= state.oddArea ^ coord;
-                state.oddArea = 0x0000000000000000L;
-                state.evenCount = 1;
-                state.oddCount = 0;
-            } else {
-                // 偶数領域に着手
-                state.oddArea |= state.evenArea ^ coord;
-                state.evenArea = 0x0000000000000000L;
-                state.oddCount = 1;
-                state.evenCount = 0;
-            }
-        }
-    }
-
-    /**
-     * 偶数領域・奇数領域を集計する
-     */
-    private void enumerateOddEven(BitState state, long coord) {
-        state.earlyTurn = state.earlyTurn && (coord & 0xff818181818181ffL) == 0;
-//        if (state.earlyTurn && (state.oddCount + state.evenCount) == 1) {
-//            enumerateSingleArea(state, coord);
-//        } else {
-//            enumerateMultiArea(state, coord);
-//        }
-        // FIXME 単一領域の集計は考慮漏れがあるため使用しない
-        enumerateMultiArea(state, coord);
     }
 
     /**

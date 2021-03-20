@@ -4,13 +4,15 @@ import org.tensorflow.Graph;
 import org.tensorflow.SavedModelBundle;
 import org.tensorflow.Session;
 import org.tensorflow.Tensor;
-
-import java.nio.FloatBuffer;
+import org.tensorflow.ndarray.FloatNdArray;
+import org.tensorflow.ndarray.Shape;
+import org.tensorflow.ndarray.StdArrays;
+import org.tensorflow.types.TFloat32;
 
 public class CNNModel {
 
-    private static final int COLUMNS = 8;
     private static final int ROWS = 8;
+    private static final int COLUMNS = 8;
     private static final int CHANNELS = 16;
 
     private Graph graph;
@@ -33,7 +35,7 @@ public class CNNModel {
         graph.close();
     }
 
-    public float calculatePredicatedValue(FloatBuffer stateBuffer) {
+    public float calculatePredicatedValue(float[] stateBuffer) {
         // FIXME コマンドラインツールの使い方を理解する
         // TensorFlow > 学ぶ > TensorFlow Core > ガイド > SavedModel
         // Details of the SavedModel command line interface
@@ -53,14 +55,14 @@ public class CNNModel {
         //       shape: (-1, 1)
         //       name: StatefulPartitionedCall:0
         // Method name is: tensorflow/serving/predict
-        try (Tensor<Float> state = Tensor.create(new long[]{1, ROWS * COLUMNS * CHANNELS}, stateBuffer);
-             Tensor predictions = session.runner()
+        FloatNdArray data = StdArrays.ndCopyOf(new float[][]{stateBuffer});
+        try (Tensor state = TFloat32.tensorOf(Shape.of(1, ROWS * COLUMNS * CHANNELS), data::copyTo);
+             Tensor prediction = session.runner()
                      .feed("serving_default_inputs", state)
                      .fetch("StatefulPartitionedCall")
                      .run().get(0)) {
-            float[][] matrix = new float[1][1];
-            predictions.copyTo(matrix);
-            return matrix[0][0];
+            TFloat32 matrix = TFloat32.tensorOf(prediction.shape(), prediction.asRawTensor().data().asFloats());
+            return matrix.getFloat(0, 0);
         }
     }
 }

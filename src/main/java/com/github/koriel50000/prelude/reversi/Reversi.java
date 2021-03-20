@@ -2,14 +2,13 @@ package com.github.koriel50000.prelude.reversi;
 
 import com.github.koriel50000.prelude.learning.PreludeConverter;
 
-import java.nio.FloatBuffer;
 import java.util.*;
 import java.util.function.Function;
 
 public class Reversi {
 
-    public static final int COLUMNS = 8;
     public static final int ROWS = 8;
+    public static final int COLUMNS = 8;
     public static final int CHANNELS = 16;
 
     private Board board;
@@ -99,9 +98,9 @@ public class Reversi {
     /**
      * 指定した着手から盤面の特徴量に変換する
      */
-    public FloatBuffer convertState(Coord coord) {
+    public float[] convertState(Coord coord) {
         List<Coord> flipped = computeFlipped(coord);
-        FloatBuffer buffer = converter.convertState(board, flipped, coord, currentColor);
+        float[] buffer = converter.convertState(board, flipped, coord, currentColor);
         return buffer;
     }
 

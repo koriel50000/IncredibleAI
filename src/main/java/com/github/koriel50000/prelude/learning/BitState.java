@@ -2,7 +2,6 @@ package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
 
-import java.nio.FloatBuffer;
 import java.util.Arrays;
 
 import static com.github.koriel50000.prelude.reversi.BitBoard.*;
@@ -29,7 +28,7 @@ public class BitState {
     public long flipped;
     public long coord;
 
-    private float[] buffer = new float[COLUMNS * ROWS * CHANNELS];
+    private float[] buffer = new float[ROWS * COLUMNS * CHANNELS];
 
     BitState() {
         region = 0;
@@ -63,8 +62,8 @@ public class BitState {
         this.flippedBoard6 = state.flippedBoard6;
     }
 
-    public FloatBuffer getBuffer() {
-        return FloatBuffer.wrap(buffer);
+    public float[] getBuffer() {
+        return buffer;
     }
 
     private void put(int channel, long coords) {
@@ -93,7 +92,7 @@ public class BitState {
             coords_ = Bits.transposed(coords_);
         }
 
-        int offset = channel * ROWS * COLUMNS;
+        int offset = ROWS * COLUMNS * channel;
         while (coords_ != 0) {
             long coord = Bits.getRightmostBit(coords_);
             int index = Bits.indexOf(coord);
@@ -103,8 +102,8 @@ public class BitState {
     }
 
     private void fill(int channel) {
-        int offset = channel * ROWS * COLUMNS;
-        Arrays.fill(buffer, offset,  offset + ROWS * COLUMNS, 1);
+        int offset = ROWS * COLUMNS * channel;
+        Arrays.fill(buffer, offset, offset + ROWS * COLUMNS, 1);
     }
 
     /**

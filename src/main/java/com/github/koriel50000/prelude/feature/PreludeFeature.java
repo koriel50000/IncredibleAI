@@ -1,11 +1,13 @@
 package com.github.koriel50000.prelude.feature;
 
 import com.github.koriel50000.prelude.learning.BitState;
-import com.github.koriel50000.prelude.reversi.*;
 import com.github.koriel50000.prelude.learning.CNNModel;
+import com.github.koriel50000.prelude.reversi.BitBoard;
+import com.github.koriel50000.prelude.reversi.Bits;
+import com.github.koriel50000.prelude.reversi.LineBuffer;
+import com.github.koriel50000.prelude.reversi.Reversi;
 import org.apache.commons.lang3.ArrayUtils;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,8 +48,8 @@ public class PreludeFeature implements Feature {
 
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
-            FloatBuffer buffer = state.getBuffer();
-            FloatBuffer expectedBuffer = reversi.convertState(Coord.valueOf(coord));
+            float[] buffer = state.getBuffer();
+            float[] expectedBuffer = reversi.convertState(Coord.valueOf(coord));
             try {
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {
@@ -97,14 +99,13 @@ public class PreludeFeature implements Feature {
         System.out.println(ArrayUtils.toString(coords_));
     }
 
-    private void assertEquals(FloatBuffer expected, FloatBuffer actual, String message) {
-        FloatBuffer expected_ = expected.duplicate();
-        FloatBuffer actual_ = actual.duplicate();
-        float[] matrix = new float[8 * 8];
+    private void assertEquals(float[] expected, float[] actual, String message) {
+        float[] matrix = new float[ROWS * COLUMNS];
         for (int channel = 0; channel < 16; channel++) {
-            expected_.get(matrix);
+            int offset = ROWS * COLUMNS * channel;
+            System.arraycopy(expected, offset, matrix, 0, matrix.length);
             long expectedMatrix = matrixTo(matrix);
-            actual_.get(matrix);
+            System.arraycopy(actual, offset, matrix, 0, matrix.length);
             long actualMatrix = matrixTo(matrix);
             if (expectedMatrix != actualMatrix) {
                 LineBuffer buffer = new LineBuffer();
