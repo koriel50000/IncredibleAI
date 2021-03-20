@@ -1,35 +1,27 @@
 # -*- coding: utf-8 -*-
 
-import numpy as np
-
-import converter
-
 # 定数宣言
-COLUMNS = 8
-ROWS = 8
-CHANNELS = 16
-
 EMPTY, BLACK, WHITE, BORDER = (0, 1, 2, 3)
 STONES = (".", "@", "O")
 DIRECTIONS = ((0, -1), (1, -1), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1))
 
 # global変数宣言
-board = [[0 for x_ in range(COLUMNS + 2)] for y_ in range(ROWS + 2)]
+board = [[0 for x_ in range(1 + 8 + 1)] for y_ in range(1 + 8 + 1)]
 number_of_stones = [0, 0, 0]
 current_color = 0
 turn_count = 0
-passedBefore = False
+passed_before = False
 
 
 #
 # 盤面を初期化する
 #
 def clear():
-    global board, number_of_stones, current_color, turn_count, passedBefore
+    global board, number_of_stones, current_color, turn_count, passed_before
 
-    for y in range(ROWS + 2):
-        for x in range(COLUMNS + 2):
-            if 1 <= x <= COLUMNS and 1 <= y <= ROWS:
+    for y in range(1 + 8 + 1):
+        for x in range(1 + 8 + 1):
+            if 1 <= x <= 8 and 1 <= y <= 8:
                 board[y][x] = EMPTY
             else:
                 board[y][x] = BORDER
@@ -42,8 +34,7 @@ def clear():
     number_of_stones[WHITE] = 2
     current_color = BLACK
     turn_count = 1
-    passedBefore = False
-    converter.clear()
+    passed_before = False
 
 
 #
@@ -83,7 +74,7 @@ def can_move(coord):
 
 
 #
-# 反転する石の位置を返す
+# 反転する石の位置を返す(着手は含まない)
 #
 def compute_flipped(coord):
     flipped = []
@@ -107,21 +98,12 @@ def compute_flipped(coord):
 #
 def available_moves():
     coords = []
-    for y in range(1, ROWS + 1):
-        for x in range(1, COLUMNS + 1):
+    for y in range(1, 8 + 1):
+        for x in range(1, 8 + 1):
             coord = (x, y)
             if can_move(coord):
                 coords.append(coord)
     return coords
-
-
-#
-# 指定した着手から盤面の特徴量に変換する
-#
-def convert_state(coord, dtype=np.float32):
-    flipped = compute_flipped(coord)
-    state = converter.convert_state(board, flipped, coord, current_color, dtype)
-    return state
 
 
 #
@@ -130,19 +112,19 @@ def convert_state(coord, dtype=np.float32):
 def make_move(coord):
     global board, number_of_stones
 
-    flipped = compute_flipped(coord)
-    converter.increase_flipped(flipped, coord)
-
     x, y = coord
     board[y][x] = current_color  # 石を打つ
     number_of_stones[current_color] += 1  # 自石を増やす
     number_of_stones[EMPTY] -= 1  # 空白を減らす
 
+    flipped = compute_flipped(coord)
     for coord_ in flipped:
         x, y = coord_
         board[y][x] = current_color  # 石を反転
         number_of_stones[current_color] += 1  # 自石を増やす
         number_of_stones[opponent_turn(current_color)] -= 1  # 相手石を減らす
+
+    return flipped
 
 
 #
@@ -152,7 +134,7 @@ def has_completed(passed):
     # 空白がなくなったら終了
     # 先手・後手両方パスで終了
     # 先手・後手どちらかが完勝したら終了
-    if number_of_stones[EMPTY] == 0 or (passed and passedBefore) \
+    if number_of_stones[EMPTY] == 0 or (passed and passed_before) \
             or number_of_stones[WHITE] == 0 or number_of_stones[BLACK] == 0:
         return True
 
@@ -163,11 +145,11 @@ def has_completed(passed):
 # 手番を進める
 #
 def next_turn(passed):
-    global current_color, turn_count, passedBefore
+    global current_color, turn_count, passed_before
 
     current_color = opponent_turn(current_color)  # 手番を変更
     turn_count += 1
-    passedBefore = passed
+    passed_before = passed
 
 
 #
@@ -176,9 +158,9 @@ def next_turn(passed):
 def print_board():
     print()
     print("  A B C D E F G H")
-    for y in range(1, ROWS + 1):
+    for y in range(1, 8 + 1):
         print(y, end='')
-        for x in range(1, COLUMNS + 1):
+        for x in range(1, 8 + 1):
             print(" " + STONES[board[y][x]], end='')
         print()
 

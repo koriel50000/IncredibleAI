@@ -2,10 +2,11 @@
 
 import numpy as np
 import statistics as stat
+import tensorflow as tf
 
 # 定数宣言
-COLUMNS = 8
 ROWS = 8
+COLUMNS = 8
 CHANNELS = 16
 
 BOARD_EMPTY = 0
@@ -36,6 +37,37 @@ early_turn = True
 flipped_board = [[0 for x_ in range(COLUMNS + 2)] for y_ in range(ROWS + 2)]
 
 
+#
+# 着手を位置に変換する
+#
+def move_to_coord(move):
+    x = ord(move[:1]) - ord("A") + 1
+    y = int(move[1:])
+    return x, y
+
+
+#
+# 位置を着手に変換する
+#
+def coord_to_move(coord):
+    x, y = coord
+    return "{0}{1}".format(chr(ord("A") + x - 1), y)
+
+
+#
+# 棋譜(着手)を着手リストに変換する
+#
+def convert_moves(move_record):
+    moves = []
+    for move in [move_record[i:i + 2] for i in range(0, len(move_record), 2)]:
+        moves.append(move)
+
+    return moves
+
+
+#
+# 特徴量を初期化する
+#
 def clear():
     global region, odd_count, even_count, empty_count, early_turn, flipped_board
 
@@ -51,6 +83,31 @@ def clear():
     flipped_board[4][5] = 1
     flipped_board[5][4] = 1
     flipped_board[5][5] = 1
+
+
+#
+# 反転数を増分する
+#
+def increase_flipped(coord, flipped):
+    global flipped_board
+
+    for coord_ in flipped:
+        x, y = coord_
+        flipped_board[y][x] += 1
+    x, y = coord
+    flipped_board[y][x] += 1
+
+
+#
+# 盤面を反転する
+#
+def flip_board(board, flip):
+    new_board = [[0 for x_ in range(COLUMNS + 2)] for y_ in range(ROWS + 2)]
+    for y in range(1, ROWS + 1):
+        for x in range(y + 1, COLUMNS + 1):
+            x_, y_ = flip(x, y)
+            new_board[y][x] = board[y_][x_]
+    return new_board
 
 
 #
@@ -76,15 +133,6 @@ def is_symmetric(diagonal, board, color):
     return False
 
 
-def flip_board(board, flip):
-    new_board = [[0 for x_ in range(COLUMNS + 2)] for y_ in range(ROWS + 2)]
-    for y in range(1, ROWS + 1):
-        for x in range(y + 1, COLUMNS + 1):
-            x_, y_ = flip(x, y)
-            new_board[y][x] = board[y_][x_]
-    return new_board
-
-
 #
 # 領域を判定する
 #
@@ -96,19 +144,6 @@ def check_region(board, coord, color):
 
     if region >= 8 and is_symmetric(region, board, color):
         region += 1
-
-
-#
-# 反転数を増分する
-#
-def increase_flipped(flipped, coord):
-    global flipped_board
-
-    for coord_ in flipped:
-        x, y = coord_
-        flipped_board[y][x] += 1
-    x, y = coord
-    flipped_board[y][x] += 1
 
 
 #
@@ -206,9 +241,13 @@ def fill(state, channel):
 
 
 #
-# 石を置いたときの状態を返す
+# 指定した着手から盤面の特徴量に変換する
 #
-def convert_state(board, flipped, coord, color, dtype):
+def convert_state(reversi, coord, dtype=np.float32):
+    board = reversi.board
+    color = reversi.current_color
+    flipped = reversi.compute_flipped(coord)
+
     check_region(board, coord, color)
     enumerate_oddeven(board)
 
@@ -218,7 +257,7 @@ def convert_state(board, flipped, coord, color, dtype):
         for x in range(1, COLUMNS + 1):
             if board[y][x] == color:
                 put(state, x, y, 0)  # 着手前に自石
-            elif board[y][x] == opponent_turn(color):
+            elif board[y][x] == reversi.opponent_turn(color):
                 put(state, x, y, 1)  # 着手前に相手石
             else:
                 put(state, x, y, 2)  # 着手前に空白
@@ -243,7 +282,7 @@ def convert_state(board, flipped, coord, color, dtype):
     if odd_count == 1 or odd_count % 2 == 0:
         fill(state, 9)  # 奇数領域が1個または偶数
 
-    return state
+    return state.flatten()
 
 
 #
@@ -283,37 +322,21 @@ def convert_evals(eval_record):
     return evals
 
 
-#
-# 相手の手番を返す
-# BLACK(1)->WHITE(2)、WHITE(2)->BLACK(1)
-#
-def opponent_turn(turn):
-    return turn ^ 3
+def serialize_example(state, label):
+    feature = {
+        "x": tf.train.Feature(float_list=tf.train.FloatList(value=state)),
+        "y": tf.train.Feature(float_list=tf.train.FloatList(value=[label]))
+    }
+    example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
+    return example_proto.SerializeToString()
 
 
-#
-# 着手を位置に変換する
-#
-def move_to_coord(move):
-    x = ord(move[:1]) - ord("A") + 1
-    y = int(move[1:])
+def parse_function(example_proto):
+    feature_description = {
+        'x': tf.io.FixedLenFeature([ROWS * COLUMNS * CHANNELS], tf.float32),
+        'y': tf.io.FixedLenFeature([], tf.float32),
+    }
+    features = tf.io.parse_single_example(example_proto, feature_description)
+    x = features['x']
+    y = features['y']
     return x, y
-
-
-#
-# 位置を着手に変換する
-#
-def coord_to_move(coord):
-    x, y = coord
-    return "{0}{1}".format(chr(ord("A") + x - 1), y)
-
-
-#
-# 棋譜(着手)を着手リストに変換する
-#
-def convert_moves(move_record):
-    moves = []
-    for move in [move_record[i:i + 2] for i in range(0, len(move_record), 2)]:
-        moves.append(move)
-
-    return moves

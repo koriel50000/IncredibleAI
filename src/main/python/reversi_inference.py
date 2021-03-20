@@ -6,8 +6,8 @@ import os.path
 import zipfile
 
 import reversi
-import converter
-import cnn_model
+import oddeven_feature as feature
+import cnn_model as model
 
 # global変数宣言
 total_count = 0
@@ -116,20 +116,19 @@ def calculate_accuracies(index, evals, predicted_evals):
 #
 # 棋譜を評価する
 #
-def evaluating_records(move_record, eval_records):
+def evaluating_records(move_line, eval_lines):
     reversi.clear()
+    feature.clear()
 
-    for index, actual_move in enumerate(converter.convert_moves(move_record)):
+    for index, actual_move in enumerate(feature.convert_moves(move_line)):
         # print("index:{0} move:{1}".format(index, actual_move))
-        while True:
-            if len(reversi.available_moves()) > 0:
-                break
-            print("Pass!")
-            if reversi.has_completed(True):
-                raise Exception("Error!")  # 先手・後手両方パスで終了は考慮しない
+        if len(reversi.available_moves()) == 0:
+            print("{0}: Pass!".format(index))
             reversi.next_turn(True)
+            if len(reversi.available_moves()) == 0:
+                raise Exception("Error!")  # 先手・後手両方パスで終了は考慮しない
 
-        evals = converter.convert_evals(eval_records[index])
+        evals = feature.convert_evals(eval_lines[index])
 
         ndigits = 3  # 評価値は小数点第三位を四捨五入
         predicted_evals = []
@@ -137,15 +136,17 @@ def evaluating_records(move_record, eval_records):
             coord = entry['coord']
             value = entry['value']
             entry['value'] = round(value, ndigits)
-            state = reversi.convert_state(coord)
-            predicted_value = round(cnn_model.calculate_predicted_value(state), ndigits)
+            state = feature.convert_to_state(reversi, coord)
+            predicted_value = round(model.calculate_predicted_value(state), ndigits)
             predicted_evals.append({'coord': coord, 'value': predicted_value})
 
         calculate_accuracies(index, evals, predicted_evals)
 
-        coord = converter.move_to_coord(actual_move)
-        reversi.make_move(coord)
+        coord = feature.move_to_coord(actual_move)
+        flipped = reversi.make_move(coord)
         reversi.next_turn(False)
+
+        feature.increase_flipped(coord, flipped)
 
 
 #
@@ -155,10 +156,10 @@ def evaluating_model(path, filenames):
     for i, filename in enumerate(filenames):
         file = os.path.join(path, filename)
         with open(file, "r") as fin:
-            move_record = fin.readline().strip()
-            eval_records = [x.strip() for x in fin.readlines()]
+            move_line = fin.readline().strip()
+            eval_lines = [x.strip() for x in fin.readlines()]
 
-        evaluating_records(move_record, eval_records)
+        evaluating_records(move_line, eval_lines)
 
         # 全体の正答率
         print("{0}: {1}".format(i, file))
@@ -174,7 +175,7 @@ def evaluating_model(path, filenames):
 # メイン
 #
 def main(args):
-    cnn_model.load_model("../resources/model/")
+    model.load_model("../resources/model/")
 
     path = "../resources/records/"
     with zipfile.ZipFile(os.path.join(path, "kifu102245.zip")) as records_zip:
@@ -193,5 +194,5 @@ def main(args):
 
 
 if __name__ == "__main__":
-    exitCode = main(sys.argv)
-    sys.exit(exitCode)
+    exit_code = main(sys.argv)
+    sys.exit(exit_code)

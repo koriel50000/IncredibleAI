@@ -1,7 +1,17 @@
 # -*- coding: utf-8 -*-
 
-import datasets
+import tensorflow as tf
 from tensorflow import keras
+
+# メモリ使用を制限
+# https://www.tensorflow.org/api_docs/python/tf/config/experimental/set_memory_growth
+physical_devices = tf.config.list_physical_devices('GPU')
+try:
+    tf.config.experimental.set_memory_growth(physical_devices[0], True)
+except:
+    # Invalid device or cannot modify virtual devices once initialized.
+    pass
+
 
 # 定数宣言
 input_cols = 8
@@ -31,20 +41,25 @@ model.compile(optimizer=keras.optimizers.Adam(1e-5),
 #
 # モデルを学習する
 #
-def training_model(datasets_dir, checkpoint_dir, step, epoch, epoch_size):
-    prefix = 'train1k{:02d}'.format(step)
-    reversi_data = datasets.read_data_sets(datasets_dir, prefix)
-    x_train = reversi_data.train.images
-    y_train = reversi_data.train.labels
-    print("images;", x_train.shape)
-    print("labels:", y_train.shape)
+def training_model(dataset, checkpoint_prefix, batch_size, initial_epoch, epoch_size):
+    dataset = dataset.shuffle(buffer_size=1024).batch(batch_size)
+
     model.summary()
 
-    checkpoint_path = checkpoint_dir + prefix + '_{epoch:02d}'
+    checkpoint_path = checkpoint_prefix + "_{epoch:02d}"
     checkpoint = keras.callbacks.ModelCheckpoint(checkpoint_path,
+                                                 monitor='val_accuracy',
+                                                 verbose=1,
                                                  save_weights_only=True)
 
-    model.fit(x_train, y_train, batch_size=1, initial_epoch=epoch, epochs=epoch_size, callbacks=[checkpoint])
+    model.fit(dataset, batch_size=batch_size, initial_epoch=initial_epoch, epochs=epoch_size, callbacks=[checkpoint])
+
+
+#
+# 予測値を計算する
+#
+def calculate_predicted_values(states):
+    return model.predict(states)
 
 
 #
@@ -73,8 +88,17 @@ def load_model(import_dir):
 
 
 #
+# 学習データをロードする
+#
+def load_dataset(filename, parse_function):
+    raw_dataset = tf.data.TFRecordDataset([filename], compression_type="GZIP")
+    parsed_dataset = raw_dataset.map(parse_function)
+    return parsed_dataset
+
+
+#
 # チェックポイントを読み込む
 #
-def load_checkpoint(checkpoint_dir, step, epoch):
-    filename = 'train1k{:02d}_{:02d}'.format(step, epoch)
-    model.load_weights(checkpoint_dir + filename)
+def load_checkpoint(checkpoint_prefix, epoch):
+    checkpoint_path = checkpoint_prefix + "_{:02d}".format(epoch)
+    model.load_weights(checkpoint_path)
