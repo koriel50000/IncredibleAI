@@ -2,6 +2,7 @@ package com.github.koriel50000.prelude.op;
 
 import com.github.koriel50000.prelude.learning.BitState;
 import com.github.koriel50000.prelude.learning.CNNModel;
+import com.github.koriel50000.prelude.learning.PreludeFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
@@ -19,12 +20,16 @@ public class PreludeOperator implements Operator {
 
     private BitBoard bitBoard;
     private Reversi reversi;
+    private PreludeFeature feature;
+
     private CNNModel model;
     private Random random;
 
-    public PreludeOperator(BitBoard bitBoard, Reversi reversi, long seed) {
+    public PreludeOperator(BitBoard bitBoard,
+                           Reversi reversi, PreludeFeature feature, long seed) {
         this.bitBoard = bitBoard;
         this.reversi = reversi;
+        this.feature = feature;
         model = new CNNModel();
         random = new Random(seed);
     }
@@ -49,7 +54,7 @@ public class PreludeOperator implements Operator {
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
             float[] buffer = state.getBuffer();
-            float[] expectedBuffer = reversi.convertState(Coord.valueOf(coord));
+            float[] expectedBuffer = feature.convertState(reversi, Coord.valueOf(coord));
             try {
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {

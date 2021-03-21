@@ -17,11 +17,8 @@ public class Reversi {
     private boolean passedBefore;
     private Score score;
 
-    private PreludeFeature converter;
-
     public Reversi() {
         board = new Board();
-        converter = new PreludeFeature();
     }
 
     /**
@@ -33,7 +30,6 @@ public class Reversi {
         turnCount = 1;
         passedBefore = false;
         score = null;
-        converter.clear();
     }
 
     /**
@@ -67,7 +63,7 @@ public class Reversi {
     /**
      * 反転する石の位置を返す
      */
-    private List<Coord> computeFlipped(Coord coord) {
+    public List<Coord> computeFlipped(Coord coord) {
         List<Coord> flipped = new ArrayList<>();
         for (Direction dir : Direction.values()) {
             if (!canMoveDirection(coord, dir)) {
@@ -96,25 +92,17 @@ public class Reversi {
     }
 
     /**
-     * 指定した着手から盤面の特徴量に変換する
-     */
-    public float[] convertState(Coord coord) {
-        List<Coord> flipped = computeFlipped(coord);
-        float[] buffer = converter.convertState(board, flipped, coord, currentColor);
-        return buffer;
-    }
-
-    /**
      * 指定された位置に石を打つ
      */
-    public void makeMove(Coord coord) {
+    public List<Coord> makeMove(Coord coord) {
         List<Coord> flipped = computeFlipped(coord);
-        converter.increaseFlipped(flipped, coord);
 
         board.put(coord, currentColor); // 石を打つ
         for (Coord coord_ : flipped) {
             board.put(coord_, currentColor); // 石を反転
         }
+
+        return flipped;
     }
 
     /**
@@ -198,6 +186,10 @@ public class Reversi {
         buffer.println(String.format(" winner:%s", score.getWinner()));
         buffer.println(String.format("black:%d white:%d", score.getBlackStones(), score.getWhiteStones()));
         buffer.println();
+    }
+
+    public Board getBoard() {
+        return board;
     }
 
     public Color getCurrentColor() {

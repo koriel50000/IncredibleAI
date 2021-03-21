@@ -18,17 +18,16 @@ public class RolloutPolicy {
     private Random random;
 
     private Reversi reversi;
-    private PreludeFeature converter;
+    private PreludeFeature feature;
 
     private volatile long lastCoord;
 
-    public RolloutPolicy(BitBoard bitBoard, Reversi reversi, long seed) {
+    public RolloutPolicy(BitBoard bitBoard, Reversi reversi, PreludeFeature feature, long seed) {
         this.bitBoard = bitBoard;
         this.reversi = reversi;
+        this.feature = feature;
         model = new CNNModel();
         random = new Random(seed);
-
-        converter = new PreludeFeature();
     }
 
     public void init() {
@@ -51,7 +50,7 @@ public class RolloutPolicy {
 
             // Assert
             BitState state = bitBoard.convertState(player, opponent, coord);
-            float[] expectedBuffer = reversi.convertState(Reversi.Coord.valueOf(coord));
+            float[] expectedBuffer = feature.convertState(reversi, Reversi.Coord.valueOf(coord));
             try {
                 float[] buffer = state.getBuffer();
                 assertEquals(expectedBuffer, buffer, "buffer");

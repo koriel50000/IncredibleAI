@@ -1,5 +1,6 @@
 package com.github.koriel50000.prelude;
 
+import com.github.koriel50000.prelude.learning.PreludeFeature;
 import com.github.koriel50000.prelude.op.Operator;
 import com.github.koriel50000.prelude.op.PreludeOperator;
 import com.github.koriel50000.prelude.op.RandomOperator;
@@ -8,6 +9,8 @@ import com.github.koriel50000.prelude.reversi.Bits;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
 import com.github.koriel50000.prelude.reversi.Reversi;
 
+import java.util.List;
+
 import static com.github.koriel50000.prelude.reversi.Reversi.Color;
 import static com.github.koriel50000.prelude.reversi.Reversi.Coord;
 
@@ -15,15 +18,18 @@ public class PlayMain {
 
     private BitBoard bitBoard;
     private Reversi reversi;
+    private PreludeFeature feature;
 
     private PlayMain() {
         bitBoard = new BitBoard();
         reversi = new Reversi();
+        feature = new PreludeFeature();
     }
 
     private void oneplay() {
         long seed = System.currentTimeMillis();
-        Operator preludeOperator = new PreludeOperator(bitBoard, reversi, seed);
+        Operator preludeOperator = new PreludeOperator(
+                bitBoard, reversi, feature, seed);
         Operator randomOperator = new RandomOperator(seed);
         preludeOperator.init();
         randomOperator.init();
@@ -40,6 +46,7 @@ public class PlayMain {
     private void play(Operator blackOperator, Operator whiteOperator) {
         bitBoard.clear();
         reversi.clear();
+        feature.clear();
 
         LineBuffer buffer = new LineBuffer();
 
@@ -56,61 +63,36 @@ public class PlayMain {
             boolean expectedBlackTurn = reversi.getCurrentColor() == Color.Black;
             assertEquals(expectedBlackTurn, blackTurn, "currentColor");
 
-            if (blackTurn) {
-                // Assert
-                long coords = bitBoard.availableMoves(bitBoard.blackBoard, bitBoard.whiteBoard);
-                long expectedCoords = Coord.toCoords(reversi.availableMoves());
-                try {
-                    assertEquals(expectedCoords, coords, "availableMoves");
-                } catch (AssertionError e) {
-                    LineBuffer errorBuffer = new LineBuffer();
-                    errorBuffer.offset(0);
-                    errorBuffer.println("expected");
-                    Bits.printMatrix(errorBuffer, expectedCoords);
-                    errorBuffer.offset(15);
-                    errorBuffer.println("actual");
-                    Bits.printMatrix(errorBuffer, coords);
-                    errorBuffer.flush();
-                    throw e;
-                }
+            long playerBoard = blackTurn ? bitBoard.blackBoard : bitBoard.whiteBoard;
+            long opponentBoard = blackTurn ? bitBoard.whiteBoard : bitBoard.blackBoard;
+            Operator operator = blackTurn ? blackOperator : whiteOperator;
 
-                if (coords != 0) {
-                    long coord = blackOperator.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
+            // Assert
+            long coords = bitBoard.availableMoves(playerBoard, opponentBoard);
+            long expectedCoords = Coord.toCoords(reversi.availableMoves());
+            try {
+                assertEquals(expectedCoords, coords, "availableMoves");
+            } catch (AssertionError e) {
+                LineBuffer errorBuffer = new LineBuffer();
+                errorBuffer.offset(0);
+                errorBuffer.println("expected");
+                Bits.printMatrix(errorBuffer, expectedCoords);
+                errorBuffer.offset(15);
+                errorBuffer.println("actual");
+                Bits.printMatrix(errorBuffer, coords);
+                errorBuffer.flush();
+                throw e;
+            }
 
-                    bitBoard.makeMove(bitBoard.blackBoard, bitBoard.whiteBoard, coord);
-                    reversi.makeMove(Coord.valueOf(coord));
-                } else {
-                    System.out.println("Pass!");
-                    passed = true;
-                }
+            if (coords == 0) {
+                System.out.println("Pass!");
+                passed = true;
             } else {
-                // Assert
-                long coords = bitBoard.availableMoves(bitBoard.whiteBoard, bitBoard.blackBoard);
-                long expectedCoords = Coord.toCoords(reversi.availableMoves());
-                try {
-                    assertEquals(expectedCoords, coords, "availableMoves");
-                } catch (AssertionError e) {
-                    LineBuffer errorBuffer = new LineBuffer();
-                    errorBuffer.offset(0);
-                    errorBuffer.println("expected");
-                    Bits.printMatrix(errorBuffer, expectedCoords);
-                    errorBuffer.offset(15);
-                    errorBuffer.println("actual");
-                    Bits.printMatrix(errorBuffer, coords);
-                    errorBuffer.flush();
-                    throw e;
-                }
-
-                if (coords != 0) {
-                    long coord = whiteOperator.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
-
-                    bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
-                    reversi.convertState(Coord.valueOf(coord));
-                    reversi.makeMove(Coord.valueOf(coord));
-                } else {
-                    System.out.println("Pass!");
-                    passed = true;
-                }
+                long coord = operator.evaluate(playerBoard, opponentBoard, coords);
+                bitBoard.makeMove(playerBoard, opponentBoard, coord);
+                Coord coord_ = Coord.valueOf(coord);
+                List<Coord> flipped = reversi.makeMove(coord_);
+                feature.increaseFlipped(coord_, flipped);
             }
 
             // Assert
@@ -122,7 +104,6 @@ public class PlayMain {
             if (completed) {
                 break;
             }
-
             bitBoard.nextTurn(passed);
             reversi.nextTurn(passed);
         }

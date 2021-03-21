@@ -1,5 +1,6 @@
 package com.github.koriel50000.prelude;
 
+import com.github.koriel50000.prelude.learning.PreludeFeature;
 import com.github.koriel50000.prelude.op.Operator;
 import com.github.koriel50000.prelude.op.PreludeOperator;
 import com.github.koriel50000.prelude.op.RandomOperator;
@@ -9,22 +10,28 @@ import com.github.koriel50000.prelude.reversi.LineBuffer;
 import com.github.koriel50000.prelude.reversi.Reversi;
 import com.github.koriel50000.prelude.reversi.Score;
 
+import java.util.List;
+
 import static com.github.koriel50000.prelude.reversi.Reversi.Coord;
 
 public class AutoPlayMain {
 
     private BitBoard bitBoard;
     private Reversi reversi;
+    private PreludeFeature feature;
 
     private AutoPlayMain() {
         bitBoard = new BitBoard();
         reversi = new Reversi();
+        feature = new PreludeFeature();
     }
 
     private void autoplay() {
         long seed = System.currentTimeMillis();
-        Operator referenceOperator = new ReferenceOperator(bitBoard, reversi, seed);
-        Operator preludeOperator = new PreludeOperator(bitBoard, reversi, seed);
+        Operator referenceOperator = new ReferenceOperator(
+                bitBoard, reversi, feature, seed);
+        Operator preludeOperator = new PreludeOperator(
+                bitBoard, reversi, feature, seed);
         Operator randomOperator = new RandomOperator(seed);
         preludeOperator.init();
         randomOperator.init();
@@ -91,29 +98,26 @@ public class AutoPlayMain {
     private Score play(Operator blackOperator, Operator whiteOperator) {
         bitBoard.clear();
         reversi.clear();
+        feature.clear();
 
         LineBuffer buffer = new LineBuffer();
 
         while (true) {
             boolean passed = false;
-            if (bitBoard.currentColor == BitBoard.BLACK) {
-                long coords = bitBoard.availableMoves(bitBoard.blackBoard, bitBoard.whiteBoard);
-                if (coords != 0) {
-                    long coord = blackOperator.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
-                    bitBoard.makeMove(bitBoard.blackBoard, bitBoard.whiteBoard, coord);
-                    reversi.makeMove(Coord.valueOf(coord));
-                } else {
-                    passed = true;
-                }
+            boolean blackTurn = bitBoard.currentColor == BitBoard.BLACK;
+            long playerBoard =  blackTurn ? bitBoard.blackBoard : bitBoard.whiteBoard;
+            long opponentBoard = blackTurn ? bitBoard.whiteBoard : bitBoard.blackBoard;
+            Operator operator = blackTurn ? blackOperator : whiteOperator;
+
+            long coords = bitBoard.availableMoves(playerBoard, opponentBoard);
+            if (coords == 0) {
+                passed = true;
             } else {
-                long coords = bitBoard.availableMoves(bitBoard.whiteBoard, bitBoard.blackBoard);
-                if (coords != 0) {
-                    long coord = whiteOperator.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
-                    bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
-                    reversi.makeMove(Coord.valueOf(coord));
-                } else {
-                    passed = true;
-                }
+                long coord = operator.evaluate(playerBoard, opponentBoard, coords);
+                bitBoard.makeMove(playerBoard, opponentBoard, coord);
+                Coord coord_ = Coord.valueOf(coord);
+                List<Coord> flipped = reversi.makeMove(coord_);
+                feature.increaseFlipped(coord_, flipped);
             }
 
             // ゲーム終了を判定

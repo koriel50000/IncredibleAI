@@ -1,5 +1,7 @@
 package com.github.koriel50000.prelude.learning;
 
+import com.github.koriel50000.prelude.reversi.Reversi;
+
 import java.util.List;
 
 import static com.github.koriel50000.prelude.reversi.Reversi.*;
@@ -101,11 +103,11 @@ public class PreludeFeature {
     /**
      * 反転数を増分する
      */
-    public void increaseFlipped(List<Coord> flipped, Coord coord) {
+    public void increaseFlipped(Coord coord, List<Coord> flipped) {
+        flippedBoard[coord.index()]++;
         for (Coord coord_ : flipped) {
             flippedBoard[coord_.index()]++;
         }
-        flippedBoard[coord.index()]++;
     }
 
     /**
@@ -233,7 +235,11 @@ public class PreludeFeature {
     /**
      * 石を置いたときの特徴量を返す
      */
-    public float[] convertState(Board board, List<Coord> flipped, Coord coord, Color color) {
+    public float[] convertState(Reversi reversi, Coord coord) {
+        Board board = reversi.getBoard();
+        Color color = reversi.getCurrentColor();
+        List<Coord> flipped = reversi.computeFlipped(coord);
+
         checkRegion(board, coord, color);
         enumerateOddEven(board);
 
@@ -274,7 +280,6 @@ public class PreludeFeature {
             fill(buffer, 9); // 奇数領域が1個または偶数
         }
 
-        //buffer.clear(); // positionを0、limitをcapacityに戻す
         return buffer;
     }
 }
