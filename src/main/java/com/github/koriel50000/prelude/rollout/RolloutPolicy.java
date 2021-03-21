@@ -6,7 +6,6 @@ import com.github.koriel50000.prelude.reversi.Bits;
 import com.github.koriel50000.prelude.reversi.Reversi;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
 
-import java.nio.FloatBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +18,7 @@ public class RolloutPolicy {
     private Random random;
 
     private Reversi reversi;
-    private PreludeConverter converter;
+    private PreludeFeature converter;
 
     private volatile long lastCoord;
 
@@ -29,7 +28,7 @@ public class RolloutPolicy {
         model = new CNNModel();
         random = new Random(seed);
 
-        converter = new PreludeConverter();
+        converter = new PreludeFeature();
     }
 
     public void init() {

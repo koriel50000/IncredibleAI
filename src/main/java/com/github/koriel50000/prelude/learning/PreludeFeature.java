@@ -4,7 +4,7 @@ import java.util.List;
 
 import static com.github.koriel50000.prelude.reversi.Reversi.*;
 
-public class PreludeConverter {
+public class PreludeFeature {
 
     private static final int AREA_EMPTY = 0;
     private static final int AREA_ODD = 1;
@@ -31,7 +31,7 @@ public class PreludeConverter {
     private boolean earlyTurn;
     private int[] flippedBoard;
 
-    public PreludeConverter() {
+    public PreludeFeature() {
         oddevenArea = new int[COLUMNS * ROWS];
         flippedBoard = new int[COLUMNS * ROWS];
     }

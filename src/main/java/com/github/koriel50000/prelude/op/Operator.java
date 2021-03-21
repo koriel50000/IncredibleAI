@@ -1,6 +1,6 @@
-package com.github.koriel50000.prelude.feature;
+package com.github.koriel50000.prelude.op;
 
-public interface Feature {
+public interface Operator {
 
     void init();
 

@@ -2,7 +2,7 @@ package com.github.koriel50000.prelude.learning;
 
 import com.github.koriel50000.prelude.reversi.Bits;
 
-public class BitConverter {
+public class BitFeature {
 
     private static final int[] REGION = new int[]{
             8, 0, 0, 0, 2, 2, 2, 10,
@@ -120,26 +120,6 @@ public class BitConverter {
 
             flipped ^= coord;
         }
-    }
-
-    /**
-     * 再帰的にたどって領域を分割する
-     */
-    private long partitionRecursive(long area, long coord, long part) {
-        area &= ~part;
-        if ((area & coord) == 0) {
-            return part;
-        }
-        part |= coord;
-        // 上
-        part = partitionRecursive(area, coord << 8, part);
-        // 下
-        part = partitionRecursive(area, coord >>> 8, part);
-        // 左
-        part = partitionRecursive(area, (coord & 0x7f7f7f7f7f7f7f7fL) << 1, part);
-        // 右
-        part = partitionRecursive(area, (coord >>> 1) & 0x7f7f7f7f7f7f7f7fL, part);
-        return part;
     }
 
     private static class Segment {

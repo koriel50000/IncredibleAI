@@ -1,4 +1,4 @@
-package com.github.koriel50000.prelude.feature;
+package com.github.koriel50000.prelude.op;
 
 import com.github.koriel50000.prelude.book.BookSearch;
 import com.github.koriel50000.prelude.reversi.BitBoard;
@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.*;
 
-public class ReferenceFeature implements Feature {
+public class ReferenceOperator implements Operator {
 
     private static final long TIME_LIMIT = 1000; // 制限時間 1000(ms)
 
@@ -21,7 +21,7 @@ public class ReferenceFeature implements Feature {
     private ExecutorService executor;
     private List<EvaluateTask> evaluateTasks;
 
-    public ReferenceFeature(BitBoard bitBoard, Reversi reversi, long seed) {
+    public ReferenceOperator(BitBoard bitBoard, Reversi reversi, long seed) {
         bookSearch = new BookSearch(bitBoard);
         rolloutPolicy = new RolloutPolicy(bitBoard, reversi, seed);
         winLossExplorer = new WinLossExplorer(bitBoard);

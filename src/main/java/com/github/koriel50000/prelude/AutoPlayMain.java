@@ -1,8 +1,9 @@
 package com.github.koriel50000.prelude;
 
-import com.github.koriel50000.prelude.feature.Feature;
-import com.github.koriel50000.prelude.feature.PreludeFeature;
-import com.github.koriel50000.prelude.feature.RandomFeature;
+import com.github.koriel50000.prelude.op.Operator;
+import com.github.koriel50000.prelude.op.PreludeOperator;
+import com.github.koriel50000.prelude.op.RandomOperator;
+import com.github.koriel50000.prelude.op.ReferenceOperator;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
 import com.github.koriel50000.prelude.reversi.Reversi;
@@ -22,11 +23,11 @@ public class AutoPlayMain {
 
     private void autoplay() {
         long seed = System.currentTimeMillis();
-        //Feature referenceFeature = new ReferenceFeature(bitBoard, reversi, seed);
-        Feature preludeFeature = new PreludeFeature(bitBoard, reversi, seed);
-        Feature randomFeature = new RandomFeature(seed);
-        preludeFeature.init();
-        randomFeature.init();
+        Operator referenceOperator = new ReferenceOperator(bitBoard, reversi, seed);
+        Operator preludeOperator = new PreludeOperator(bitBoard, reversi, seed);
+        Operator randomOperator = new RandomOperator(seed);
+        preludeOperator.init();
+        randomOperator.init();
 
         int win = 0;
         int loss = 0;
@@ -36,7 +37,7 @@ public class AutoPlayMain {
         Score score;
 
         for (int i = 0; i < 50; i++) {
-            score = play(preludeFeature, randomFeature);
+            score = play(preludeOperator, randomOperator);
 
             switch (score.getWinner()) {
                 case "black":
@@ -56,7 +57,7 @@ public class AutoPlayMain {
                     break;
             }
 
-            score = play(randomFeature, preludeFeature);
+            score = play(randomOperator, preludeOperator);
 
             switch (score.getWinner()) {
                 case "black":
@@ -80,14 +81,14 @@ public class AutoPlayMain {
         System.out.println(String.format("win:%d loss:%d draw:%d", win, loss, draw));
         System.out.println(String.format("win_stone:%d loss_stone:%d", winStones, lossStones));
 
-        preludeFeature.destroy();
-        randomFeature.destroy();
+        preludeOperator.destroy();
+        randomOperator.destroy();
     }
 
     /**
      * ゲームを開始する
      */
-    private Score play(Feature blackFeature, Feature whiteFeature) {
+    private Score play(Operator blackOperator, Operator whiteOperator) {
         bitBoard.clear();
         reversi.clear();
 
@@ -98,7 +99,7 @@ public class AutoPlayMain {
             if (bitBoard.currentColor == BitBoard.BLACK) {
                 long coords = bitBoard.availableMoves(bitBoard.blackBoard, bitBoard.whiteBoard);
                 if (coords != 0) {
-                    long coord = blackFeature.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
+                    long coord = blackOperator.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
                     bitBoard.makeMove(bitBoard.blackBoard, bitBoard.whiteBoard, coord);
                     reversi.makeMove(Coord.valueOf(coord));
                 } else {
@@ -107,7 +108,7 @@ public class AutoPlayMain {
             } else {
                 long coords = bitBoard.availableMoves(bitBoard.whiteBoard, bitBoard.blackBoard);
                 if (coords != 0) {
-                    long coord = whiteFeature.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
+                    long coord = whiteOperator.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
                     bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
                     reversi.makeMove(Coord.valueOf(coord));
                 } else {

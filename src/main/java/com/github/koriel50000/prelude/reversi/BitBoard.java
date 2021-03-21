@@ -1,6 +1,6 @@
 package com.github.koriel50000.prelude.reversi;
 
-import com.github.koriel50000.prelude.learning.BitConverter;
+import com.github.koriel50000.prelude.learning.BitFeature;
 import com.github.koriel50000.prelude.learning.BitState;
 
 import java.util.Arrays;
@@ -23,11 +23,11 @@ public class BitBoard {
     private boolean passedBefore;
     private Score score;
 
-    private BitConverter converter;
+    private BitFeature converter;
     private BitState[] availableStates;
 
     public BitBoard() {
-        converter = new BitConverter();
+        converter = new BitFeature();
         availableStates = new BitState[64];
     }
 

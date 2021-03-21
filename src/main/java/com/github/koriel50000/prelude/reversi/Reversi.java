@@ -1,6 +1,6 @@
 package com.github.koriel50000.prelude.reversi;
 
-import com.github.koriel50000.prelude.learning.PreludeConverter;
+import com.github.koriel50000.prelude.learning.PreludeFeature;
 
 import java.util.*;
 import java.util.function.Function;
@@ -17,11 +17,11 @@ public class Reversi {
     private boolean passedBefore;
     private Score score;
 
-    private PreludeConverter converter;
+    private PreludeFeature converter;
 
     public Reversi() {
         board = new Board();
-        converter = new PreludeConverter();
+        converter = new PreludeFeature();
     }
 
     /**

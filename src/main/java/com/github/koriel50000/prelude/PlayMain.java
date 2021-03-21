@@ -1,8 +1,8 @@
 package com.github.koriel50000.prelude;
 
-import com.github.koriel50000.prelude.feature.Feature;
-import com.github.koriel50000.prelude.feature.PreludeFeature;
-import com.github.koriel50000.prelude.feature.RandomFeature;
+import com.github.koriel50000.prelude.op.Operator;
+import com.github.koriel50000.prelude.op.PreludeOperator;
+import com.github.koriel50000.prelude.op.RandomOperator;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Bits;
 import com.github.koriel50000.prelude.reversi.LineBuffer;
@@ -23,21 +23,21 @@ public class PlayMain {
 
     private void oneplay() {
         long seed = System.currentTimeMillis();
-        Feature preludeFeature = new PreludeFeature(bitBoard, reversi, seed);
-        Feature randomFeature = new RandomFeature(seed);
-        preludeFeature.init();
-        randomFeature.init();
+        Operator preludeOperator = new PreludeOperator(bitBoard, reversi, seed);
+        Operator randomOperator = new RandomOperator(seed);
+        preludeOperator.init();
+        randomOperator.init();
 
-        play(preludeFeature, randomFeature);
+        play(preludeOperator, randomOperator);
 
-        preludeFeature.destroy();
-        randomFeature.destroy();
+        preludeOperator.destroy();
+        randomOperator.destroy();
     }
 
     /**
      * ゲームを開始する
      */
-    private void play(Feature blackFeature, Feature whiteFeature) {
+    private void play(Operator blackOperator, Operator whiteOperator) {
         bitBoard.clear();
         reversi.clear();
 
@@ -75,7 +75,7 @@ public class PlayMain {
                 }
 
                 if (coords != 0) {
-                    long coord = blackFeature.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
+                    long coord = blackOperator.evaluate(bitBoard.blackBoard, bitBoard.whiteBoard, coords);
 
                     bitBoard.makeMove(bitBoard.blackBoard, bitBoard.whiteBoard, coord);
                     reversi.makeMove(Coord.valueOf(coord));
@@ -102,7 +102,7 @@ public class PlayMain {
                 }
 
                 if (coords != 0) {
-                    long coord = whiteFeature.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
+                    long coord = whiteOperator.evaluate(bitBoard.whiteBoard, bitBoard.blackBoard, coords);
 
                     bitBoard.makeMove(bitBoard.whiteBoard, bitBoard.blackBoard, coord);
                     reversi.convertState(Coord.valueOf(coord));

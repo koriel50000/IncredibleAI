@@ -1,4 +1,4 @@
-package com.github.koriel50000.prelude.feature;
+package com.github.koriel50000.prelude.op;
 
 import com.github.koriel50000.prelude.learning.BitState;
 import com.github.koriel50000.prelude.learning.CNNModel;
@@ -15,14 +15,14 @@ import java.util.Random;
 
 import static com.github.koriel50000.prelude.reversi.Reversi.*;
 
-public class PreludeFeature implements Feature {
+public class PreludeOperator implements Operator {
 
     private BitBoard bitBoard;
     private Reversi reversi;
     private CNNModel model;
     private Random random;
 
-    public PreludeFeature(BitBoard bitBoard, Reversi reversi, long seed) {
+    public PreludeOperator(BitBoard bitBoard, Reversi reversi, long seed) {
         this.bitBoard = bitBoard;
         this.reversi = reversi;
         model = new CNNModel();

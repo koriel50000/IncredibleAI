@@ -1,4 +1,4 @@
-package com.github.koriel50000.prelude.feature;
+package com.github.koriel50000.prelude.op;
 
 import com.github.koriel50000.prelude.reversi.Bits;
 
@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class RandomFeature implements Feature {
+public class RandomOperator implements Operator {
 
     private Random random;
 
-    public RandomFeature(long seed) {
+    public RandomOperator(long seed) {
         random = new Random(seed);
     }
 
