@@ -116,19 +116,18 @@ def calculate_accuracies(index, evals, predicted_evals):
 #
 # 棋譜を評価する
 #
-def evaluating_records(move_line, eval_lines):
+def evaluating_records(move_record, eval_records):
     reversi.clear()
     feature.clear()
 
-    for index, actual_move in enumerate(feature.convert_moves(move_line)):
+    for index, actual_move in enumerate(feature.convert_moves(move_record)):
         # print("index:{0} move:{1}".format(index, actual_move))
         if len(reversi.available_moves()) == 0:
-            print("{0}: Pass!".format(index))
             reversi.next_turn(True)
             if len(reversi.available_moves()) == 0:
                 raise Exception("Error!")  # 先手・後手両方パスで終了は考慮しない
 
-        evals = feature.convert_evals(eval_lines[index])
+        evals = feature.convert_evals(eval_records[index])
 
         ndigits = 3  # 評価値は小数点第三位を四捨五入
         predicted_evals = []
@@ -136,7 +135,7 @@ def evaluating_records(move_line, eval_lines):
             coord = entry['coord']
             value = entry['value']
             entry['value'] = round(value, ndigits)
-            state = feature.convert_to_state(reversi, coord)
+            state = feature.convert_state(reversi, coord)
             predicted_value = round(model.calculate_predicted_value(state), ndigits)
             predicted_evals.append({'coord': coord, 'value': predicted_value})
 
@@ -144,9 +143,8 @@ def evaluating_records(move_line, eval_lines):
 
         coord = feature.move_to_coord(actual_move)
         flipped = reversi.make_move(coord)
-        reversi.next_turn(False)
-
         feature.increase_flipped(coord, flipped)
+        reversi.next_turn(False)
 
 
 #
@@ -156,10 +154,10 @@ def evaluating_model(path, filenames):
     for i, filename in enumerate(filenames):
         file = os.path.join(path, filename)
         with open(file, "r") as fin:
-            move_line = fin.readline().strip()
-            eval_lines = [x.strip() for x in fin.readlines()]
+            move_record = fin.readline().strip()
+            eval_records = [x.strip() for x in fin.readlines()]
 
-        evaluating_records(move_line, eval_lines)
+        evaluating_records(move_record, eval_records)
 
         # 全体の正答率
         print("{0}: {1}".format(i, file))

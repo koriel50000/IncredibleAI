@@ -322,10 +322,12 @@ def convert_evals(eval_record):
     return evals
 
 
-def serialize_example(state, label):
+def serialize_example(state, value):
+    state_ = state.tobytes()
+    value_ = np.array([value], dtype=np.uint8).tobytes()
     feature = {
-        "x": tf.train.Feature(float_list=tf.train.FloatList(value=state)),
-        "y": tf.train.Feature(float_list=tf.train.FloatList(value=[label]))
+        "x": tf.train.Feature(bytes_list=tf.train.BytesList(value=[state_])),
+        "y": tf.train.Feature(bytes_list=tf.train.BytesList(value=[value_]))
     }
     example_proto = tf.train.Example(features=tf.train.Features(feature=feature))
     return example_proto.SerializeToString()
@@ -333,10 +335,12 @@ def serialize_example(state, label):
 
 def parse_function(example_proto):
     feature_description = {
-        'x': tf.io.FixedLenFeature([ROWS * COLUMNS * CHANNELS], tf.float32),
-        'y': tf.io.FixedLenFeature([], tf.float32),
+        'x': tf.io.FixedLenFeature([], tf.string),
+        'y': tf.io.FixedLenFeature([], tf.string),
     }
     features = tf.io.parse_single_example(example_proto, feature_description)
-    x = features['x']
-    y = features['y']
-    return x, y
+    x = tf.cast(tf.io.decode_raw(features['x'], tf.uint8), tf.float32)
+    y = tf.cast(tf.io.decode_raw(features['y'], tf.uint8), tf.float32)
+    x_ = tf.reshape(x, [ROWS * COLUMNS * CHANNELS])
+    y_ = tf.reshape(tf.divide(tf.subtract(y, 128), 127), [1])
+    return x_, y_

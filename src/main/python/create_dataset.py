@@ -2,9 +2,11 @@
 
 import sys
 import os
+import glob
 import zipfile
 import gzip
 import shutil
+import numpy as np
 import tensorflow as tf
 
 import reversi
@@ -36,7 +38,9 @@ def write_record(fout, move_record, eval_records):
         for entry in evals:
             coord = entry['coord']
             value = entry['value']
-            state = feature.convert_state(reversi, coord)
+            # Convert from [-1.0, 0.0, 1.0] -> [1, 255].
+            value = int(round(value * 127)) + 128
+            state = feature.convert_state(reversi, coord, np.uint8)
             write_example(fout, state, value)
 
         coord = feature.move_to_coord(actual_move)
@@ -53,7 +57,7 @@ def compress(filename):
 
 
 def output_dataset(input_path, output_path, filenames):
-    dataset_file = "{0}.tfrecords".format(output_path)  # NHWC float32
+    dataset_file = "{0}.tfrecords".format(output_path)  # NHWC uint8
 
     with tf.io.TFRecordWriter(dataset_file) as fout:
         for i, filename in enumerate(filenames):
@@ -62,9 +66,9 @@ def output_dataset(input_path, output_path, filenames):
 
             file = os.path.join(input_path, filename)
             with open(file, "r") as file:
-                move_line = file.readline().strip()
-                eval_lines = [x.strip() for x in file.readlines()]
-            write_record(fout, move_line, eval_lines)
+                move_record = file.readline().strip()
+                eval_records = [x.strip() for x in file.readlines()]
+            write_record(fout, move_record, eval_records)
 
     compress(dataset_file)
 
@@ -76,15 +80,15 @@ def main(args):
         namelist = records_zip.namelist()
 
         step = 1000
-        for i, pos in enumerate(range(101000, 102000, step)):
+        for i, pos in enumerate(range(0, 1000, step)):
             filenames = namelist[pos: pos + step]
             records_zip.extractall(input_path, filenames)
 
-            output_path = "../resources/REVERSI_data/train1k{:02d}".format(i)
+            output_path = "../resources/REVERSI_data/kifu1k{:02d}".format(i)
             output_dataset(input_path, output_path, filenames)
 
-            for filename in filenames:
-                os.remove(os.path.join(input_path, filename))
+            for file in glob.glob(os.path.join(input_path, "kifu*.txt")):
+                os.remove(file)
 
     return 0
 
