@@ -14,14 +14,14 @@ except:
 
 
 # 定数宣言
-input_cols = 8
-input_rows = 8
+input_height = 8
+input_width = 8
 input_channels = 16
 
 
 # モデル定義
-inputs = keras.Input(shape=(input_cols * input_rows * input_channels,), name='inputs')
-x = keras.layers.Reshape((input_cols, input_rows, input_channels))(inputs)
+inputs = keras.Input(shape=(input_height * input_width * input_channels,), name='inputs')
+x = keras.layers.Reshape((input_height, input_width, input_channels))(inputs)
 x = keras.layers.Conv2D(64, 5, padding='SAME', activation='relu', use_bias=False)(x)
 x = keras.layers.Conv2D(64, 3, padding='SAME', activation='relu', use_bias=False)(x)
 x = keras.layers.Conv2D(64, 3, padding='SAME', activation='relu', use_bias=False)(x)
@@ -41,7 +41,7 @@ model.compile(optimizer=keras.optimizers.Adam(1e-5),
 #
 # モデルを学習する
 #
-def training_model(dataset, checkpoint_prefix, batch_size, initial_epoch, epoch_size):
+def training_model(dataset, checkpoint_prefix, batch_size, initial_epoch, epochs):
     dataset = dataset.shuffle(buffer_size=1024).batch(batch_size)
 
     model.summary()
@@ -52,7 +52,7 @@ def training_model(dataset, checkpoint_prefix, batch_size, initial_epoch, epoch_
                                                  verbose=1,
                                                  save_weights_only=True)
 
-    model.fit(dataset, batch_size=batch_size, initial_epoch=initial_epoch, epochs=epoch_size, callbacks=[checkpoint])
+    model.fit(dataset, batch_size=batch_size, initial_epoch=initial_epoch, epochs=epochs, callbacks=[checkpoint])
 
 
 #

@@ -80,7 +80,7 @@ def main(args):
         namelist = records_zip.namelist()
 
         step = 1000
-        for i, pos in enumerate(range(0, 1000, step)):
+        for i, pos in enumerate(range(0, 102000, step)):
             filenames = namelist[pos: pos + step]
             records_zip.extractall(input_path, filenames)
 

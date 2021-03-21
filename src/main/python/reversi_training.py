@@ -8,7 +8,7 @@ import cnn_model as model
 
 # 定数宣言
 BATCH_SIZE = 16
-EPOCH_SIZE = 10
+EPOCHS = 10
 
 
 #
@@ -26,7 +26,7 @@ def main(args):
         checkpoint_prefix = "../resources/checkpoint/kifu1k{:02d}".format(start_step)
         model.load_checkpoint(checkpoint_prefix, initial_epoch)
 
-    if initial_epoch == EPOCH_SIZE:
+    if initial_epoch == EPOCHS:
         start_step += 1
         initial_epoch = 0
 
@@ -40,7 +40,7 @@ def main(args):
                              checkpoint_prefix,
                              BATCH_SIZE,
                              initial_epoch,
-                             EPOCH_SIZE)
+                             EPOCHS)
 
         initial_epoch = 0
         print(datetime.now())
