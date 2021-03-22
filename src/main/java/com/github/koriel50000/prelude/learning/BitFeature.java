@@ -231,11 +231,11 @@ public class BitFeature {
 
     private BitState createState(long player, long opponent, long flipped, long coord, int index) {
         BitState state = new BitState(currentState);
-        state.region = checkRegion(player, opponent, index); // 新しい盤面で領域を確認
         state.player = player;
         state.opponent = opponent;
         state.flipped = flipped;
         state.coord = coord;
+        state.region = checkRegion(player, opponent, index); // 新しい盤面で領域を確認
         return state;
     }
 

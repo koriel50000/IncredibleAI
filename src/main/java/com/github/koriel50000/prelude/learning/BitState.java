@@ -9,7 +9,6 @@ import static com.github.koriel50000.prelude.reversi.BitBoard.*;
 
 public class BitState {
 
-    public int region;
     public long oddArea;
     public long evenArea;
     public int oddCount;
@@ -27,9 +26,9 @@ public class BitState {
     public long opponent;
     public long flipped;
     public long coord;
+    public int region;
 
     BitState() {
-        region = 0;
         oddArea = 0x0000000000000000L;
         evenArea = 0xffffffe7e7ffffffL;
         oddCount = 0;
@@ -45,7 +44,6 @@ public class BitState {
     }
 
     BitState(BitState state) {
-        this.region = state.region;
         this.oddArea = state.oddArea;
         this.evenArea = state.evenArea;
         this.oddCount = state.oddCount;
