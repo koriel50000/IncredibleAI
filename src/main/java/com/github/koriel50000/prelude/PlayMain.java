@@ -38,6 +38,7 @@ public class PlayMain {
         randomOperator.init();
 
         play(preludeOperator, randomOperator);
+        play(randomOperator, preludeOperator);
 
         preludeOperator.destroy();
         randomOperator.destroy();
