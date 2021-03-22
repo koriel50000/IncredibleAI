@@ -1,6 +1,6 @@
 package com.github.koriel50000.prelude.op;
 
-import com.github.koriel50000.prelude.reversi.Bits;
+import com.github.koriel50000.prelude.util.Bits;
 
 import java.util.ArrayList;
 import java.util.List;

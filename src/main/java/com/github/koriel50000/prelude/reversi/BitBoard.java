@@ -1,9 +1,7 @@
 package com.github.koriel50000.prelude.reversi;
 
-import com.github.koriel50000.prelude.learning.BitFeature;
-import com.github.koriel50000.prelude.learning.BitState;
-
-import java.util.Arrays;
+import com.github.koriel50000.prelude.util.Bits;
+import com.github.koriel50000.prelude.util.LineBuffer;
 
 public class BitBoard {
 

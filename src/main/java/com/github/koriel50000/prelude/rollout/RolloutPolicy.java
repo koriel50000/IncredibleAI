@@ -2,9 +2,9 @@ package com.github.koriel50000.prelude.rollout;
 
 import com.github.koriel50000.prelude.learning.*;
 import com.github.koriel50000.prelude.reversi.BitBoard;
-import com.github.koriel50000.prelude.reversi.Bits;
+import com.github.koriel50000.prelude.util.Bits;
 import com.github.koriel50000.prelude.reversi.Reversi;
-import com.github.koriel50000.prelude.reversi.LineBuffer;
+import com.github.koriel50000.prelude.util.LineBuffer;
 
 import java.util.ArrayList;
 import java.util.Collections;

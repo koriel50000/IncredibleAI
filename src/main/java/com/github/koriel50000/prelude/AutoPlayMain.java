@@ -7,6 +7,8 @@ import com.github.koriel50000.prelude.op.PreludeOperator;
 import com.github.koriel50000.prelude.op.RandomOperator;
 import com.github.koriel50000.prelude.op.ReferenceOperator;
 import com.github.koriel50000.prelude.reversi.*;
+import com.github.koriel50000.prelude.util.Bits;
+import com.github.koriel50000.prelude.util.LineBuffer;
 
 import java.util.List;
 

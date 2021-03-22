@@ -1,4 +1,4 @@
-package com.github.koriel50000.prelude.reversi;
+package com.github.koriel50000.prelude.util;
 
 import java.util.*;
 
@@ -14,10 +14,9 @@ public class LineBuffer {
         offsetMap = new HashMap<>();
     }
 
-    void print(String str) {
+    public void print(String str) {
         currentLine.append(str);
     }
-
 
     public void print(int y) {
         print(Integer.toString(y));

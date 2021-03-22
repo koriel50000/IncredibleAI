@@ -1,6 +1,7 @@
 package com.github.koriel50000.prelude.reversi;
 
-import com.github.koriel50000.prelude.learning.PreludeFeature;
+import com.github.koriel50000.prelude.util.Bits;
+import com.github.koriel50000.prelude.util.LineBuffer;
 
 import java.util.*;
 import java.util.function.Function;

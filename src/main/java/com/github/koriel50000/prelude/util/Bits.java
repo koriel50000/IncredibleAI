@@ -1,4 +1,4 @@
-package com.github.koriel50000.prelude.reversi;
+package com.github.koriel50000.prelude.util;
 
 import org.apache.commons.lang3.StringUtils;
 

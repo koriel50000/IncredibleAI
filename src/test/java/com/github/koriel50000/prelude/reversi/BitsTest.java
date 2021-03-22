@@ -1,5 +1,6 @@
 package com.github.koriel50000.prelude.reversi;
 
+import com.github.koriel50000.prelude.util.Bits;
 import org.junit.jupiter.api.*;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
