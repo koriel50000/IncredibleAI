@@ -1,5 +1,6 @@
 package com.github.koriel50000.prelude;
 
+import com.github.koriel50000.prelude.learning.BitFeature;
 import com.github.koriel50000.prelude.learning.PreludeFeature;
 import com.github.koriel50000.prelude.op.Operator;
 import com.github.koriel50000.prelude.op.PreludeOperator;
@@ -17,11 +18,13 @@ import static com.github.koriel50000.prelude.reversi.Reversi.Coord;
 public class PlayMain {
 
     private BitBoard bitBoard;
+    private BitFeature bitFeature;
     private Reversi reversi;
     private PreludeFeature feature;
 
     private PlayMain() {
         bitBoard = new BitBoard();
+        bitFeature = new BitFeature();
         reversi = new Reversi();
         feature = new PreludeFeature();
     }
@@ -29,7 +32,7 @@ public class PlayMain {
     private void oneplay() {
         long seed = System.currentTimeMillis();
         Operator preludeOperator = new PreludeOperator(
-                bitBoard, reversi, feature, seed);
+                bitBoard, bitFeature, reversi, feature, seed);
         Operator randomOperator = new RandomOperator(seed);
         preludeOperator.init();
         randomOperator.init();
@@ -45,6 +48,7 @@ public class PlayMain {
      */
     private void play(Operator blackOperator, Operator whiteOperator) {
         bitBoard.clear();
+        bitFeature.clear();
         reversi.clear();
         feature.clear();
 
@@ -63,12 +67,12 @@ public class PlayMain {
             boolean expectedBlackTurn = reversi.getCurrentColor() == Color.Black;
             assertEquals(expectedBlackTurn, blackTurn, "currentColor");
 
-            long playerBoard = blackTurn ? bitBoard.blackBoard : bitBoard.whiteBoard;
-            long opponentBoard = blackTurn ? bitBoard.whiteBoard : bitBoard.blackBoard;
+            long player = blackTurn ? bitBoard.blackBoard : bitBoard.whiteBoard;
+            long opponent = blackTurn ? bitBoard.whiteBoard : bitBoard.blackBoard;
             Operator operator = blackTurn ? blackOperator : whiteOperator;
 
             // Assert
-            long coords = bitBoard.availableMoves(playerBoard, opponentBoard);
+            long coords = bitBoard.availableMoves(player, opponent);
             long expectedCoords = Coord.toCoords(reversi.availableMoves());
             try {
                 assertEquals(expectedCoords, coords, "availableMoves");
@@ -88,11 +92,16 @@ public class PlayMain {
                 System.out.println("Pass!");
                 passed = true;
             } else {
-                long coord = operator.evaluate(playerBoard, opponentBoard, coords);
-                bitBoard.makeMove(playerBoard, opponentBoard, coord);
+                long coord = operator.evaluate(player, opponent, coords);
+
+                int index = Bits.indexOf(coord);
+                long flipped = bitBoard.computeFlipped(player, opponent, index);
+                bitBoard.makeMove(flipped, coord);
+                bitFeature.setState(player, opponent, flipped, coord, index);
+
                 Coord coord_ = Coord.valueOf(coord);
-                List<Coord> flipped = reversi.makeMove(coord_);
-                feature.increaseFlipped(coord_, flipped);
+                List<Coord> flipped_ = reversi.makeMove(coord_);
+                feature.increaseFlipped(coord_, flipped_);
             }
 
             // Assert

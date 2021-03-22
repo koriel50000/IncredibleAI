@@ -235,7 +235,7 @@ public class PreludeFeature {
     /**
      * 石を置いたときの特徴量を返す
      */
-    public float[] convertState(Reversi reversi, Coord coord) {
+    public float[] getStateBuffer(Reversi reversi, Coord coord) {
         Board board = reversi.getBoard();
         Color color = reversi.getCurrentColor();
         List<Coord> flipped = reversi.computeFlipped(coord);

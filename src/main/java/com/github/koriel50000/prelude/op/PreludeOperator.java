@@ -1,6 +1,6 @@
 package com.github.koriel50000.prelude.op;
 
-import com.github.koriel50000.prelude.learning.BitState;
+import com.github.koriel50000.prelude.learning.BitFeature;
 import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.learning.PreludeFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
@@ -19,15 +19,17 @@ import static com.github.koriel50000.prelude.reversi.Reversi.*;
 public class PreludeOperator implements Operator {
 
     private BitBoard bitBoard;
+    private BitFeature bitFeature;
     private Reversi reversi;
     private PreludeFeature feature;
 
     private CNNModel model;
     private Random random;
 
-    public PreludeOperator(BitBoard bitBoard,
+    public PreludeOperator(BitBoard bitBoard, BitFeature bitFeature,
                            Reversi reversi, PreludeFeature feature, long seed) {
         this.bitBoard = bitBoard;
+        this.bitFeature = bitFeature;
         this.reversi = reversi;
         this.feature = feature;
         model = new CNNModel();
@@ -52,9 +54,10 @@ public class PreludeOperator implements Operator {
             long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
 
             // Assert
-            BitState state = bitBoard.convertState(player, opponent, coord);
-            float[] buffer = state.getBuffer();
-            float[] expectedBuffer = feature.convertState(reversi, Coord.valueOf(coord));
+            int index = Bits.indexOf(coord);
+            long flipped = bitBoard.computeFlipped(player, opponent, index);
+            float[] buffer = bitFeature.getStateBuffer(player, opponent, flipped, coord, index);
+            float[] expectedBuffer = feature.getStateBuffer(reversi, Coord.valueOf(coord));
             try {
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {

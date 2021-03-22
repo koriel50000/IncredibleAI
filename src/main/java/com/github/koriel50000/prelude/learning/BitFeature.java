@@ -17,14 +17,11 @@ public class BitFeature {
 
     private BitState currentState;
 
-    public void clear() {
-        currentState = new BitState();
+    public BitFeature() {
     }
 
-    public void setState(BitState state) {
-        enumerateOddEven(state, state.coord);
-        increaseFlipped(state, state.flipped | state.coord);
-        this.currentState = state;
+    public void clear() {
+        currentState = new BitState();
     }
 
     /**
@@ -203,7 +200,6 @@ public class BitFeature {
      * 偶数領域・奇数領域を集計する
      */
     private void enumerateOddEven(BitState state, long coord) {
-        state.earlyTurn = state.earlyTurn && (coord & 0xff818181818181ffL) == 0;
         if ((state.oddArea & coord) != 0) {
             // 奇数領域に着手
             state.oddArea ^= coord;
@@ -233,19 +229,30 @@ public class BitFeature {
         }
     }
 
-    /**
-     * 石を置いたときの特徴量を返す
-     */
-    public BitState convertState(long player, long opponent, long flipped, long coord, int index, int depth) {
+    private BitState createState(long player, long opponent, long flipped, long coord, int index) {
         BitState state = new BitState(currentState);
-        state.region = checkRegion(player, opponent, index);
-        state.emptyCount = depth;
+        state.region = checkRegion(player, opponent, index); // 新しい盤面で領域を確認
         state.player = player;
         state.opponent = opponent;
         state.flipped = flipped;
         state.coord = coord;
-
-        state.convertBuffer();
         return state;
+    }
+
+    /**
+     * 石を置いたときの特徴量を返す
+     */
+    public float[] getStateBuffer(long player, long opponent, long flipped, long coord, int index) {
+        BitState state = createState(player, opponent, flipped, coord, index);
+        return state.convertBuffer();
+    }
+
+    public void setState(long player, long opponent, long flipped, long coord, int index) {
+        BitState state = createState(player, opponent, flipped, coord, index);
+        --state.emptyCount;  // 空白は必ず1つずつ減る
+        state.earlyTurn = state.earlyTurn && (coord & 0xff818181818181ffL) == 0;  // 周囲に着手するまでは序盤
+        enumerateOddEven(state, coord);  // 偶数領域・奇数領域を集計する
+        increaseFlipped(state, flipped | coord);  // 反転数を増分する
+        this.currentState = state;
     }
 }

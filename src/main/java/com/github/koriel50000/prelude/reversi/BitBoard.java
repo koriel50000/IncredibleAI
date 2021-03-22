@@ -23,12 +23,7 @@ public class BitBoard {
     private boolean passedBefore;
     private Score score;
 
-    private BitFeature converter;
-    private BitState[] availableStates;
-
     public BitBoard() {
-        converter = new BitFeature();
-        availableStates = new BitState[64];
     }
 
     /**
@@ -41,8 +36,6 @@ public class BitBoard {
         depth = 60;
         passedBefore = false;
         score = null;
-        converter.clear();
-        Arrays.fill(availableStates, null);
     }
 
     /**
@@ -189,35 +182,10 @@ public class BitBoard {
         return mobility;
     }
 
-    private BitState convertStatePrivate(long player, long opponent, long coord) {
-        int index = Bits.indexOf(coord);
-        long flipped = computeFlipped(player, opponent, index);
-
-        return converter.convertState(player, opponent, flipped, coord, index, depth);
-    }
-
-    /**
-     * 盤面の特徴量を返す
-     */
-    public BitState convertState(long player, long opponent, long coord) {
-        BitState state = convertStatePrivate(player, opponent, coord);
-        availableStates[Bits.indexOf(coord)] = state;
-        return state;
-    }
-
     /**
      * 指定された位置に石を打つ
      */
-    public void makeMove(long player, long opponent, long coord) {
-        BitState state = availableStates[Bits.indexOf(coord)];
-        if (state == null) {
-            state = convertStatePrivate(player, opponent, coord);
-        } else {
-            Arrays.fill(availableStates, null);
-        }
-        converter.setState(state);
-
-        long flipped = state.flipped;
+    public void makeMove(long flipped, long coord) {
         blackBoard ^= (coord * (currentColor & 1)) | flipped;
         whiteBoard ^= (coord * (currentColor >> 1)) | flipped;
         --depth;

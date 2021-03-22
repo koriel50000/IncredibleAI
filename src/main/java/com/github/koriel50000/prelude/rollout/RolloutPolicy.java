@@ -14,16 +14,19 @@ import java.util.Random;
 public class RolloutPolicy {
 
     private BitBoard bitBoard;
-    private CNNModel model;
-    private Random random;
-
+    private BitFeature bitFeature;
     private Reversi reversi;
     private PreludeFeature feature;
 
+    private CNNModel model;
+    private Random random;
+
     private volatile long lastCoord;
 
-    public RolloutPolicy(BitBoard bitBoard, Reversi reversi, PreludeFeature feature, long seed) {
+    public RolloutPolicy(BitBoard bitBoard, BitFeature bitFeature,
+                         Reversi reversi, PreludeFeature feature, long seed) {
         this.bitBoard = bitBoard;
+        this.bitFeature = bitFeature;
         this.reversi = reversi;
         this.feature = feature;
         model = new CNNModel();
@@ -49,20 +52,21 @@ public class RolloutPolicy {
             long coord = Bits.getRightmostBit(coords);  // 一番右のビットのみ取り出す
 
             // Assert
-            BitState state = bitBoard.convertState(player, opponent, coord);
-            float[] expectedBuffer = feature.convertState(reversi, Reversi.Coord.valueOf(coord));
+            int index = Bits.indexOf(coord);
+            long flipped = bitBoard.computeFlipped(player, opponent, index);
+            float[] buffer = bitFeature.getStateBuffer(player, opponent, flipped, coord, index);
+            float[] expectedBuffer = feature.getStateBuffer(reversi, Reversi.Coord.valueOf(coord));
             try {
-                float[] buffer = state.getBuffer();
                 assertEquals(expectedBuffer, buffer, "buffer");
             } catch (AssertionError e) {
-                LineBuffer buffer = new LineBuffer();
-                reversi.printBoard(buffer.offset(0));
-                Bits.printMatrix(buffer.offset(30), coord);
-                buffer.flush();
+                LineBuffer errorBuffer = new LineBuffer();
+                reversi.printBoard(errorBuffer.offset(0));
+                Bits.printMatrix(errorBuffer.offset(30), coord);
+                errorBuffer.flush();
                 throw e;
             }
 
-            float value = model.calculatePredicatedValue(state.getBuffer());
+            float value = model.calculatePredicatedValue(buffer);
             evals.add(new RolloutPolicy.Eval(coord, value));
 
             coords ^= coord;  // 一番右のビットを0にする

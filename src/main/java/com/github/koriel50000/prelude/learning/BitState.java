@@ -28,8 +28,6 @@ public class BitState {
     public long flipped;
     public long coord;
 
-    private float[] buffer = new float[ROWS * COLUMNS * CHANNELS];
-
     BitState() {
         region = 0;
         oddArea = 0x0000000000000000L;
@@ -62,11 +60,7 @@ public class BitState {
         this.flippedBoard6 = state.flippedBoard6;
     }
 
-    public float[] getBuffer() {
-        return buffer;
-    }
-
-    private void put(int channel, long coords) {
+    private void put(float[] buffer, int channel, long coords) {
         long coords_;
         switch (region & 0x06) {
             case 0:
@@ -101,7 +95,7 @@ public class BitState {
         }
     }
 
-    private void fill(int channel) {
+    private void fill(float[] buffer, int channel) {
         int offset = ROWS * COLUMNS * channel;
         Arrays.fill(buffer, offset, offset + ROWS * COLUMNS, 1);
     }
@@ -109,44 +103,48 @@ public class BitState {
     /**
      * 盤面を特徴量に変換する
      */
-    void convertBuffer() {
-        put(0, player); // 着手前に自石
-        put(1, opponent); // 着手前に相手石
-        put(2, ~(player | opponent)); // 着手前に空白
-        put(3, coord); // 着手
-        put(4, flipped | coord); // 変化した石
+    float[] convertBuffer() {
+        float[] buffer = new float[ROWS * COLUMNS * CHANNELS];
+
+        put(buffer, 0, player); // 着手前に自石
+        put(buffer, 1, opponent); // 着手前に相手石
+        put(buffer, 2, ~(player | opponent)); // 着手前に空白
+        put(buffer, 3, coord); // 着手
+        put(buffer, 4, flipped | coord); // 変化した石
         if (oddArea != 0) {
-            put(5, oddArea); // 奇数領域
+            put(buffer, 5, oddArea); // 奇数領域
         }
         if (evenArea != 0) {
-            put(6, evenArea); // 偶数領域
+            put(buffer, 6, evenArea); // 偶数領域
         }
         if (!earlyTurn) {
-            fill(7); // 序盤でない
+            fill(buffer, 7); // 序盤でない
         }
         if (emptyCount % 2 == 1) {
-            fill(8); // 空白数が奇数
+            fill(buffer, 8); // 空白数が奇数
         }
         if (oddCount == 1 || oddCount % 2 == 0) {
-            fill(9); // 奇数領域が1個または偶数
+            fill(buffer, 9); // 奇数領域が1個または偶数
         }
         if (flippedBoard1 != 0) {
-            put(10, flippedBoard1); // 反転数1
+            put(buffer, 10, flippedBoard1); // 反転数1
         }
         if (flippedBoard2 != 0) {
-            put(11, flippedBoard2); // 反転数2
+            put(buffer, 11, flippedBoard2); // 反転数2
         }
         if (flippedBoard3 != 0) {
-            put(12, flippedBoard3); // 反転数3
+            put(buffer, 12, flippedBoard3); // 反転数3
         }
         if (flippedBoard4 != 0) {
-            put(13, flippedBoard4); // 反転数4
+            put(buffer, 13, flippedBoard4); // 反転数4
         }
         if (flippedBoard5 != 0) {
-            put(14, flippedBoard5); // 反転数5
+            put(buffer, 14, flippedBoard5); // 反転数5
         }
         if (flippedBoard6 != 0) {
-            put(15, flippedBoard6); // 反転数6
+            put(buffer, 15, flippedBoard6); // 反転数6
         }
+
+        return buffer;
     }
 }

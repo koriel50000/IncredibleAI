@@ -1,6 +1,7 @@
 package com.github.koriel50000.prelude.op;
 
 import com.github.koriel50000.prelude.book.BookSearch;
+import com.github.koriel50000.prelude.learning.BitFeature;
 import com.github.koriel50000.prelude.learning.PreludeFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
 import com.github.koriel50000.prelude.reversi.Reversi;
@@ -22,10 +23,10 @@ public class ReferenceOperator implements Operator {
     private ExecutorService executor;
     private List<EvaluateTask> evaluateTasks;
 
-    public ReferenceOperator(BitBoard bitBoard,
+    public ReferenceOperator(BitBoard bitBoard, BitFeature bitFeature,
                              Reversi reversi, PreludeFeature feature, long seed) {
         bookSearch = new BookSearch(bitBoard);
-        rolloutPolicy = new RolloutPolicy(bitBoard, reversi, feature, seed);
+        rolloutPolicy = new RolloutPolicy(bitBoard, bitFeature, reversi, feature, seed);
         winLossExplorer = new WinLossExplorer(bitBoard);
 
         evaluateTasks = new ArrayList<>();
