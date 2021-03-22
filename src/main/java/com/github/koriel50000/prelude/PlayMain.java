@@ -6,9 +6,9 @@ import com.github.koriel50000.prelude.op.Operator;
 import com.github.koriel50000.prelude.op.PreludeOperator;
 import com.github.koriel50000.prelude.op.RandomOperator;
 import com.github.koriel50000.prelude.reversi.BitBoard;
+import com.github.koriel50000.prelude.reversi.Reversi;
 import com.github.koriel50000.prelude.util.Bits;
 import com.github.koriel50000.prelude.util.LineBuffer;
-import com.github.koriel50000.prelude.reversi.Reversi;
 
 import java.util.List;
 

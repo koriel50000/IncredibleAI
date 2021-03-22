@@ -1,9 +1,11 @@
 package com.github.koriel50000.prelude.rollout;
 
-import com.github.koriel50000.prelude.learning.*;
+import com.github.koriel50000.prelude.learning.BitFeature;
+import com.github.koriel50000.prelude.learning.CNNModel;
+import com.github.koriel50000.prelude.learning.PreludeFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
-import com.github.koriel50000.prelude.util.Bits;
 import com.github.koriel50000.prelude.reversi.Reversi;
+import com.github.koriel50000.prelude.util.Bits;
 import com.github.koriel50000.prelude.util.LineBuffer;
 
 import java.util.ArrayList;

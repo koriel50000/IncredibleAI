@@ -4,9 +4,9 @@ import com.github.koriel50000.prelude.learning.BitFeature;
 import com.github.koriel50000.prelude.learning.CNNModel;
 import com.github.koriel50000.prelude.learning.PreludeFeature;
 import com.github.koriel50000.prelude.reversi.BitBoard;
+import com.github.koriel50000.prelude.reversi.Reversi;
 import com.github.koriel50000.prelude.util.Bits;
 import com.github.koriel50000.prelude.util.LineBuffer;
-import com.github.koriel50000.prelude.reversi.Reversi;
 import org.apache.commons.lang3.ArrayUtils;
 
 import java.util.ArrayList;

@@ -6,7 +6,9 @@ import com.github.koriel50000.prelude.op.Operator;
 import com.github.koriel50000.prelude.op.PreludeOperator;
 import com.github.koriel50000.prelude.op.RandomOperator;
 import com.github.koriel50000.prelude.op.ReferenceOperator;
-import com.github.koriel50000.prelude.reversi.*;
+import com.github.koriel50000.prelude.reversi.BitBoard;
+import com.github.koriel50000.prelude.reversi.Reversi;
+import com.github.koriel50000.prelude.reversi.Score;
 import com.github.koriel50000.prelude.util.Bits;
 import com.github.koriel50000.prelude.util.LineBuffer;
 
@@ -108,7 +110,7 @@ public class AutoPlayMain {
         while (true) {
             boolean passed = false;
             boolean blackTurn = bitBoard.currentColor == BitBoard.BLACK;
-            long player =  blackTurn ? bitBoard.blackBoard : bitBoard.whiteBoard;
+            long player = blackTurn ? bitBoard.blackBoard : bitBoard.whiteBoard;
             long opponent = blackTurn ? bitBoard.whiteBoard : bitBoard.blackBoard;
             Operator operator = blackTurn ? blackOperator : whiteOperator;
 
