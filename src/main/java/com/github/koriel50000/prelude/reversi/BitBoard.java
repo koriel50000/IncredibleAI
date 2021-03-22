@@ -5,8 +5,8 @@ import com.github.koriel50000.prelude.util.LineBuffer;
 
 public class BitBoard {
 
-    public static final int COLUMNS = 8;
     public static final int ROWS = 8;
+    public static final int COLUMNS = 8;
     public static final int CHANNELS = 16;
 
     public static final int EMPTY = 0;
