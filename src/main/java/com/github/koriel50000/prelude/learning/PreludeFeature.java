@@ -8,6 +8,10 @@ import static com.github.koriel50000.prelude.reversi.Reversi.*;
 
 public class PreludeFeature {
 
+    public static final int ROWS = 8;
+    public static final int COLUMNS = 8;
+    public static final int CHANNELS = 16;
+
     private static final int AREA_EMPTY = 0;
     private static final int AREA_ODD = 1;
     private static final int AREA_EVEN = 2;

@@ -8,10 +8,6 @@ import java.util.function.Function;
 
 public class Reversi {
 
-    public static final int ROWS = 8;
-    public static final int COLUMNS = 8;
-    public static final int CHANNELS = 16;
-
     private Board board;
     private Color currentColor;
     private int turnCount;
@@ -150,9 +146,9 @@ public class Reversi {
     public void printBoard(LineBuffer buffer) {
         buffer.println();
         buffer.println("  A B C D E F G H");
-        for (int y = 1; y <= ROWS; y++) {
+        for (int y = 1; y <= 8; y++) {
             buffer.print(y);
-            for (int x = 1; x <= COLUMNS; x++) {
+            for (int x = 1; x <= 8; x++) {
                 buffer.print(" " + board.get(x, y).toString());
             }
             buffer.println();
@@ -207,7 +203,7 @@ public class Reversi {
         private int[] stones;
 
         Board() {
-            board = new Stone[COLUMNS * ROWS];
+            board = new Stone[8 * 8];
             stones = new int[3];
         }
 
@@ -352,7 +348,7 @@ public class Reversi {
 
         static {
             OUT_OF_BOUNDS = new Coord(-1, -1, "OB");
-            values = new Coord[COLUMNS * ROWS];
+            values = new Coord[8 * 8];
             symbolMap = new HashMap<>();
             int i = 0;
             for (int y = 1; y <= 8; y++) {
@@ -451,7 +447,7 @@ public class Reversi {
         }
 
         private static Coord valueOf(int x, int y) {
-            if (x < 1 || COLUMNS < x || y < 1 || ROWS < y) {
+            if (x < 1 || 8 < x || y < 1 || 8 < y) {
                 return OUT_OF_BOUNDS;
             }
             return values[(y - 1) * 8 + (x - 1)];

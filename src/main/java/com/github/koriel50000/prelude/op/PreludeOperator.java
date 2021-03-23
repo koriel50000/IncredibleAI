@@ -14,7 +14,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
-import static com.github.koriel50000.prelude.reversi.Reversi.*;
+import static com.github.koriel50000.prelude.learning.PreludeFeature.COLUMNS;
+import static com.github.koriel50000.prelude.learning.PreludeFeature.ROWS;
+import static com.github.koriel50000.prelude.reversi.Reversi.Coord;
 
 public class PreludeOperator implements Operator {
 
