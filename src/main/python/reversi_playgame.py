@@ -33,7 +33,7 @@ def prelude_operator(coords):
     ndigits = 3  # 評価値は小数点第三位を四捨五入
     evals = []
     for coord in coords:
-        state = feature.convert_to_state(reversi, coord)
+        state = feature.convert_state(reversi, coord)
         value = round(model.calculate_predicted_value(state), ndigits)
         evals.append({'coord': coord, 'value': value})
 
