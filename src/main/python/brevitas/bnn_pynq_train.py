@@ -25,7 +25,7 @@ import os
 import sys
 
 import torch
-from brevitas_examples.bnn_pynq.trainer import Trainer
+from trainer import Trainer
 
 # Pytorch precision
 torch.set_printoptions(precision=10)
@@ -134,8 +134,8 @@ def main():
     args = ['--network', 'LFC_1W1A',
             '--datadir', '../../resources/brevitas/data',
             '--experiments', '../../resources/brevitas/experiments',
-            '--gpus', 'None',
-            '--epochs', '5']
+            '--num_workers', '2',
+            '--epochs', '2']
     launch(args)
 
 
