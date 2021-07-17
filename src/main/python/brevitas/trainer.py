@@ -34,9 +34,7 @@ from torchvision import transforms
 from torchvision.datasets import MNIST, CIFAR10
 
 from logger import Logger, TrainingEpochMeters, EvalEpochMeters
-from models import model_with_cfg
 from models.losses import SqrHingeLoss
-
 
 class MirrorMNIST(MNIST):
 
@@ -72,16 +70,12 @@ def accuracy(output, target, topk=(1,)):
 
 
 class Trainer(object):
-    def __init__(self, args):
-
-        model, cfg = model_with_cfg(args.network, args.pretrained)
+    def __init__(self, model, args):
 
         # Init arguments
         self.args = args
-        prec_name = "_{}W{}A".format(cfg.getint('QUANT', 'WEIGHT_BIT_WIDTH'),
-                                     cfg.getint('QUANT', 'ACT_BIT_WIDTH'))
-        experiment_name = '{}{}_{}'.format(args.network, prec_name,
-                                           datetime.now().strftime('%Y%m%d_%H%M%S'))
+        prec_name = "_{}W{}A".format(1, 1)
+        experiment_name = '{}{}'.format(args.network, prec_name)
         self.output_dir_path = os.path.join(args.experiments, experiment_name)
 
         if self.args.resume:
@@ -103,8 +97,8 @@ class Trainer(object):
         # Datasets
         transform_to_tensor = transforms.Compose([transforms.ToTensor()])
 
-        dataset = cfg.get('MODEL', 'DATASET')
-        self.num_classes = cfg.getint('MODEL', 'NUM_CLASSES')
+        dataset = 'MNIST'
+        self.num_classes = 10
         if dataset == 'CIFAR10':
             train_transforms_list = [transforms.RandomCrop(32, padding=4),
                                      transforms.RandomHorizontalFlip(),

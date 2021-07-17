@@ -1,26 +1,3 @@
-# MIT License
-#
-# Copyright (c) 2019 Xilinx
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
-import ast
 from functools import reduce
 from operator import mul
 
@@ -87,18 +64,12 @@ class FC(Module):
         return x
 
 
-def fc(cfg):
-    weight_bit_width = cfg.getint('QUANT', 'WEIGHT_BIT_WIDTH')
-    act_bit_width = cfg.getint('QUANT', 'ACT_BIT_WIDTH')
-    in_bit_width = cfg.getint('QUANT', 'IN_BIT_WIDTH')
-    num_classes = cfg.getint('MODEL', 'NUM_CLASSES')
-    in_channels = cfg.getint('MODEL', 'IN_CHANNELS')
-    out_features = ast.literal_eval(cfg.get('MODEL', 'OUT_FEATURES'))
+def fc():
     net = FC(
-        weight_bit_width=weight_bit_width,
-        act_bit_width=act_bit_width,
-        in_bit_width=in_bit_width,
-        in_channels=in_channels,
-        out_features=out_features,
-        num_classes=num_classes)
+        weight_bit_width=1,
+        act_bit_width=1,
+        in_bit_width=1,
+        in_channels=1,
+        out_features=[64, 64, 64],
+        num_classes=10)
     return net

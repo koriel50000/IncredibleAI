@@ -1,25 +1,3 @@
-# MIT License
-#
-# Copyright (c) 2019 Xilinx
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 import torch
 from torch.nn import Module, ModuleList, BatchNorm2d, MaxPool2d, BatchNorm1d
 
@@ -112,16 +90,10 @@ class CNV(Module):
         return x
 
 
-def cnv(cfg):
-    weight_bit_width = cfg.getint('QUANT', 'WEIGHT_BIT_WIDTH')
-    act_bit_width = cfg.getint('QUANT', 'ACT_BIT_WIDTH')
-    in_bit_width = cfg.getint('QUANT', 'IN_BIT_WIDTH')
-    num_classes = cfg.getint('MODEL', 'NUM_CLASSES')
-    in_channels = cfg.getint('MODEL', 'IN_CHANNELS')
-    net = CNV(weight_bit_width=weight_bit_width,
-              act_bit_width=act_bit_width,
-              in_bit_width=in_bit_width,
-              num_classes=num_classes,
-              in_ch=in_channels)
+def cnv():
+    net = CNV(weight_bit_width=1,
+              act_bit_width=1,
+              in_bit_width=8,
+              num_classes=10,
+              in_ch=3)
     return net
-

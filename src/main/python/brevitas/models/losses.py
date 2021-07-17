@@ -1,9 +1,9 @@
-
 import torch
 import torch.nn as nn
 from torch.autograd import Function
 
-class squared_hinge_loss(Function):
+
+class SquaredHingeLoss(Function):
     @staticmethod
     def forward(ctx, predictions, targets):
         ctx.save_for_backward(predictions, targets) 
@@ -22,10 +22,11 @@ class squared_hinge_loss(Function):
        grad_output.div_(predictions.numel())
        return grad_output, None    
 
+
 class SqrHingeLoss(nn.Module):
     # Squared Hinge Loss
     def __init__(self):
         super(SqrHingeLoss, self).__init__()
     
     def forward(self, input, target):
-        return squared_hinge_loss.apply(input, target)
+        return SquaredHingeLoss.apply(input, target)
