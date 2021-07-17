@@ -28,6 +28,7 @@ class FC(Module):
         self.features.append(QuantIdentity(act_quant=CommonActQuant, bit_width=in_bit_width))
         self.features.append(Dropout(p=DROPOUT))
         in_features = reduce(mul, in_features)
+
         for out_features in out_features:
             self.features.append(QuantLinear(
                 in_features=in_features,

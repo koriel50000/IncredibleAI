@@ -1,7 +1,7 @@
 import sys
 import argparse
 import torch
-from brevitas.export import FINNManager
+import onnx
 
 from trainer import Trainer
 from models.FC import fc
@@ -58,18 +58,6 @@ def parse_args(args):
     return parser.parse_args(args)
 
 
-def resume():
-    print()
-    # print('Loading model checkpoint at: {}'.format(resume))
-    # package = torch.load(resume, map_location='cpu')
-    # model_state_dict = package['state_dict']
-    # model.load_state_dict(model_state_dict)
-
-
-def export(model, path):
-    FINNManager.export(model, input_shape=(1, 28, 28), export_path=path)
-
-
 def main():
     cmd_args = ['--network', 'TFC',
             '--datadir', '../../resources/brevitas/data',
@@ -80,12 +68,8 @@ def main():
     args = parse_args(cmd_args)
 
     model = fc()
-
     trainer = Trainer(model, args)
-
     trainer.train_model()
-
-    export(model, '../../resources/brevitas/experiments/tfc-w1a1.onnx')
 
     return 0
 
