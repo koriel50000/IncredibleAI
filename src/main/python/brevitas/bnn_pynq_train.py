@@ -58,7 +58,7 @@ def parse_args(args):
     parser.add_argument("--epochs", default=1000, type=int, help="Number of epochs")
     parser.add_argument("--random_seed", default=1, type=int, help="Random seed")
     # Neural network Architecture
-    parser.add_argument("--network", default="TFC_1W1A", type=str, help="neural network")
+    parser.add_argument("--network", default="TFC-W1A1", type=str, help="neural network")
     parser.add_argument("--pretrained", action='store_true', help="Load pretrained model")
     return parser.parse_args(args)
 

@@ -22,12 +22,12 @@ def export(model, path):
 
 def main():
     model = cnv()
-    load_checkpoint(model, '../../resources/brevitas/experiments/CNV_1W1A/checkpoints/best.tar')
+    load_checkpoint(model, '../../resources/brevitas/experiments/CNV-W1A1/checkpoints/best.tar')
     export(model, '../../resources/brevitas/experiments/1_cnv-w1a1.onnx')
 
     onnx_model = onnx.load('../../resources/brevitas/experiments/1_cnv-w1a1.onnx')
     finn_model = ModelWrapper(onnx_model)
-    print(finn_model.model)
+    print(finn_model.graph)
 
     #export(finn_model, '../../resources/brevitas/experiments/2_cnv-w1a1.onnx')
 

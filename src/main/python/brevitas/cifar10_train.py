@@ -4,7 +4,7 @@ import bnn_pynq_train
 
 
 def main():
-    args = ['--network', 'TFC_1W1A',
+    args = ['--network', 'CNV-W1A1',
             '--datadir', '../../resources/brevitas/data',
             '--experiments', '../../resources/brevitas/experiments',
             '--gpus', None,
