@@ -6,7 +6,7 @@ import onnx
 from brevitas.export import FINNManager
 from finn.core.modelwrapper import ModelWrapper
 
-from models.FC import fc
+from models.CNV import cnv
 
 
 def load_checkpoint(model, path):
@@ -17,19 +17,19 @@ def load_checkpoint(model, path):
 
 
 def export(model, path):
-    FINNManager.export(model, input_shape=(1, 28, 28), export_path=path)
+    FINNManager.export(model, input_shape=(1, 3, 32, 32), export_path=path)
 
 
 def main():
-    model = fc()
-    load_checkpoint(model, '../../resources/brevitas/experiments/TFC_1W1A/checkpoints/best.tar')
-    export(model, '../../resources/brevitas/experiments/1_tfc-w1a1.onnx')
+    model = cnv()
+    load_checkpoint(model, '../../resources/brevitas/experiments/CNV_1W1A/checkpoints/best.tar')
+    export(model, '../../resources/brevitas/experiments/1_cnv-w1a1.onnx')
 
-    onnx_model = onnx.load('../../resources/brevitas/experiments/1_tfc-w1a1.onnx')
+    onnx_model = onnx.load('../../resources/brevitas/experiments/1_cnv-w1a1.onnx')
     finn_model = ModelWrapper(onnx_model)
     print(finn_model.model)
 
-    #export(finn_model, '../../resources/brevitas/experiments/2_tfc-w1a1.onnx')
+    #export(finn_model, '../../resources/brevitas/experiments/2_cnv-w1a1.onnx')
 
     return 0
 

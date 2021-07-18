@@ -35,6 +35,9 @@ from torchvision.datasets import MNIST, CIFAR10
 
 from logger import Logger, TrainingEpochMeters, EvalEpochMeters
 from models.losses import SqrHingeLoss
+from models.FC import fc
+from models.CNV import cnv
+
 
 class MirrorMNIST(MNIST):
 
@@ -70,13 +73,18 @@ def accuracy(output, target, topk=(1,)):
 
 
 class Trainer(object):
-    def __init__(self, model, args):
+    def __init__(self, args):
+
+        if args.network == 'TFC_1W1A':
+            model = fc()
+            dataset = 'MNIST'
+        else:
+            model = cnv()
+            dataset = 'CIFAR10'
 
         # Init arguments
         self.args = args
-        prec_name = "_{}W{}A".format(1, 1)
-        experiment_name = '{}{}'.format(args.network, prec_name)
-        self.output_dir_path = os.path.join(args.experiments, experiment_name)
+        self.output_dir_path = os.path.join(args.experiments, args.network)
 
         if self.args.resume:
             self.output_dir_path, _ = os.path.split(args.resume)
@@ -97,7 +105,6 @@ class Trainer(object):
         # Datasets
         transform_to_tensor = transforms.Compose([transforms.ToTensor()])
 
-        dataset = 'MNIST'
         self.num_classes = 10
         if dataset == 'CIFAR10':
             train_transforms_list = [transforms.RandomCrop(32, padding=4),
