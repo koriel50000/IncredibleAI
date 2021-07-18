@@ -81,7 +81,7 @@ class CNV(Module):
                 mod.weight.data.clamp_(min_val, max_val)
 
     def forward(self, x):
-        x = 2.0 * x - torch.tensor([1.0], device=x.device)
+        x = x / 255.0 * 2.0 - torch.tensor([1.0], device=x.device)
         for mod in self.conv_features:
             x = mod(x)
         x = x.view(x.shape[0], -1)
