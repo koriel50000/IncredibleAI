@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import torch
 from torch.nn import Module, ModuleList, BatchNorm2d, MaxPool2d, BatchNorm1d
 
