@@ -4,20 +4,20 @@ import sys
 import platform
 import pynq
 import numpy as np
-from dataset_loading import mnist
+from dataset_loading import cifar
 
 from finn.core.datatype import DataType
 from finn_examples.driver import FINNExampleOverlay
 
 
-_mnist_fc_io_shape_dict = {
+_cifar10_cnv_io_shape_dict = {
     "idt": DataType.UINT8,
     "odt": DataType.UINT8,
-    "ishape_normal": (1, 784),
+    "ishape_normal": (1, 32, 32, 3),
     "oshape_normal": (1, 1),
-    "ishape_folded": (1, 1, 784),
+    "ishape_folded": (1, 1, 32, 32, 1, 3),
     "oshape_folded": (1, 1, 1),
-    "ishape_packed": (1, 1, 784),
+    "ishape_packed": (1, 1, 32, 32, 1, 3),
     "oshape_packed": (1, 1, 1),
 }
 
@@ -45,18 +45,18 @@ def resolve_target_platform(target_platform):
         return target_platform
 
 
-def tfc_w1a1_mnist(target_platform=None):
+def cnv_w1a1_cifar10(target_platform=None):
     target_platform = resolve_target_platform(target_platform)
     driver_mode = get_driver_mode()
-    model_name = "tfc-w1a1"
-    filename = "./bitfiles/Pynq-Z1/tfc-w1a1/finn-accel.bit"
-    return FINNExampleOverlay(filename, driver_mode, _mnist_fc_io_shape_dict)
+    model_name = "cnv-w1a1"
+    filename = "./bitfiles/Pynq-Z1/cnv-w1a1/finn-accel.bit"
+    return FINNExampleOverlay(filename, driver_mode, _cifar10_cnv_io_shape_dict)
 
 
 def main(args):
-    trainx, trainy, testx, testy, valx, valy = mnist.load_mnist_data("./data", download=False, one_hot=False)
+    trainx, trainy, testx, testy, valx, valy = cifar.load_cifar_data("./data", download=True, one_hot=False)
 
-    accel = tfc_w1a1_mnist()
+    accel = cnv_w1a1_cifar10()
 
     print("Expected input shape and datatype: %s %s" % (str(accel.ishape_normal), str(accel.idt)))
     print("Expected output shape and datatype: %s %s" % (str(accel.oshape_normal), str(accel.odt)))
