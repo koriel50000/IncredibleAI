@@ -49,7 +49,7 @@ def tfc_w1a1_mnist(target_platform=None):
     target_platform = resolve_target_platform(target_platform)
     driver_mode = get_driver_mode()
     model_name = "tfc-w1a1"
-    filename = "./bitfiles/Pynq-Z1/tfc-w1a1/finn-accel.bit"
+    filename = "./bitfiles/Pynq-Z1/tfc-w1a1.bit"
     return FINNExampleOverlay(filename, driver_mode, _mnist_fc_io_shape_dict)
 
 

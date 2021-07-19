@@ -49,7 +49,7 @@ def cnv_w1a1_cifar10(target_platform=None):
     target_platform = resolve_target_platform(target_platform)
     driver_mode = get_driver_mode()
     model_name = "cnv-w1a1"
-    filename = "./bitfiles/Pynq-Z1/cnv-w1a1/finn-accel.bit"
+    filename = "./bitfiles/Pynq-Z1/cnv-w1a1.bit"
     return FINNExampleOverlay(filename, driver_mode, _cifar10_cnv_io_shape_dict)
 
 
