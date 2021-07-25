@@ -21,13 +21,13 @@ class FC(Module):
             weight_bit_width,
             act_bit_width,
             in_bit_width,
-            in_ch):
+            in_features=(1, 28, 28)):
         super(FC, self).__init__()
 
         self.features = ModuleList()
         self.features.append(QuantIdentity(act_quant=CommonActQuant, bit_width=in_bit_width))
         self.features.append(Dropout(p=DROPOUT))
-        in_features = reduce(mul, (in_ch, 28, 28))
+        in_features = reduce(mul, in_features)
 
         self.features.append(QuantLinear(
             in_features=in_features,
@@ -68,8 +68,8 @@ class FC(Module):
         self.features.append(TensorNorm())
 
         for m in self.modules():
-          if isinstance(m, QuantLinear):
-            torch.nn.init.uniform_(m.weight.data, -1, 1)
+            if isinstance(m, QuantLinear):
+                torch.nn.init.uniform_(m.weight.data, -1, 1)
 
     def clip_weights(self, min_val, max_val):
         for mod in self.features:
@@ -77,15 +77,11 @@ class FC(Module):
                 mod.weight.data.clamp_(min_val, max_val)
     
     def forward(self, x):
-        # FINNのモデルはなぜか入力が1x1x28x28、出力が1x1になっている
-        # brevitasのモデルは入力が1x28x28、出力が1x10になっている
-        x = x / 255.0
         x = x.view(x.shape[0], -1)
         x = 2.0 * x - torch.tensor([1.0], device=x.device)
         for i, mod in enumerate(self.features):
-            #print('{}: {}'.format(i,  mod))
             x = mod(x)
-        return torch.topk(x, 10).values
+        return x
 
 
 def fc():
@@ -93,6 +89,5 @@ def fc():
         weight_bit_width=1,
         act_bit_width=1,
         in_bit_width=8,
-        num_classes=10,
-        in_ch=1)
+        num_classes=10)
     return net

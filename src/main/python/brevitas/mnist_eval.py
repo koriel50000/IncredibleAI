@@ -6,15 +6,15 @@ import bnn_pynq_train
 
 
 def main():
-    args = ['--network', 'TFC-W1A1',
+    args = ['--evaluate',
             '--datadir', '../../resources/brevitas/data',
-            '--experiments', '../../resources/brevitas/experiments',
+            '--network', 'TFC-W1A1',
+            '--resume', '../../resources/brevitas/experiments/TFC-W1A1/checkpoints/best.tar',
             '--gpus', None,
-            '--num_workers', '2',
-            '--epochs', '2']
+            '--num_workers', '2']
 
-    path = bnn_pynq_train.launch(args)
-    print(path)
+    avg = bnn_pynq_train.launch(args)
+    print(avg)
 
     return 0
 

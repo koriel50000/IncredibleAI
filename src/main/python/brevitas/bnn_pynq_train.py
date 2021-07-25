@@ -104,9 +104,9 @@ def launch(cmd_args):
     # Execute
     if args.evaluate:
         with torch.no_grad():
-            trainer.eval_model()
+            return trainer.eval_model()
     else:
-        trainer.train_model()
+        return trainer.train_model()
 
 
 def main():
