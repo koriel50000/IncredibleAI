@@ -13,7 +13,8 @@ def main():
             '--num_workers', '2',
             '--epochs', '2']
 
-    bnn_pynq_train.launch(args)
+    path = bnn_pynq_train.launch(args)
+    print(path)
 
     return 0
 

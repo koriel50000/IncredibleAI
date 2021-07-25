@@ -7,9 +7,9 @@ import bnn_pynq_train
 
 def main():
     args = ['--evaluate',
-            '--network', 'TFC-W1A1',
+            '--network', 'CNV-W1A1',
             '--datadir', '../../resources/brevitas/data',
-            '--resume', '../../resources/brevitas/experiments/TFC-W1A1/checkpoints/best.tar',
+            '--resume', '../../resources/brevitas/experiments/CNV-W1A1/checkpoints/best.tar',
             '--gpus', None,
             '--num_workers', '2']
 

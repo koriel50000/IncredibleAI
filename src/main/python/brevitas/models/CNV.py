@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import torch
 from torch.nn import Module, ModuleList, BatchNorm2d, MaxPool2d, BatchNorm1d
 
@@ -68,11 +66,10 @@ class CNV(Module):
             weight_quant=CommonWeightQuant,
             weight_bit_width=weight_bit_width))
         self.linear_features.append(TensorNorm())
-        
-        for m in self.modules():
-          if isinstance(m, QuantConv2d) or isinstance(m, QuantLinear):
-            torch.nn.init.uniform_(m.weight.data, -1, 1)
 
+        for m in self.modules():
+            if isinstance(m, QuantConv2d) or isinstance(m, QuantLinear):
+                torch.nn.init.uniform_(m.weight.data, -1, 1)
 
     def clip_weights(self, min_val, max_val):
         for mod in self.conv_features:
@@ -83,7 +80,7 @@ class CNV(Module):
                 mod.weight.data.clamp_(min_val, max_val)
 
     def forward(self, x):
-        x = x / 255.0 * 2.0 - torch.tensor([1.0], device=x.device)
+        x = 2.0 * x - torch.tensor([1.0], device=x.device)
         for mod in self.conv_features:
             x = mod(x)
         x = x.view(x.shape[0], -1)
