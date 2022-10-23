@@ -1,2 +1,2 @@
-model_checkpoint_path: "kifu1k00_10"
-all_model_checkpoint_paths: "kifu1k00_10"
+model_checkpoint_path: "kifu1k99_01"
+all_model_checkpoint_paths: "kifu1k99_01"

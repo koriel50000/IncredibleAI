@@ -2,7 +2,7 @@
 <module version="4">
   <component name="FacetManager">
     <facet type="Python" name="Python">
-      <configuration sdkName="Python 3.7 (IncredibleAI)" />
+      <configuration sdkName="Python 3.10 (IncredibleAI)" />
     </facet>
   </component>
 </module>

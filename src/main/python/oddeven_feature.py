@@ -285,6 +285,13 @@ def convert_state(reversi, coord, dtype=np.float32):
     return state.flatten()
 
 
+def convert_states(states, dtype=np.float32):
+    states_ = np.zeros((len(states), CHANNELS * ROWS * COLUMNS), dtype=dtype)
+    for i, state in enumerate(states):
+        states_[i, :] = state
+    return states_
+
+
 #
 # 棋譜(評価値)を評価リストに変換する
 #

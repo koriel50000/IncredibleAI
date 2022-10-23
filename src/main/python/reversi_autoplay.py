@@ -30,11 +30,18 @@ def optimum_choice(evals):
 # 差し手を評価する
 #
 def prelude_operator(coords):
-    ndigits = 3  # 評価値は小数点第三位を四捨五入
-    evals = []
+    states = []
     for coord in coords:
         state = feature.convert_state(reversi, coord)
-        value = round(model.calculate_predicted_value(state), ndigits)
+        states.append(state)
+
+    states_ = feature.convert_states(states)
+    values = model.calculate_predicted_values(states_)
+
+    evals = []
+    for coord, value in zip(coords, values):
+        ndigits = 3  # 評価値は小数点第三位を四捨五入
+        value = round(value, ndigits)
         evals.append({'coord': coord, 'value': value})
 
     return optimum_choice(evals)

@@ -5,12 +5,12 @@ from tensorflow import keras
 
 # メモリ使用を制限
 # https://www.tensorflow.org/api_docs/python/tf/config/experimental/set_memory_growth
-physical_devices = tf.config.list_physical_devices('GPU')
-try:
-    tf.config.experimental.set_memory_growth(physical_devices[0], True)
-except:
+#physical_devices = tf.config.list_physical_devices('GPU')
+#try:
+#    tf.config.experimental.set_memory_growth(physical_devices[0], True)
+#except:
     # Invalid device or cannot modify virtual devices once initialized.
-    pass
+#    pass
 
 
 # 定数宣言
@@ -59,7 +59,7 @@ def training_model(dataset, checkpoint_prefix, batch_size, initial_epoch, epochs
 # 予測値を計算する
 #
 def calculate_predicted_values(states):
-    return model.predict(states)
+    return model.predict(states).reshape(-1).tolist()
 
 
 #

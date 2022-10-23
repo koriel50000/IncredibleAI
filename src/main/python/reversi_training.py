@@ -8,7 +8,7 @@ import cnn_model as model
 
 # 定数宣言
 BATCH_SIZE = 16
-EPOCHS = 10
+EPOCHS = 100
 
 
 #
@@ -18,7 +18,7 @@ def main(args):
     print('start:', datetime.now())
 
     start_step = 0
-    end_step = 1
+    end_step = 100
     initial_epoch = 0
 
     # チェックポイントから学習を再開する
@@ -43,7 +43,7 @@ def main(args):
                              EPOCHS)
 
         initial_epoch = 0
-        print(datetime.now())
+        print(datetime.now(), 'step:', step)
 
     model.save_model('../resources/model/')
 

@@ -4,6 +4,7 @@ import sys
 import glob
 import os.path
 import zipfile
+from collections import deque
 
 import reversi
 import oddeven_feature as feature
@@ -18,9 +19,7 @@ move_accuracies = [0.0] * 60
 #
 # 正答率を計算する
 #
-def calculate_accuracies(index, evals, predicted_evals):
-    global total_count, total_accuracy, move_accuracies
-
+def calculate_accuracies(actual_evals, predicted_evals):
     # 正答率は評価値の上位3つで計算する
     # 1.0 : 1 2 3 | 1 2 | 1
     # 0.9 : 1 2 x
@@ -37,27 +36,27 @@ def calculate_accuracies(index, evals, predicted_evals):
     # 0.0 : x x x | x x | x 上記以外は0.0
     # まずはこれでやってみる
 
-    evals.sort(key=lambda x: x['value'], reverse=True)
+    actual_evals.sort(key=lambda x: x['value'], reverse=True)
     predicted_evals.sort(key=lambda x: x['value'], reverse=True)
 
-    # for entry in evals:
-    #     move = converter.coord_to_move(entry['coord'])
+    # for entry in actual_evals:
+    #     move = feature.coord_to_move(entry['coord'])
     #     value = entry['value']
     #     print(' {0}:{1:.2f}'.format(move, value), end='')
     # print()
     # for entry in predicted_evals:
-    #     move = converter.coord_to_move(entry['coord'])
+    #     move = feature.coord_to_move(entry['coord'])
     #     value = entry['value']
     #     print(' {0}:{1:.2f}'.format(move, value), end='')
     # print()
     # print()
 
-    count = len(evals)
+    count = len(actual_evals)
     if count == 1:
         accuracy = 1.0
 
     elif count == 2:
-        first = evals[0]['coord']
+        first = actual_evals[0]['coord']
         predicted_first = predicted_evals[0]['coord']
         if predicted_first == first:  # 1 2
             accuracy = 1.0
@@ -65,11 +64,11 @@ def calculate_accuracies(index, evals, predicted_evals):
             accuracy = 0.6
 
     else:
-        first = evals[0]['coord']
+        first = actual_evals[0]['coord']
         predicted_first = predicted_evals[0]['coord']
-        second = evals[1]['coord']
+        second = actual_evals[1]['coord']
         predicted_second = predicted_evals[1]['coord']
-        third = evals[2]['coord']
+        third = actual_evals[2]['coord']
         predicted_third = predicted_evals[2]['coord']
 
         if predicted_first == first:  # 1 - -
@@ -108,17 +107,20 @@ def calculate_accuracies(index, evals, predicted_evals):
         else:  # 上記以外は0.0
             accuracy = 0.0
 
-    total_count += 1
-    total_accuracy += accuracy
-    move_accuracies[index] += accuracy
+    return accuracy
 
 
 #
 # 棋譜を評価する
 #
 def evaluating_records(move_record, eval_records):
+    global total_count, total_accuracy, move_accuracies
+
     reversi.clear()
     feature.clear()
+
+    payload = []
+    states = []
 
     for index, actual_move in enumerate(feature.convert_moves(move_record)):
         # print("index:{0} move:{1}".format(index, actual_move))
@@ -127,24 +129,39 @@ def evaluating_records(move_record, eval_records):
             if len(reversi.available_moves()) == 0:
                 raise Exception("Error!")  # 先手・後手両方パスで終了は考慮しない
 
-        evals = feature.convert_evals(eval_records[index])
+        actual_evals = feature.convert_evals(eval_records[index])
+        payload.append(actual_evals)
 
-        ndigits = 3  # 評価値は小数点第三位を四捨五入
-        predicted_evals = []
-        for entry in evals:
+        for entry in actual_evals:
             coord = entry['coord']
-            value = entry['value']
-            entry['value'] = round(value, ndigits)
             state = feature.convert_state(reversi, coord)
-            predicted_value = round(model.calculate_predicted_value(state), ndigits)
-            predicted_evals.append({'coord': coord, 'value': predicted_value})
-
-        calculate_accuracies(index, evals, predicted_evals)
+            states.append(state)
 
         coord = feature.move_to_coord(actual_move)
         flipped = reversi.make_move(coord)
         feature.increase_flipped(coord, flipped)
         reversi.next_turn(False)
+
+    states_ = feature.convert_states(states)
+    values_ = model.calculate_predicted_values(states_)
+    values = deque(values_)
+
+    for index, actual_evals in enumerate(payload):
+        predicted_evals = []
+        for entry in actual_evals:
+            coord = entry['coord']
+            ndigits = 3  # 評価値は小数点第三位を四捨五入
+            value = entry['value']
+            entry['value'] = round(value, ndigits)
+            value = values.popleft()
+            predicted_value = round(value, ndigits)
+            predicted_evals.append({'coord': coord, 'value': predicted_value})
+
+        accuracy = calculate_accuracies(actual_evals, predicted_evals)
+
+        total_count += 1
+        total_accuracy += accuracy
+        move_accuracies[index] += accuracy
 
 
 #
