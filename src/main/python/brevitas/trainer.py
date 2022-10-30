@@ -80,7 +80,7 @@ class Trainer(object):
         self.args = args
         prec_name = "_{}W{}A".format(cfg.getint('QUANT', 'WEIGHT_BIT_WIDTH'),
                                      cfg.getint('QUANT', 'ACT_BIT_WIDTH'))
-        experiment_name = '{}{}_{}'.format(args.network, prec_name,
+        experiment_name = '{}'.format(args.network, prec_name,
                                            datetime.now().strftime('%Y%m%d_%H%M%S'))
         self.output_dir_path = os.path.join(args.experiments, experiment_name)
 

@@ -5,8 +5,8 @@ import brevitas.onnx as bo
 
 
 def main(args):
-    network = 'lfc_1w1a' #args[1]
-    resume = '../../resources/brevitas/experiments/LFC_1W1A_1W1A_20221030_135656/checkpoints/best.tar' #args[2]
+    network = 'TFC_2W2A'
+    resume = '../../resources/brevitas/experiments/{}/checkpoints/best.tar'.format(network)
 
     model, cfg = model_with_cfg(network, False)
 

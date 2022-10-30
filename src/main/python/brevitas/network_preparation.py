@@ -24,7 +24,7 @@ from qonnx.transformation.general import RemoveUnusedTensors
 
 
 def main(args):
-    network = 'lfc_1w1a' #args[1]
+    network = 'TFC_2W2A'
 
     model = ModelWrapper('../../resources/brevitas/experiments/' + network + '.onnx')
 
@@ -65,24 +65,24 @@ def main(args):
     model = model.transform(RemoveStaticGraphInputs())
     model.save(chkpt_name)
 
-    # move initial Mul (from preproc) past the Reshape
-    model = model.transform(MoveScalarLinearPastInvariants())
-    # streamline
-    model = model.transform(Streamline())
-    model.save('../../resources/brevitas/experiments/' + network + '_streamlined.onnx')
-
-    model = model.transform(ConvertBipolarMatMulToXnorPopcount())
-    model = model.transform(absorb.AbsorbAddIntoMultiThreshold())
-    model = model.transform(absorb.AbsorbMulIntoMultiThreshold())
-    # absorb final add-mul nodes into TopK
-    model = model.transform(absorb.AbsorbScalarMulAddIntoTopK())
-    model = model.transform(RoundAndClipThresholds())
-
-    # bit of tidy-up
-    model = model.transform(InferDataLayouts())
-    model = model.transform(RemoveUnusedTensors())
-
-    model.save('../../resources/brevitas/experiments/' + network + '_ready_for_hls_conversion.onnx')
+    # # move initial Mul (from preproc) past the Reshape
+    # model = model.transform(MoveScalarLinearPastInvariants())
+    # # streamline
+    # model = model.transform(Streamline())
+    # model.save('../../resources/brevitas/experiments/' + network + '_streamlined.onnx')
+    #
+    # model = model.transform(ConvertBipolarMatMulToXnorPopcount())
+    # model = model.transform(absorb.AbsorbAddIntoMultiThreshold())
+    # model = model.transform(absorb.AbsorbMulIntoMultiThreshold())
+    # # absorb final add-mul nodes into TopK
+    # model = model.transform(absorb.AbsorbScalarMulAddIntoTopK())
+    # model = model.transform(RoundAndClipThresholds())
+    #
+    # # bit of tidy-up
+    # model = model.transform(InferDataLayouts())
+    # model = model.transform(RemoveUnusedTensors())
+    #
+    # model.save('../../resources/brevitas/experiments/' + network + '_ready_for_hls_conversion.onnx')
 
 
 if __name__ == "__main__":

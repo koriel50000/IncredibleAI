@@ -76,7 +76,7 @@ def parse_args(args):
     parser.add_argument("--milestones", type=none_or_str, default='100,150,200,250', help="Scheduler milestones")
     parser.add_argument("--momentum", default=0.9, type=float, help="Momentum")
     parser.add_argument("--weight_decay", default=0, type=float, help="Weight decay")
-    parser.add_argument("--epochs", default=10, type=int, help="Number of epochs")
+    parser.add_argument("--epochs", default=1000, type=int, help="Number of epochs")
     parser.add_argument("--random_seed", default=1, type=int, help="Random seed")
     # Neural network Architecture
     parser.add_argument("--network", default="LFC_1W1A", type=str, help="neural network")
