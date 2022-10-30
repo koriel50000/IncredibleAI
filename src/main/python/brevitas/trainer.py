@@ -1,6 +1,29 @@
+# MIT License
+#
+# Copyright (c) 2019 Xilinx
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import random
 import os
 import time
+from datetime import datetime
 
 import torch
 import torch.optim as optim
@@ -11,21 +34,20 @@ from torchvision import transforms
 from torchvision.datasets import MNIST, CIFAR10
 
 from logger import Logger, TrainingEpochMeters, EvalEpochMeters
+from models import model_with_cfg
 from models.losses import SqrHingeLoss
-from models.FC import fc
-from models.CNV import cnv
 
 
 class MirrorMNIST(MNIST):
 
     resources = [
-        ("train-images-idx3-ubyte.gz",
+        ("https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz",
          "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
-        ("train-labels-idx1-ubyte.gz",
+        ("https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz",
          "d53e105ee54ea40749a09fcbcd1e9432"),
-        ("t10k-images-idx3-ubyte.gz",
+        ("https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz",
          "9fb629c4189551a2d022fa330f9573f3"),
-        ("t10k-labels-idx1-ubyte.gz",
+        ("https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz",
          "ec29112dd5afa0611ce80d1b7f02629c")
     ]
 
@@ -52,16 +74,15 @@ def accuracy(output, target, topk=(1,)):
 class Trainer(object):
     def __init__(self, args):
 
-        if args.network == 'TFC-W1A1':
-            model = fc()
-            dataset = 'MNIST'
-        else:
-            model = cnv()
-            dataset = 'CIFAR10'
+        model, cfg = model_with_cfg(args.network, args.pretrained)
 
         # Init arguments
         self.args = args
-        self.output_dir_path = os.path.join(args.experiments, args.network)
+        prec_name = "_{}W{}A".format(cfg.getint('QUANT', 'WEIGHT_BIT_WIDTH'),
+                                     cfg.getint('QUANT', 'ACT_BIT_WIDTH'))
+        experiment_name = '{}{}_{}'.format(args.network, prec_name,
+                                           datetime.now().strftime('%Y%m%d_%H%M%S'))
+        self.output_dir_path = os.path.join(args.experiments, experiment_name)
 
         if self.args.resume:
             self.output_dir_path, _ = os.path.split(args.resume)
@@ -82,7 +103,8 @@ class Trainer(object):
         # Datasets
         transform_to_tensor = transforms.Compose([transforms.ToTensor()])
 
-        self.num_classes = 10
+        dataset = cfg.get('MODEL', 'DATASET')
+        self.num_classes = cfg.getint('MODEL', 'NUM_CLASSES')
         if dataset == 'CIFAR10':
             train_transforms_list = [transforms.RandomCrop(32, padding=4),
                                      transforms.RandomHorizontalFlip(),
@@ -131,7 +153,7 @@ class Trainer(object):
             print('Loading model checkpoint at: {}'.format(args.resume))
             package = torch.load(args.resume, map_location='cpu')
             model_state_dict = package['state_dict']
-            model.load_state_dict(model_state_dict)
+            model.load_state_dict(model_state_dict, strict=args.strict)
 
         if args.gpus is not None and len(args.gpus) == 1:
             model = model.to(device=self.device)

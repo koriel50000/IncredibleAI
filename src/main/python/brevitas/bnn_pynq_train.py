@@ -1,9 +1,30 @@
+# MIT License
+#
+# Copyright (c) 2019 Xilinx
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import argparse
 import os
 import sys
 
 import torch
-
 from trainer import Trainer
 
 # Pytorch precision
@@ -34,8 +55,8 @@ def none_or_int(value):
 def parse_args(args):
     parser = argparse.ArgumentParser(description="PyTorch MNIST/CIFAR10 Training")
     # I/O
-    parser.add_argument("--datadir", default="./data/", help="Dataset location")
-    parser.add_argument("--experiments", default="./experiments", help="Path to experiments folder")
+    parser.add_argument("--datadir", default="../../resources/brevitas/data/", help="Dataset location")
+    parser.add_argument("--experiments", default="../../resources/brevitas/experiments", help="Path to experiments folder")
     parser.add_argument("--dry_run", action="store_true", help="Disable output files generation")
     parser.add_argument("--log_freq", type=int, default=10)
     # Execution modes
@@ -55,11 +76,12 @@ def parse_args(args):
     parser.add_argument("--milestones", type=none_or_str, default='100,150,200,250', help="Scheduler milestones")
     parser.add_argument("--momentum", default=0.9, type=float, help="Momentum")
     parser.add_argument("--weight_decay", default=0, type=float, help="Weight decay")
-    parser.add_argument("--epochs", default=1000, type=int, help="Number of epochs")
+    parser.add_argument("--epochs", default=10, type=int, help="Number of epochs")
     parser.add_argument("--random_seed", default=1, type=int, help="Random seed")
     # Neural network Architecture
-    parser.add_argument("--network", default="TFC-W1A1", type=str, help="neural network")
+    parser.add_argument("--network", default="LFC_1W1A", type=str, help="neural network")
     parser.add_argument("--pretrained", action='store_true', help="Load pretrained model")
+    parser.add_argument("--strict", action='store_true', help="Strict state dictionary loading")
     return parser.parse_args(args)
 
 
@@ -104,9 +126,9 @@ def launch(cmd_args):
     # Execute
     if args.evaluate:
         with torch.no_grad():
-            return trainer.eval_model()
+            trainer.eval_model()
     else:
-        return trainer.train_model()
+        trainer.train_model()
 
 
 def main():
