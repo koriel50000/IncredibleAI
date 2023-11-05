@@ -1,3 +1,4 @@
+import shutil
 import sys
 from qonnx.core.modelwrapper import ModelWrapper
 from brevitas.export import FINNManager
@@ -24,9 +25,11 @@ from qonnx.transformation.general import RemoveUnusedTensors
 
 
 def main(args):
-    network = 'TFC_2W2A'
+    network = 'CNV_2W2A'
+    brevitas_path = '../../resources/brevitas/experiments'
+    finn_build_path = '../../resources/finn-examples/build/bnn-pynq/models'
 
-    model = ModelWrapper('../../resources/brevitas/experiments/' + network + '.onnx')
+    model = ModelWrapper('{}/{}.onnx'.format(brevitas_path, network))
 
     model = model.transform(InferShapes())
     model = model.transform(FoldConstants())
@@ -35,13 +38,13 @@ def main(args):
     model = model.transform(InferDataTypes())
     model = model.transform(RemoveStaticGraphInputs())
 
-    model.save('../../resources/brevitas/experiments/' + network + '_tidy.onnx')
+    model.save('{}/{}_tidy.onnx'.format(brevitas_path, network))
 
     global_inp_name = model.graph.input[0].name
     ishape = model.get_tensor_shape(global_inp_name)
     # preprocessing: torchvision's ToTensor divides uint8 inputs by 255
     totensor_pyt = ToTensor()
-    chkpt_preproc_name = '../../resources/brevitas/experiments/' + network + '_preproc.onnx'
+    chkpt_preproc_name = '{}/{}_preproc.onnx'.format(brevitas_path, network)
     #bo.export_finn_onnx(totensor_pyt, ishape, chkpt_preproc_name)
     FINNManager.export(totensor_pyt, input_shape=ishape, export_path=chkpt_preproc_name)
 
@@ -52,11 +55,11 @@ def main(args):
     global_inp_name = model.graph.input[0].name
     model.set_tensor_datatype(global_inp_name, DataType["UINT8"])
 
-    model.save('../../resources/brevitas/experiments/' + network + '_with_preproc.onnx')
+    model.save('{}/{}_with_preproc.onnx'.format(brevitas_path, network))
 
     # postprocessing: insert Top-1 node at the end
     model = model.transform(InsertTopK(k=1))
-    chkpt_name = '../../resources/brevitas/experiments/' + network + '_pre_post.onnx'
+    chkpt_name = '{}/{}_pre_post.onnx'.format(brevitas_path, network)
     # tidy-up again
     model = model.transform(InferShapes())
     model = model.transform(FoldConstants())
@@ -66,11 +69,13 @@ def main(args):
     model = model.transform(RemoveStaticGraphInputs())
     model.save(chkpt_name)
 
+    shutil.copy(chkpt_name, '{}/{}.onnx'.format(finn_build_path, network))
+
     # # move initial Mul (from preproc) past the Reshape
     # model = model.transform(MoveScalarLinearPastInvariants())
     # # streamline
     # model = model.transform(Streamline())
-    # model.save('../../resources/brevitas/experiments/' + network + '_streamlined.onnx')
+    # model.save('{}/{}_streamlined.onnx'.format(brevitas_path, network))
     #
     # model = model.transform(ConvertBipolarMatMulToXnorPopcount())
     # model = model.transform(absorb.AbsorbAddIntoMultiThreshold())
@@ -83,7 +88,7 @@ def main(args):
     # model = model.transform(InferDataLayouts())
     # model = model.transform(RemoveUnusedTensors())
     #
-    # model.save('../../resources/brevitas/experiments/' + network + '_ready_for_hls_conversion.onnx')
+    # model.save('{}/{}_ready_for_hls_conversion.onnx'.format(brevitas_path, network))
 
 
 if __name__ == "__main__":
