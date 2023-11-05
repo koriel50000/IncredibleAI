@@ -1,6 +1,6 @@
 import sys
 from qonnx.core.modelwrapper import ModelWrapper
-import brevitas.onnx as bo
+from brevitas.export import FINNManager
 
 from qonnx.transformation.general import GiveReadableTensorNames, GiveUniqueNodeNames, RemoveStaticGraphInputs
 from qonnx.transformation.infer_shapes import InferShapes
@@ -42,7 +42,8 @@ def main(args):
     # preprocessing: torchvision's ToTensor divides uint8 inputs by 255
     totensor_pyt = ToTensor()
     chkpt_preproc_name = '../../resources/brevitas/experiments/' + network + '_preproc.onnx'
-    bo.export_finn_onnx(totensor_pyt, ishape, chkpt_preproc_name)
+    #bo.export_finn_onnx(totensor_pyt, ishape, chkpt_preproc_name)
+    FINNManager.export(totensor_pyt, input_shape=ishape, export_path=chkpt_preproc_name)
 
     # join preprocessing and core model
     pre_model = ModelWrapper(chkpt_preproc_name)

@@ -1,58 +1,46 @@
-# MIT License
-#
-# Copyright (c) 2019 Xilinx
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
 
-import random
-import os
-import time
 from datetime import datetime
+from hashlib import sha256
+import os
+import random
+import time
 
+from packaging.version import parse
 import torch
-import torch.optim as optim
 from torch import nn
+import torch.optim as optim
 from torch.optim.lr_scheduler import MultiStepLR
 from torch.utils.data import DataLoader
+import torchvision
 from torchvision import transforms
-from torchvision.datasets import MNIST, CIFAR10
+from torchvision.datasets import CIFAR10
+from torchvision.datasets import MNIST
 
-from logger import Logger, TrainingEpochMeters, EvalEpochMeters
+from logger import EvalEpochMeters
+from logger import Logger
+from logger import TrainingEpochMeters
 from models import model_with_cfg
 from models.losses import SqrHingeLoss
 
 
 class MirrorMNIST(MNIST):
 
-    resources = [
-        ("https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz",
-         "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
-        ("https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz",
-         "d53e105ee54ea40749a09fcbcd1e9432"),
-        ("https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz",
-         "9fb629c4189551a2d022fa330f9573f3"),
-        ("https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz",
-         "ec29112dd5afa0611ce80d1b7f02629c")
-    ]
+    if parse(torchvision.__version__) < parse('0.9.1'):
 
-    # required by torchvision <= 0.4.2
-    urls = [l for l, h in resources]
+        resources = [(
+            "https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz",
+            "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
+                     (
+                         "https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz",
+                         "d53e105ee54ea40749a09fcbcd1e9432"),
+                     (
+                         "https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz",
+                         "9fb629c4189551a2d022fa330f9573f3"),
+                     (
+                         "https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz",
+                         "ec29112dd5afa0611ce80d1b7f02629c")]
 
 
 def accuracy(output, target, topk=(1,)):
@@ -72,16 +60,14 @@ def accuracy(output, target, topk=(1,)):
 
 
 class Trainer(object):
+
     def __init__(self, args):
 
         model, cfg = model_with_cfg(args.network, args.pretrained)
 
         # Init arguments
         self.args = args
-        prec_name = "_{}W{}A".format(cfg.getint('QUANT', 'WEIGHT_BIT_WIDTH'),
-                                     cfg.getint('QUANT', 'ACT_BIT_WIDTH'))
-        experiment_name = '{}'.format(args.network, prec_name,
-                                           datetime.now().strftime('%Y%m%d_%H%M%S'))
+        experiment_name = '{}'.format(args.network)
         self.output_dir_path = os.path.join(args.experiments, experiment_name)
 
         if self.args.resume:
@@ -106,9 +92,10 @@ class Trainer(object):
         dataset = cfg.get('MODEL', 'DATASET')
         self.num_classes = cfg.getint('MODEL', 'NUM_CLASSES')
         if dataset == 'CIFAR10':
-            train_transforms_list = [transforms.RandomCrop(32, padding=4),
-                                     transforms.RandomHorizontalFlip(),
-                                     transforms.ToTensor()]
+            train_transforms_list = [
+                transforms.RandomCrop(32, padding=4),
+                transforms.RandomHorizontalFlip(),
+                transforms.ToTensor()]
             transform_train = transforms.Compose(train_transforms_list)
             builder = CIFAR10
 
@@ -118,22 +105,13 @@ class Trainer(object):
         else:
             raise Exception("Dataset not supported: {}".format(args.dataset))
 
-        train_set = builder(root=args.datadir,
-                            train=True,
-                            download=True,
-                            transform=transform_train)
-        test_set = builder(root=args.datadir,
-                           train=False,
-                           download=True,
-                           transform=transform_to_tensor)
-        self.train_loader = DataLoader(train_set,
-                                       batch_size=args.batch_size,
-                                       shuffle=True,
-                                       num_workers=args.num_workers)
-        self.test_loader = DataLoader(test_set,
-                                      batch_size=args.batch_size,
-                                      shuffle=False,
-                                      num_workers=args.num_workers)
+        train_set = builder(root=args.datadir, train=True, download=True, transform=transform_train)
+        test_set = builder(
+            root=args.datadir, train=False, download=True, transform=transform_to_tensor)
+        self.train_loader = DataLoader(
+            train_set, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
+        self.test_loader = DataLoader(
+            test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
 
         # Init starting values
         self.starting_epoch = 1
@@ -155,6 +133,19 @@ class Trainer(object):
             model_state_dict = package['state_dict']
             model.load_state_dict(model_state_dict, strict=args.strict)
 
+        if args.state_dict_to_pth:
+            state_dict = model.state_dict()
+            name = args.network.lower()
+            path = os.path.join(self.checkpoints_dir_path, name)
+            torch.save(state_dict, path)
+            with open(path, "rb") as f:
+                bytes = f.read()
+                readable_hash = sha256(bytes).hexdigest()[:8]
+            new_path = path + '-' + readable_hash + '.pth'
+            os.rename(path, new_path)
+            self.logger.info("Saving checkpoint model to {}".format(new_path))
+            exit(0)
+
         if args.gpus is not None and len(args.gpus) == 1:
             model = model.to(device=self.device)
         if args.gpus is not None and len(args.gpus) > 1:
@@ -164,20 +155,22 @@ class Trainer(object):
         # Loss function
         if args.loss == 'SqrHinge':
             self.criterion = SqrHingeLoss()
-        else:
+        elif args.loss == 'CrossEntropy':
             self.criterion = nn.CrossEntropyLoss()
+        else:
+            raise ValueError(f"{args.loss} not supported.")
         self.criterion = self.criterion.to(device=self.device)
 
         # Init optimizer
         if args.optim == 'ADAM':
-            self.optimizer = optim.Adam(self.model.parameters(),
-                                        lr=args.lr,
-                                        weight_decay=args.weight_decay)
+            self.optimizer = optim.Adam(
+                self.model.parameters(), lr=args.lr, weight_decay=args.weight_decay)
         elif args.optim == 'SGD':
-            self.optimizer = optim.SGD(self.model.parameters(),
-                                       lr=self.args.lr,
-                                       momentum=self.args.momentum,
-                                       weight_decay=self.args.weight_decay)
+            self.optimizer = optim.SGD(
+                self.model.parameters(),
+                lr=self.args.lr,
+                momentum=self.args.momentum,
+                weight_decay=self.args.weight_decay)
 
         # Resume optimizer, if any
         if args.resume and not args.evaluate:
@@ -192,9 +185,7 @@ class Trainer(object):
         # LR scheduler
         if args.scheduler == 'STEP':
             milestones = [int(i) for i in args.milestones.split(',')]
-            self.scheduler = MultiStepLR(optimizer=self.optimizer,
-                                         milestones=milestones,
-                                         gamma=0.1)
+            self.scheduler = MultiStepLR(optimizer=self.optimizer, milestones=milestones, gamma=0.1)
         elif args.scheduler == 'FIXED':
             self.scheduler = None
         else:
@@ -211,8 +202,8 @@ class Trainer(object):
             'state_dict': self.model.state_dict(),
             'optim_dict': self.optimizer.state_dict(),
             'epoch': epoch + 1,
-            'best_val_acc': self.best_val_acc,
-        }, best_path)
+            'best_val_acc': self.best_val_acc,},
+                   best_path)
 
     def train_model(self):
 
@@ -238,8 +229,8 @@ class Trainer(object):
                 # for hingeloss only
                 if isinstance(self.criterion, SqrHingeLoss):
                     target = target.unsqueeze(1)
-                    target_onehot = torch.Tensor(target.size(0), self.num_classes).to(self.device,
-                                                                                      non_blocking=True)
+                    target_onehot = torch.Tensor(target.size(0), self.num_classes).to(
+                        self.device, non_blocking=True)
                     target_onehot.fill_(-1)
                     target_onehot.scatter_(1, target, 1)
                     target = target.squeeze()
@@ -260,7 +251,8 @@ class Trainer(object):
                 loss.backward()
                 self.optimizer.step()
 
-                self.model.clip_weights(-1, 1)
+                if hasattr(self.model, 'clip_weights'):
+                    self.model.clip_weights(-1, 1)
 
                 # measure elapsed time
                 epoch_meters.batch_time.update(time.time() - start_batch)
@@ -270,8 +262,8 @@ class Trainer(object):
                     epoch_meters.losses.update(loss.item(), input.size(0))
                     epoch_meters.top1.update(prec1.item(), input.size(0))
                     epoch_meters.top5.update(prec5.item(), input.size(0))
-                    self.logger.training_batch_cli_log(epoch_meters, epoch, i,
-                                                       len(self.train_loader))
+                    self.logger.training_batch_cli_log(
+                        epoch_meters, epoch, i, len(self.train_loader))
 
                 # training batch ends
                 start_data_loading = time.time()
@@ -317,8 +309,8 @@ class Trainer(object):
             # for hingeloss only
             if isinstance(self.criterion, SqrHingeLoss):
                 target = target.unsqueeze(1)
-                target_onehot = torch.Tensor(target.size(0), self.num_classes).to(self.device,
-                                                                                  non_blocking=True)
+                target_onehot = torch.Tensor(target.size(0), self.num_classes).to(
+                    self.device, non_blocking=True)
                 target_onehot.fill_(-1)
                 target_onehot.scatter_(1, target, 1)
                 target = target.squeeze()

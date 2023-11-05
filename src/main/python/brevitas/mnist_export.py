@@ -2,11 +2,8 @@
 
 import sys
 import torch
-import onnx
+from models import model_with_cfg
 from brevitas.export import FINNManager
-from finn.core.modelwrapper import ModelWrapper
-
-from models.FC import fc
 
 
 def load_checkpoint(model, path):
@@ -17,19 +14,17 @@ def load_checkpoint(model, path):
 
 
 def export(model, path):
-    FINNManager.export(model, input_shape=(1, 28, 28), export_path=path)
+    FINNManager.export(model, input_shape=(1, 1, 28, 28), export_path=path)
 
 
 def main():
-    model = fc()
-    load_checkpoint(model, '../../resources/brevitas/experiments/TFC-W1A1/checkpoints/best.tar')
-    export(model, '../../resources/brevitas/experiments/1_tfc-w1a1.onnx')
+    network = 'TFC_2W2A'
+    resume_path = '../../resources/brevitas/experiments/{}/checkpoints/best.tar'.format(network)
 
-    onnx_model = onnx.load('../../resources/brevitas/experiments/1_tfc-w1a1.onnx')
-    finn_model = ModelWrapper(onnx_model)
-    print(finn_model.graph)
-
-    #export(finn_model, '../../resources/brevitas/experiments/2_tfc-w1a1.onnx')
+    model, cfg = model_with_cfg(network, False)
+    load_checkpoint(model, resume_path)
+    export_path = '../../resources/brevitas/experiments/{}.onnx'.format(network)
+    export(model, export_path)
 
     return 0
 

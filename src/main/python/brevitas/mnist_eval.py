@@ -6,10 +6,12 @@ import bnn_pynq_train
 
 
 def main():
+    network = 'TFC_2W2A'
+    resume_path = '../../resources/brevitas/experiments/{}/checkpoints/best.tar'.format(network)
     args = ['--evaluate',
-            '--network', 'TFC-W1A1',
+            '--network', network,
             '--datadir', '../../resources/brevitas/data',
-            '--resume', '../../resources/brevitas/experiments/TFC-W1A1/checkpoints/best.tar',
+            '--resume', resume_path,
             '--gpus', None,
             '--num_workers', '2']
 

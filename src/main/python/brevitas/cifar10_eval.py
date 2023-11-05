@@ -6,10 +6,12 @@ import bnn_pynq_train
 
 
 def main():
+    network = 'CNV_2W2A'
+    resume_path = '../../resources/brevitas/experiments/{}/checkpoints/best.tar'.format(network)
     args = ['--evaluate',
-            '--network', 'CNV-W1A1',
+            '--network', network,
             '--datadir', '../../resources/brevitas/data',
-            '--resume', '../../resources/brevitas/experiments/CNV-W1A1/checkpoints/best.tar',
+            '--resume', resume_path,
             '--gpus', None,
             '--num_workers', '2']
 

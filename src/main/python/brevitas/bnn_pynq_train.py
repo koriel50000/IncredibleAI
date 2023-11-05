@@ -1,30 +1,12 @@
-# MIT License
-#
-# Copyright (c) 2019 Xilinx
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
 
 import argparse
 import os
 import sys
 
 import torch
+
 from trainer import Trainer
 
 # Pytorch precision
@@ -55,14 +37,18 @@ def none_or_int(value):
 def parse_args(args):
     parser = argparse.ArgumentParser(description="PyTorch MNIST/CIFAR10 Training")
     # I/O
-    parser.add_argument("--datadir", default="../../resources/brevitas/data/", help="Dataset location")
-    parser.add_argument("--experiments", default="../../resources/brevitas/experiments", help="Path to experiments folder")
+    parser.add_argument("--datadir", default="./data/", help="Dataset location")
+    parser.add_argument("--experiments", default="./experiments", help="Path to experiments folder")
     parser.add_argument("--dry_run", action="store_true", help="Disable output files generation")
     parser.add_argument("--log_freq", type=int, default=10)
     # Execution modes
-    parser.add_argument("--evaluate", dest="evaluate", action="store_true", help="evaluate model on validation set")
-    parser.add_argument("--resume", dest="resume", type=none_or_str,
-                        help="Resume from checkpoint. Overrides --pretrained flag.")
+    parser.add_argument(
+        "--evaluate", dest="evaluate", action="store_true", help="evaluate model on validation set")
+    parser.add_argument(
+        "--resume",
+        dest="resume",
+        type=none_or_str,
+        help="Resume from checkpoint. Overrides --pretrained flag.")
     add_bool_arg(parser, "detect_nan", default=False)
     # Compute resources
     parser.add_argument("--num_workers", default=4, type=int, help="Number of workers")
@@ -73,7 +59,8 @@ def parse_args(args):
     parser.add_argument("--optim", type=none_or_str, default="ADAM", help="Optimizer to use")
     parser.add_argument("--loss", type=none_or_str, default="SqrHinge", help="Loss function to use")
     parser.add_argument("--scheduler", default="FIXED", type=none_or_str, help="LR Scheduler")
-    parser.add_argument("--milestones", type=none_or_str, default='100,150,200,250', help="Scheduler milestones")
+    parser.add_argument(
+        "--milestones", type=none_or_str, default='100,150,200,250', help="Scheduler milestones")
     parser.add_argument("--momentum", default=0.9, type=float, help="Momentum")
     parser.add_argument("--weight_decay", default=0, type=float, help="Weight decay")
     parser.add_argument("--epochs", default=1000, type=int, help="Number of epochs")
@@ -82,10 +69,15 @@ def parse_args(args):
     parser.add_argument("--network", default="LFC_1W1A", type=str, help="neural network")
     parser.add_argument("--pretrained", action='store_true', help="Load pretrained model")
     parser.add_argument("--strict", action='store_true', help="Strict state dictionary loading")
+    parser.add_argument(
+        "--state_dict_to_pth",
+        action='store_true',
+        help="Saves a model state_dict into a pth and then exits")
     return parser.parse_args(args)
 
 
 class objdict(dict):
+
     def __getattr__(self, name):
         if name in self:
             return self[name]

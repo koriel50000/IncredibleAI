@@ -1,28 +1,9 @@
-# MIT License
-#
-# Copyright (c) 2019 Xilinx
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# Copyright (C) 2023, Advanced Micro Devices, Inc. All rights reserved.
+# SPDX-License-Identifier: BSD-3-Clause
 
 import logging
-import sys
 import os
+import sys
 
 
 class AverageMeter(object):
@@ -45,6 +26,7 @@ class AverageMeter(object):
 
 
 class TrainingEpochMeters(object):
+
     def __init__(self):
         self.batch_time = AverageMeter()
         self.data_time = AverageMeter()
@@ -54,6 +36,7 @@ class TrainingEpochMeters(object):
 
 
 class EvalEpochMeters(object):
+
     def __init__(self):
         self.model_time = AverageMeter()
         self.loss_time = AverageMeter()
@@ -87,29 +70,34 @@ class Logger(object):
         self.log.info(arg)
 
     def eval_batch_cli_log(self, epoch_meters, batch, tot_batches):
-        self.info('Test: [{0}/{1}]\t'
-                  'Model Time {model_time.val:.3f} ({model_time.avg:.3f})\t'
-                  'Loss Time {loss_time.val:.3f} ({loss_time.avg:.3f})\t'
-                  'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                  'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                  'Prec@5 {top5.val:.3f} ({top5.avg:.3f})\t'
-                  .format(batch, tot_batches,
-                          model_time=epoch_meters.model_time,
-                          loss_time=epoch_meters.loss_time,
-                          loss=epoch_meters.losses,
-                          top1=epoch_meters.top1,
-                          top5=epoch_meters.top5))
+        self.info(
+            'Test: [{0}/{1}]\t'
+            'Model Time {model_time.val:.3f} ({model_time.avg:.3f})\t'
+            'Loss Time {loss_time.val:.3f} ({loss_time.avg:.3f})\t'
+            'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+            'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+            'Prec@5 {top5.val:.3f} ({top5.avg:.3f})\t'.format(
+                batch,
+                tot_batches,
+                model_time=epoch_meters.model_time,
+                loss_time=epoch_meters.loss_time,
+                loss=epoch_meters.losses,
+                top1=epoch_meters.top1,
+                top5=epoch_meters.top5))
 
     def training_batch_cli_log(self, epoch_meters, epoch, batch, tot_batches):
-        self.info('Epoch: [{0}][{1}/{2}]\t'
-                         'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
-                         'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
-                         'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
-                         'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
-                         'Prec@5 {top5.val:.3f} ({top5.avg:.3f})\t'
-                         .format(epoch, batch, tot_batches,
-                                 batch_time=epoch_meters.batch_time,
-                                 data_time=epoch_meters.data_time,
-                                 loss=epoch_meters.losses,
-                                 top1=epoch_meters.top1,
-                                 top5=epoch_meters.top5))
+        self.info(
+            'Epoch: [{0}][{1}/{2}]\t'
+            'Time {batch_time.val:.3f} ({batch_time.avg:.3f})\t'
+            'Data {data_time.val:.3f} ({data_time.avg:.3f})\t'
+            'Loss {loss.val:.4f} ({loss.avg:.4f})\t'
+            'Prec@1 {top1.val:.3f} ({top1.avg:.3f})\t'
+            'Prec@5 {top5.val:.3f} ({top5.avg:.3f})\t'.format(
+                epoch,
+                batch,
+                tot_batches,
+                batch_time=epoch_meters.batch_time,
+                data_time=epoch_meters.data_time,
+                loss=epoch_meters.losses,
+                top1=epoch_meters.top1,
+                top5=epoch_meters.top5))
