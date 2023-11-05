@@ -35,7 +35,7 @@ def none_or_int(value):
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(description="PyTorch MNIST/CIFAR10 Training")
+    parser = argparse.ArgumentParser(description="PyTorch MNIST/CIFAR10/KIFU Training")
     # I/O
     parser.add_argument("--datadir", default="./data/", help="Dataset location")
     parser.add_argument("--experiments", default="./experiments", help="Path to experiments folder")

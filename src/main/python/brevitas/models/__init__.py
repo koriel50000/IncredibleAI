@@ -20,13 +20,15 @@ __all__ = [
     'lfc_1w1a',
     'lfc_1w2a',
     'resnet18_4w4a',
+    'cnn_2w2a',
     'model_with_cfg']
 
 from .CNV import cnv
 from .FC import fc
 from .resnet import quant_resnet18
+from .CNN import cnn
 
-model_impl = {'CNV': cnv, 'FC': fc, 'RESNET18': quant_resnet18}
+model_impl = {'CNV': cnv, 'FC': fc, 'RESNET18': quant_resnet18, 'CNN': cnn}
 
 
 def get_model_cfg(name):
@@ -106,4 +108,9 @@ def lfc_1w2a(pretrained=True):
 
 def resnet18_4w4a(pretrained=True):
     model, _ = model_with_cfg('resnet18_4w4a', pretrained)
+    return model
+
+
+def cnn_2w2a(pretrained=True):
+    model, _ = model_with_cfg('cnn_2w2a', pretrained)
     return model

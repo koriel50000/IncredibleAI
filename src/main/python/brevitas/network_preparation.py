@@ -25,7 +25,7 @@ from qonnx.transformation.general import RemoveUnusedTensors
 
 
 def main(args):
-    network = 'CNV_2W2A'
+    network = 'CNN_2W2A'
     brevitas_path = '../../resources/brevitas/experiments'
     finn_build_path = '../../resources/finn-examples/build/bnn-pynq/models'
 
