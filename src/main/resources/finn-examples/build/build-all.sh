@@ -75,5 +75,5 @@ for PLATFORM in $PLATFORMS; do
     zip -r $PLATFORM.zip $PLATFORM/ || true
     MD5SUM=$(md5sum $PLATFORM.zip)
     echo "$PLATFORM.zip : $MD5SUM" >> md5sum.log
-    cp $PLATFORM.zip ../../bitfiles
+    cp $PLATFORM.zip $SCRIPTPATH/../bitfiles
 done
