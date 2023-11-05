@@ -17,8 +17,8 @@ from .common import CommonActQuant
 from .common import CommonWeightQuant
 from .tensor_norm import TensorNorm
 
-CNV_OUT_CH_POOL = [(64, False), (64, False), (1, False)]
-INTERMEDIATE_FC_FEATURES = [(256, 256)]
+CNV_OUT_CH_POOL = [(64, False), (64, False), (256, True)]
+INTERMEDIATE_FC_FEATURES = [(16384, 256)]
 LAST_FC_IN_FEATURES = 256
 LAST_FC_PER_OUT_CH_SCALING = False
 POOL_SIZE = 2
