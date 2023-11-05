@@ -184,7 +184,7 @@ def find_bitfile(model_name, target_platform):
     bitfile_ext = bitfile_exts[get_edge_or_pcie()]
     bitfile_name = "%s.%s" % (model_name, bitfile_ext)
     bitfile_candidates = [
-         "../../../resources/finn-examples/bitfiles/%s/%s" % (target_platform, bitfile_name)
+         "../../resources/finn-examples/bitfiles/%s/%s" % (target_platform, bitfile_name)
     ]
     #    pk.resource_filename(
     #        "finn_examples", "bitfiles/%s/%s" % (target_platform, bitfile_name)

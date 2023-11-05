@@ -6,7 +6,7 @@ from dataset_loading import mnist
 import models
 
 def main(args):
-    trainx, trainy, testx, testy, valx, valy = mnist.load_mnist_data("../../../resources/finn-examples/data/mnist", download=False, one_hot=False)
+    trainx, trainy, testx, testy, valx, valy = mnist.load_mnist_data("../../resources/finn-examples/data/mnist", download=False, one_hot=False)
 
     accel = models.tfc_2w2a_mnist()
 
