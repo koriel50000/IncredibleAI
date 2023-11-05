@@ -2,13 +2,16 @@ import sys
 import pynq
 import numpy as np
 
+#from dataset_loading import mnist
 from dataset_loading import cifar
-import models
+from finn_examples import models
 
 def main(args):
+    #trainx, trainy, testx, testy, valx, valy = mnist.load_mnist_data("../../../resources/finn-examples/data/mnist", download=False, one_hot=False)
     trainx, trainy, testx, testy, valx, valy = cifar.load_cifar_data("../../../resources/finn-examples/data", download=False, one_hot=False)
 
-    accel = models.cnv_2w2a_cifar10()
+    #accel = models.tfc_w2a2_mnist()
+    accel = models.cnv_w2a2_cifar10()
 
     print("Expected input shape and datatype: %s %s" % (str(accel.ishape_normal()), str(accel.idt())))
     print("Expected output shape and datatype: %s %s" % (str(accel.oshape_normal()), str(accel.odt())))
