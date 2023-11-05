@@ -8,12 +8,19 @@ import shutil
 # the BNN-PYNQ models -- these all come as exported .onnx models
 # see models/download_bnn_pynq_models.sh
 models = [
-    "tfc-w1a1"
-#    "cnv-w1a1"
+    "TFC_2W2A",
+#    "tfc-w1a1",
+#    "tfc-w1a2",
+#    "tfc-w2a2",
+#    "cnv-w1a1",
+#    "cnv-w1a2",
+#    "cnv-w2a2",
 ]
 
 # which platforms to build the networks for
+#zynq_platforms = ["Pynq-Z1", "Ultra96", "ZCU104"]
 zynq_platforms = ["Pynq-Z1"]
+#alveo_platforms = ["U250"]
 alveo_platforms = []
 platforms_to_build = zynq_platforms + alveo_platforms
 
@@ -72,10 +79,3 @@ for platform_name in platforms_to_build:
             dst_file = platform_dir + "/" + f.replace("finn-accel", model_name)
             if os.path.isfile(src_file):
                 shutil.copy(src_file, dst_file)
-    # create zipfile for all examples for this platform
-    shutil.make_archive(
-        "release/" + release_platform_name,
-        "zip",
-        root_dir="release",
-        base_dir=release_platform_name,
-    )
