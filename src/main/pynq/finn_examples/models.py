@@ -67,6 +67,22 @@ _cifar10_cnv_io_shape_dict = {
     "num_outputs" : 1,
 }
 
+_kifu_cnn_io_shape_dict = {
+    "idt" : [DataType['UINT8']],
+    "odt" : [DataType['UINT8']],
+    "ishape_normal" : [(1, 28, 28, 1)],
+    "oshape_normal" : [(1, 1)],
+    "ishape_folded" : [(1, 28, 28, 1, 1)],
+    "oshape_folded" : [(1, 1, 1)],
+    "ishape_packed" : [(1, 28, 28, 1, 1)],
+    "oshape_packed" : [(1, 1, 1)],
+    "input_dma_name" : ['idma0'],
+    "output_dma_name" : ['odma0'],
+    "number_of_external_weights": 0,
+    "num_inputs" : 1,
+    "num_outputs" : 1,
+}
+
 _bincop_cnv_io_shape_dict = {
     "idt": [DataType["UINT8"]],
     "odt": [DataType["UINT8"]],
@@ -291,6 +307,14 @@ def cnv_2w2a_cifar10(target_platform=None):
     model_name = "CNV_2W2A"
     filename = find_bitfile(model_name, target_platform)
     return FINNExampleOverlay(filename, driver_mode, _cifar10_cnv_io_shape_dict)
+
+
+def cnn_2w2a_kifu(target_platform=None):
+    target_platform = resolve_target_platform(target_platform)
+    driver_mode = get_driver_mode()
+    model_name = "CNN_2W2A"
+    filename = find_bitfile(model_name, target_platform)
+    return FINNExampleOverlay(filename, driver_mode, _kifu_cnn_io_shape_dict)
 
 
 def bincop_cnv(target_platform=None):
