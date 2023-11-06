@@ -8,6 +8,7 @@ import sys
 import torch
 
 from trainer import Trainer
+from tftrainer import TFTrainer
 
 # Pytorch precision
 torch.set_printoptions(precision=10)
@@ -67,6 +68,7 @@ def parse_args(args):
     parser.add_argument("--random_seed", default=1, type=int, help="Random seed")
     # Neural network Architecture
     parser.add_argument("--network", default="LFC_1W1A", type=str, help="neural network")
+    parser.add_argument("--tftrainer", action='store_true', help="Tensorflow Trainer")
     parser.add_argument("--pretrained", action='store_true', help="Load pretrained model")
     parser.add_argument("--strict", action='store_true', help="Strict state dictionary loading")
     parser.add_argument(
@@ -113,7 +115,7 @@ def launch(cmd_args):
         args.dry_run = True
 
     # Init trainer
-    trainer = Trainer(args)
+    trainer = TFTrainer(args) if args.tftrainer else Trainer(args)
 
     # Execute
     if args.evaluate:

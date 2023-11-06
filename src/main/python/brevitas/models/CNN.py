@@ -17,12 +17,12 @@ from .common import CommonActQuant
 from .common import CommonWeightQuant
 from .tensor_norm import TensorNorm
 
-CNV_OUT_CH_POOL = [(64, 5, True), (64, 3, True), (128, 3, False), (128, 3, False)]
-INTERMEDIATE_FC_FEATURES = [(128, 256)]
+CNV_OUT_CH_POOL = [(32, False), (32, False), (64, False)]
+INTERMEDIATE_FC_FEATURES = [(256, 256)]
 LAST_FC_IN_FEATURES = 256
 LAST_FC_PER_OUT_CH_SCALING = False
 POOL_SIZE = 2
-#KERNEL_SIZE = 3
+KERNEL_SIZE = 3
 
 
 class CNN(Module):
@@ -41,10 +41,10 @@ class CNN(Module):
             narrow_range=False,
             restrict_scaling_type=RestrictValueType.POWER_OF_TWO))
 
-        for out_ch, kernel_size, is_pool_enabled in CNV_OUT_CH_POOL:
+        for out_ch, is_pool_enabled in CNV_OUT_CH_POOL:
             self.conv_features.append(
                 QuantConv2d(
-                    kernel_size=kernel_size,
+                    kernel_size=KERNEL_SIZE,
                     in_channels=in_ch,
                     out_channels=out_ch,
                     bias=False,

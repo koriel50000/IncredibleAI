@@ -7,11 +7,13 @@ import bnn_pynq_train
 
 def main():
     args = ['--network', 'CNN_2W2A',
+            '--tftrainer',
             '--datadir', '../../resources/brevitas/data',
             '--experiments', '../../resources/brevitas/experiments',
             '--gpus', None,
             '--num_workers', '2',
-            '--epochs', '5']
+            '--epochs', '5',
+            '--tftrainer']
 
     path = bnn_pynq_train.launch(args)
     print(path)

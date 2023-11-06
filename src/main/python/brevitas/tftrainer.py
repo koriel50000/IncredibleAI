@@ -7,7 +7,7 @@ import os
 import random
 import time
 
-from packaging.version import parse
+import numpy as np
 import torch
 from torch import nn
 import torch.optim as optim
@@ -17,6 +17,7 @@ import torchvision
 from torchvision import transforms
 from torchvision.datasets import CIFAR10
 from torchvision.datasets import MNIST
+import tensorflow as tf
 
 from logger import EvalEpochMeters
 from logger import Logger
@@ -25,22 +26,22 @@ from models import model_with_cfg
 from models.losses import SqrHingeLoss
 
 
-class MirrorMNIST(MNIST):
+ROWS = 8
+COLUMNS = 8
+CHANNELS = 16
 
-    if parse(torchvision.__version__) < parse('0.9.1'):
 
-        resources = [(
-            "https://ossci-datasets.s3.amazonaws.com/mnist/train-images-idx3-ubyte.gz",
-            "f68b3c2dcbeaaa9fbdd348bbdeb94873"),
-                     (
-                         "https://ossci-datasets.s3.amazonaws.com/mnist/train-labels-idx1-ubyte.gz",
-                         "d53e105ee54ea40749a09fcbcd1e9432"),
-                     (
-                         "https://ossci-datasets.s3.amazonaws.com/mnist/t10k-images-idx3-ubyte.gz",
-                         "9fb629c4189551a2d022fa330f9573f3"),
-                     (
-                         "https://ossci-datasets.s3.amazonaws.com/mnist/t10k-labels-idx1-ubyte.gz",
-                         "ec29112dd5afa0611ce80d1b7f02629c")]
+def parse_function(example_proto):
+    feature_description = {
+        'x': tf.io.FixedLenFeature([], tf.string),
+        'y': tf.io.FixedLenFeature([], tf.string),
+    }
+    features = tf.io.parse_single_example(example_proto, feature_description)
+    x = tf.io.decode_raw(features['x'], tf.uint8)
+    y = tf.io.decode_raw(features['y'], tf.uint8)
+    x_ = tf.reshape(x, [CHANNELS, ROWS, COLUMNS])
+    y_ = tf.reshape(y, [1])
+    return x_, y_
 
 
 def accuracy(output, target, topk=(1,)):
@@ -59,7 +60,7 @@ def accuracy(output, target, topk=(1,)):
     return res
 
 
-class Trainer(object):
+class TFTrainer(object):
 
     def __init__(self, args):
 
@@ -86,36 +87,19 @@ class Trainer(object):
         torch.manual_seed(args.random_seed)
         torch.cuda.manual_seed_all(args.random_seed)
 
-        # Datasets
-        transform_to_tensor = transforms.Compose([transforms.ToTensor()])
-
         dataset = cfg.get('MODEL', 'DATASET')
         self.num_classes = cfg.getint('MODEL', 'NUM_CLASSES')
-        if dataset == 'CIFAR10':
-            train_transforms_list = [
-                transforms.RandomCrop(32, padding=4),
-                transforms.RandomHorizontalFlip(),
-                transforms.ToTensor()]
-            transform_train = transforms.Compose(train_transforms_list)
-            builder = CIFAR10
 
-        elif dataset == 'MNIST':
-            transform_train = transform_to_tensor
-            builder = MirrorMNIST
-
-        elif dataset == 'KIFU':
-            transform_train = transform_to_tensor
-            builder = KIFUDataset
-        else:
+        if dataset != 'KIFU':
             raise Exception("Dataset not supported: {}".format(args.dataset))
 
-        train_set = builder(root=args.datadir, train=True, download=True, transform=transform_train)
-        test_set = builder(
-            root=args.datadir, train=False, download=True, transform=transform_to_tensor)
-        self.train_loader = DataLoader(
-            train_set, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
-        self.test_loader = DataLoader(
-            test_set, batch_size=args.batch_size, shuffle=False, num_workers=args.num_workers)
+        train_filename = os.path.join('../../resources/REVERSI_data', 'kifu1k00.tfrecords.gz')
+        raw_dataset = tf.data.TFRecordDataset([train_filename], compression_type="GZIP")
+        self.train_loader = raw_dataset.map(parse_function).batch(args.batch_size)
+        test_filename = os.path.join('../../resources/REVERSI_data', 'kifu1k100.tfrecords.gz')
+        raw_dataset = tf.data.TFRecordDataset([test_filename], compression_type="GZIP")
+        self.test_loader = raw_dataset.map(parse_function).batch(args.batch_size)
+        self.loader_len = 50000
 
         # Init starting values
         self.starting_epoch = 1
@@ -156,13 +140,8 @@ class Trainer(object):
             model = nn.DataParallel(model, args.gpus)
         self.model = model
 
-        # Loss function
-        if args.loss == 'SqrHinge':
-            self.criterion = SqrHingeLoss()
-        elif args.loss == 'CrossEntropy':
-            self.criterion = nn.CrossEntropyLoss()
-        else:
-            raise ValueError(f"{args.loss} not supported.")
+        # Loss function CrossEntropy only
+        self.criterion = nn.CrossEntropyLoss()
         self.criterion = self.criterion.to(device=self.device)
 
         # Init optimizer
@@ -225,22 +204,16 @@ class Trainer(object):
             epoch_meters = TrainingEpochMeters()
             start_data_loading = time.time()
 
-            for i, data in enumerate(self.train_loader):
-                (input, target) = data
+            for i, data in enumerate(self.train_loader.as_numpy_iterator()):
+                (raw_input, raw_target) = data
+                input = torch.from_numpy(raw_input).clone()
+                target = torch.from_numpy(raw_target.astype(np.int64)).clone()
                 input = input.to(self.device, non_blocking=True)
                 target = target.to(self.device, non_blocking=True)
 
-                # for hingeloss only
-                if isinstance(self.criterion, SqrHingeLoss):
-                    target = target.unsqueeze(1)
-                    target_onehot = torch.Tensor(target.size(0), self.num_classes).to(
-                        self.device, non_blocking=True)
-                    target_onehot.fill_(-1)
-                    target_onehot.scatter_(1, target, 1)
-                    target = target.squeeze()
-                    target_var = target_onehot
-                else:
-                    target_var = target
+                target_var = target.squeeze_()
+                # pytorch error: multi-target not supported in CrossEntropyLoss()
+                # @see https://stackoverflow.com/questions/49206550/pytorch-error-multi-target-not-supported-in-crossentropyloss/49209628
 
                 # measure data loading time
                 epoch_meters.data_time.update(time.time() - start_data_loading)
@@ -261,13 +234,13 @@ class Trainer(object):
                 # measure elapsed time
                 epoch_meters.batch_time.update(time.time() - start_batch)
 
-                if i % int(self.args.log_freq) == 0 or i == len(self.train_loader) - 1:
+                if i % int(self.args.log_freq) == 0 or i == self.loader_len - 1:
                     prec1, prec5 = accuracy(output.detach(), target, topk=(1, 5))
                     epoch_meters.losses.update(loss.item(), input.size(0))
                     epoch_meters.top1.update(prec1.item(), input.size(0))
                     epoch_meters.top5.update(prec5.item(), input.size(0))
                     self.logger.training_batch_cli_log(
-                        epoch_meters, epoch, i, len(self.train_loader))
+                        epoch_meters, epoch, i, self.loader_len)
 
                 # training batch ends
                 start_data_loading = time.time()
@@ -302,25 +275,17 @@ class Trainer(object):
         self.model.eval()
         self.criterion.eval()
 
-        for i, data in enumerate(self.test_loader):
+        for i, data in enumerate(self.test_loader.as_numpy_iterator()):
 
             end = time.time()
-            (input, target) = data
+            (raw_input, raw_target) = data
+            input = torch.from_numpy(raw_input).clone()
+            target = torch.from_numpy(raw_target.astype(np.int64)).clone()
 
             input = input.to(self.device, non_blocking=True)
             target = target.to(self.device, non_blocking=True)
 
-            # for hingeloss only
-            if isinstance(self.criterion, SqrHingeLoss):
-                target = target.unsqueeze(1)
-                target_onehot = torch.Tensor(target.size(0), self.num_classes).to(
-                    self.device, non_blocking=True)
-                target_onehot.fill_(-1)
-                target_onehot.scatter_(1, target, 1)
-                target = target.squeeze()
-                target_var = target_onehot
-            else:
-                target_var = target
+            target_var = target.squeeze_()
 
             # compute output
             output = self.model(input)
@@ -343,6 +308,6 @@ class Trainer(object):
             eval_meters.top5.update(prec5.item(), input.size(0))
 
             # Eval batch ends
-            self.logger.eval_batch_cli_log(eval_meters, i, len(self.test_loader))
+            self.logger.eval_batch_cli_log(eval_meters, i, self.loader_len)
 
         return eval_meters.top1.avg

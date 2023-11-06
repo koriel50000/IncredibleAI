@@ -14,7 +14,7 @@ def load_checkpoint(model, path):
 
 
 def export(model, path):
-    FINNManager.export(model, input_shape=(1, 1, 28, 28), export_path=path)
+    FINNManager.export(model, input_shape=(1, 16, 8, 8), export_path=path)
 
 
 def main():
