@@ -28,26 +28,17 @@
     "ram_style": "distributed"
   },
   "MatrixVectorActivation_2": {
-    "PE": 8,
-    "SIMD": 8,
-    "ram_style": "auto"
-  },
-  "ConvolutionInputGenerator_3": {
-    "SIMD": 8,
-    "ram_style": "distributed"
-  },
-  "MatrixVectorActivation_3": {
     "PE": 1,
     "SIMD": 8,
     "ram_style": "auto"
   },
-  "MatrixVectorActivation_4": {
+  "MatrixVectorActivation_3": {
     "PE": 1,
     "SIMD": 2,
     "ram_style": "block"
   },
-  "MatrixVectorActivation_5": {
-    "PE": 5,
+  "MatrixVectorActivation_4": {
+    "PE": 128,
     "SIMD": 1,
     "ram_style": "distributed"
   },
