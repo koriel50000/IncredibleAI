@@ -55,7 +55,7 @@ class CNN(Module):
             self.conv_features.append(
                 QuantIdentity(act_quant=CommonActQuant, bit_width=act_bit_width))
             if is_pool_enabled:
-                self.conv_features.append(MaxPool2d(kernel_size=2))
+                self.conv_features.append(MaxPool2d(kernel_size=POOL_SIZE))
 
         for in_features, out_features in INTERMEDIATE_FC_FEATURES:
             self.linear_features.append(
