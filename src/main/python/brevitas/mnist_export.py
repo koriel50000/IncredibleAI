@@ -26,9 +26,6 @@ def main():
     export_path = '../../resources/brevitas/experiments/{}.onnx'.format(network)
     export(model, export_path)
 
-    return 0
-
 
 if __name__ == "__main__":
-    exit_code = main()
-    sys.exit(exit_code)
+    main()

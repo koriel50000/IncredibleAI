@@ -13,12 +13,8 @@ def main():
             '--num_workers', '2',
             '--epochs', '5']
 
-    path = bnn_pynq_train.launch(args)
-    print(path)
-
-    return 0
+    bnn_pynq_train.launch(args)
 
 
 if __name__ == "__main__":
-    exit_code = main()
-    sys.exit(exit_code)
+    main()
