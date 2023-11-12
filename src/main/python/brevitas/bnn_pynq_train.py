@@ -8,7 +8,6 @@ import sys
 import torch
 
 from trainer import Trainer
-from tftrainer import TFTrainer
 
 # Pytorch precision
 torch.set_printoptions(precision=10)
@@ -36,7 +35,7 @@ def none_or_int(value):
 
 
 def parse_args(args):
-    parser = argparse.ArgumentParser(description="PyTorch MNIST/CIFAR10/KIFU Training")
+    parser = argparse.ArgumentParser(description="PyTorch MNIST/CIFAR10 Training")
     # I/O
     parser.add_argument("--datadir", default="./data/", help="Dataset location")
     parser.add_argument("--experiments", default="./experiments", help="Path to experiments folder")
@@ -68,7 +67,6 @@ def parse_args(args):
     parser.add_argument("--random_seed", default=1, type=int, help="Random seed")
     # Neural network Architecture
     parser.add_argument("--network", default="LFC_1W1A", type=str, help="neural network")
-    parser.add_argument("--tftrainer", action='store_true', help="Tensorflow Trainer")
     parser.add_argument("--pretrained", action='store_true', help="Load pretrained model")
     parser.add_argument("--strict", action='store_true', help="Strict state dictionary loading")
     parser.add_argument(
@@ -115,7 +113,7 @@ def launch(cmd_args):
         args.dry_run = True
 
     # Init trainer
-    trainer = TFTrainer(args) if args.tftrainer else Trainer(args)
+    trainer = Trainer(args)
 
     # Execute
     if args.evaluate:

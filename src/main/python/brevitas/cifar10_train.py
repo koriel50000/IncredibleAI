@@ -9,7 +9,7 @@ def main():
     args = ['--network', 'CNV_2W2A',
             '--datadir', '../../resources/brevitas/data',
             '--experiments', '../../resources/brevitas/experiments',
-            '--gpus', None,
+            '--gpus', '0',
             '--num_workers', '2',
             '--epochs', '5']
 

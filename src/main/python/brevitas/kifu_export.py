@@ -19,16 +19,13 @@ def export(model, path):
 
 def main():
     network = 'CNN_2W2A'
-    resume_path = '../../resources/brevitas/experiments/{}/checkpoints/best.tar'.format(network)
+    resume_path = '../../resources/brevitas/experiments/{}/checkpoints/checkpoint.tar'.format(network)
 
     model, cfg = model_with_cfg(network, False)
     load_checkpoint(model, resume_path)
     export_path = '../../resources/brevitas/experiments/{}.onnx'.format(network)
     export(model, export_path)
 
-    return 0
-
 
 if __name__ == "__main__":
-    exit_code = main()
-    sys.exit(exit_code)
+    main()

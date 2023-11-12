@@ -12,7 +12,7 @@ def main():
             '--network', network,
             '--datadir', '../../resources/brevitas/data',
             '--resume', resume_path,
-            '--gpus', None,
+            '--gpus', '0',
             '--num_workers', '2']
 
     bnn_pynq_train.launch(args)
