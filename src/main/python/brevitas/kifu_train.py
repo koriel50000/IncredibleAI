@@ -150,7 +150,7 @@ class Trainer(object):
             start_data_loading = time.time()
 
             start_step = 0
-            end_step = 1
+            end_step = 5
             for step in range(start_step, end_step):
                 train_filename = os.path.join(self.datadir, 'kifu1k{:02d}.tfrecords.gz').format(step)
                 print(train_filename)
@@ -211,7 +211,7 @@ def main():
     datadir = '../../resources/REVERSI_data'
     experiments = '../../resources/brevitas/experiments'
     resume = None
-    gpus = None
+    gpus = '0'
 
     batch_size = 64
     epochs = 2
