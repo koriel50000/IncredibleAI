@@ -58,7 +58,7 @@ def main(args):
     model.save('{}/{}_with_preproc.onnx'.format(brevitas_path, network))
 
     # postprocessing: insert Top-1 node at the end
-    model = model.transform(InsertTopK(k=1))
+    # model = model.transform(InsertTopK(k=1))
     chkpt_name = '{}/{}_pre_post.onnx'.format(brevitas_path, network)
     # tidy-up again
     model = model.transform(InferShapes())
