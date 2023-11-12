@@ -76,7 +76,7 @@ class CNN(Module):
                 bias=False,
                 weight_quant=CommonWeightQuant,
                 weight_bit_width=out_bit_width))
-        self.linear_features.append(TensorNorm())
+        # self.linear_features.append(TensorNorm())
 
         for m in self.modules():
             if isinstance(m, QuantConv2d) or isinstance(m, QuantLinear):
