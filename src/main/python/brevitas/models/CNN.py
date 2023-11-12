@@ -20,14 +20,14 @@ from .tensor_norm import TensorNorm
 CNV_OUT_CH_POOL = [(32, False), (32, False), (64, False)]
 INTERMEDIATE_FC_FEATURES = [(256, 256)]
 LAST_FC_IN_FEATURES = 256
-LAST_FC_PER_OUT_CH_SCALING = False
+LAST_FC_OUT_FEATURES = 1
 POOL_SIZE = 2
 KERNEL_SIZE = 3
 
 
 class CNN(Module):
 
-    def __init__(self, num_classes, weight_bit_width, act_bit_width, in_bit_width, in_ch):
+    def __init__(self, weight_bit_width, act_bit_width, in_bit_width, out_bit_width, in_ch):
         super(CNN, self).__init__()
 
         self.conv_features = ModuleList()
@@ -72,10 +72,10 @@ class CNN(Module):
         self.linear_features.append(
             QuantLinear(
                 in_features=LAST_FC_IN_FEATURES,
-                out_features=num_classes,
+                out_features=LAST_FC_OUT_FEATURES,
                 bias=False,
                 weight_quant=CommonWeightQuant,
-                weight_bit_width=weight_bit_width))
+                weight_bit_width=out_bit_width))
         self.linear_features.append(TensorNorm())
 
         for m in self.modules():
@@ -104,12 +104,12 @@ def cnn(cfg):
     weight_bit_width = cfg.getint('QUANT', 'WEIGHT_BIT_WIDTH')
     act_bit_width = cfg.getint('QUANT', 'ACT_BIT_WIDTH')
     in_bit_width = cfg.getint('QUANT', 'IN_BIT_WIDTH')
-    num_classes = cfg.getint('MODEL', 'NUM_CLASSES')
+    out_bit_width = cfg.getint('MODEL', 'OUT_BIT_WIDTH')
     in_channels = cfg.getint('MODEL', 'IN_CHANNELS')
     net = CNN(
         weight_bit_width=weight_bit_width,
         act_bit_width=act_bit_width,
         in_bit_width=in_bit_width,
-        num_classes=num_classes,
+        out_bit_width=out_bit_width,
         in_ch=in_channels)
     return net

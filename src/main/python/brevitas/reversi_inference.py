@@ -41,17 +41,17 @@ def calculate_accuracies(actual_evals, predicted_evals):
     actual_evals.sort(key=lambda x: x['value'], reverse=True)
     predicted_evals.sort(key=lambda x: x['value'], reverse=True)
 
-    # for entry in actual_evals:
-    #     move = feature.coord_to_move(entry['coord'])
-    #     value = entry['value']
-    #     print(' {0}:{1:.2f}'.format(move, value), end='')
-    # print()
-    # for entry in predicted_evals:
-    #     move = feature.coord_to_move(entry['coord'])
-    #     value = entry['value']
-    #     print(' {0}:{1:.2f}'.format(move, value), end='')
-    # print()
-    # print()
+    for entry in actual_evals:
+        move = feature.coord_to_move(entry['coord'])
+        value = entry['value']
+        print(' {0}:{1:.2f}'.format(move, value), end='')
+    print()
+    for entry in predicted_evals:
+        move = feature.coord_to_move(entry['coord'])
+        value = entry['value']
+        print(' {0}:{1:.2f}'.format(move, value), end='')
+    print()
+    print()
 
     count = len(actual_evals)
     if count == 1:
@@ -201,7 +201,7 @@ def main():
 
         namelist = records_zip.namelist()
 
-        filenames = namelist[100000: 100100]
+        filenames = namelist[100000: 100010]
         records_zip.extractall(path, filenames)
 
         with torch.no_grad():

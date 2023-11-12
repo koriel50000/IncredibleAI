@@ -27,25 +27,25 @@ def parse_function(example_proto):
     }
     features = tf.io.parse_single_example(example_proto, feature_description)
     x = tf.io.decode_raw(features['x'], tf.uint8)
-    y = tf.io.decode_raw(features['y'], tf.uint8)
+    y = tf.io.decode_raw(features['y'], tf.int8)
     x_ = tf.reshape(x, [CHANNELS, ROWS, COLUMNS])
-    y_ = tf.reshape(tf.divide(y, 255), [1])
+    y_ = tf.reshape(tf.divide(tf.subtract(y, 128), 127), [1])
     return x_, y_
 
 
 def accuracy(output, target, topk=(1,)):
-    """Computes the precision@k for the specified values of k"""
-    maxk = max(topk)
-    batch_size = target.size(0)
-
-    _, pred = output.topk(maxk, 1, True, True)
-    pred = pred.t()
-    correct = pred.eq(target.view(1, -1).expand_as(pred))
-
-    res = []
-    for k in topk:
-        correct_k = correct[:k].flatten().float().sum(0)
-        res.append(correct_k.mul_(64.0 / batch_size))
+    # """Computes the precision@k for the specified values of k"""
+    # maxk = max(topk)
+    # batch_size = target.size(0)
+    #
+    # _, pred = output.topk(maxk, 1, True, True)
+    # pred = pred.t()
+    # correct = pred.eq(target.view(1, -1).expand_as(pred))
+    #
+    res = [torch.tensor(0), torch.tensor(0)]
+    # for k in topk:
+    #     correct_k = correct[:k].flatten().float().sum(0)
+    #     res.append(correct_k.mul_(100.0 / batch_size))
     return res
 
 
@@ -76,9 +76,6 @@ class Trainer(object):
         torch.manual_seed(random_seed)
         torch.cuda.manual_seed_all(random_seed)
 
-        dataset = cfg.get('MODEL', 'DATASET')
-        self.num_classes = cfg.getint('MODEL', 'NUM_CLASSES')
-
         # Init starting values
         self.loader_len = 32768
         self.starting_epoch = 1
@@ -107,7 +104,7 @@ class Trainer(object):
         self.model = model
 
         # Loss function CrossEntropy only
-        self.criterion = nn.CrossEntropyLoss()
+        self.criterion = nn.MSELoss()
         self.criterion = self.criterion.to(device=self.device)
 
         # Init optimizer
@@ -153,7 +150,7 @@ class Trainer(object):
             start_data_loading = time.time()
 
             start_step = 0
-            end_step = 5
+            end_step = 1
             for step in range(start_step, end_step):
                 train_filename = os.path.join(self.datadir, 'kifu1k{:02d}.tfrecords.gz').format(step)
                 print(train_filename)
@@ -162,17 +159,12 @@ class Trainer(object):
 
                 for i, data in enumerate(train_loader.as_numpy_iterator()):
                     (raw_input, raw_target) = data
-                    if i == 0:
-                        print(raw_input.shape)
-                        print(raw_target.shape)
-                        print(raw_input[0][1, :, :])
-                        print(raw_target[0])
                     input = torch.from_numpy(raw_input).clone()
-                    target = torch.from_numpy(raw_target.astype(np.int64)).clone()
+                    target = torch.from_numpy(raw_target.astype(np.float32)).clone()
                     input = input.to(self.device, non_blocking=True)
                     target = target.to(self.device, non_blocking=True)
 
-                    target_var = target.squeeze_()
+                    target_var = target.squeeze()
                     # pytorch error: multi-target not supported in CrossEntropyLoss()
                     # @see https://stackoverflow.com/questions/49206550/pytorch-error-multi-target-not-supported-in-crossentropyloss/49209628
 
@@ -182,7 +174,7 @@ class Trainer(object):
                     # Training batch starts
                     start_batch = time.time()
                     output = self.model(input)
-                    loss = self.criterion(output, target_var)
+                    loss = self.criterion(torch.flatten(output), target_var)
 
                     # compute gradient and do SGD step
                     self.optimizer.zero_grad()
