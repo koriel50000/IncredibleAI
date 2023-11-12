@@ -38,7 +38,7 @@
     "ram_style": "block"
   },
   "MatrixVectorActivation_4": {
-    "PE": 128,
+    "PE": 1,
     "SIMD": 1,
     "ram_style": "distributed"
   },
