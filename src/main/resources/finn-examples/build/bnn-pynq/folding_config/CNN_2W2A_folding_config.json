@@ -6,12 +6,12 @@
   },
 
   "ConvolutionInputGenerator_0": {
-    "SIMD": 1,
+    "SIMD": 8,
     "ram_style": "distributed"
   },
   "MatrixVectorActivation_0": {
     "PE": 8,
-    "SIMD": 1,
+    "SIMD": 8,
     "ram_style": "auto"
   },
   "ConvolutionInputGenerator_1": {
