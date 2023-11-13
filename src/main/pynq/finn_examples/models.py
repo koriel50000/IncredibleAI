@@ -69,7 +69,7 @@ _cifar10_cnv_io_shape_dict = {
 
 _kifu_cnn_io_shape_dict = {
     "idt" : [DataType['UINT8']],
-    "odt" : [DataType['UINT8']],
+    "odt" : [DataType['INT8']],
     "ishape_normal" : [(1, 8, 8, 16)],
     "oshape_normal" : [(1, 1)],
     "ishape_folded" : [(1, 8, 8, 16, 1)],

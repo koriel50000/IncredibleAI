@@ -76,6 +76,7 @@ def play(black_operator, white_operator):
             break
         reversi.next_turn(passed)
 
+    reversi.print_board()
     winner, black, white = reversi.print_score()
 
     return winner, black, white
