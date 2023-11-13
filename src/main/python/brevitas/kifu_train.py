@@ -140,7 +140,7 @@ class Trainer(object):
         #if self.detect_nan:
         #    torch.autograd.set_detect_anomaly(True)
 
-        for epoch in range(self.starting_epoch, epochs):
+        for epoch in range(self.starting_epoch, epochs + 1):
             # Set to training mode
             self.model.train()
             self.criterion.train()
@@ -214,7 +214,7 @@ def main():
     gpus = '0'
 
     batch_size = 64
-    epochs = 4
+    epochs = 20
     log_freq = 10
 
     trainer = Trainer(network, datadir, experiments, resume, gpus)

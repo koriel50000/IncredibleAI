@@ -33,7 +33,13 @@ class CNN(Module):
         self.conv_features = ModuleList()
         self.linear_features = ModuleList()
 
-        self.conv_features.append(QuantIdentity(act_quant=CommonActQuant, bit_width=in_bit_width))
+        self.conv_features.append(QuantIdentity( # for Q1.7 input format
+            act_quant=CommonActQuant,
+            bit_width=in_bit_width,
+            min_val=- 1.0,
+            max_val=1.0 - 2.0 ** (-7),
+            narrow_range=False,
+            restrict_scaling_type=RestrictValueType.POWER_OF_TWO))
 
         for out_ch, is_pool_enabled in CNV_OUT_CH_POOL:
             self.conv_features.append(
@@ -70,7 +76,7 @@ class CNN(Module):
                 bias=False,
                 weight_quant=CommonWeightQuant,
                 weight_bit_width=out_bit_width))
-        # self.linear_features.append(TensorNorm())
+        self.linear_features.append(TensorNorm())
 
         for m in self.modules():
             if isinstance(m, QuantConv2d) or isinstance(m, QuantLinear):
