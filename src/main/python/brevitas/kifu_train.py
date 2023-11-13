@@ -214,7 +214,7 @@ def main():
     gpus = '0'
 
     batch_size = 64
-    epochs = 2
+    epochs = 4
     log_freq = 10
 
     trainer = Trainer(network, datadir, experiments, resume, gpus)
