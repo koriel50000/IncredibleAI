@@ -18,7 +18,7 @@ random.seed()
 
 def post_record(color, coord):
     url = RECORD_ENDPOINT + '/' + str(color) + '/'
-    payload = { 'x': coord[0] - 1, 'y': coord[1] -1 }
+    payload = {'x': coord[0] - 1, 'y': coord[1] - 1}
     success = False
     print('post_record:', url, payload)
 
@@ -79,7 +79,7 @@ def optimum_choice(evals):
 #
 def prelude_operator(color, coords, passed):
     if passed:
-        coord = (-2, -2) # originの違いを補正
+        coord = (0, 0)  # originの違いを補正
         post_record(color, coord)
         return
 
