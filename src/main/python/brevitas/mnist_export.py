@@ -10,7 +10,7 @@ def load_checkpoint(model, path):
     print('Loading model checkpoint at: {}'.format(path))
     package = torch.load(path, map_location='cpu')
     model_state_dict = package['state_dict']
-    model.load_state_dict(model_state_dict)
+    model.load_state_dict(model_state_dict, strict=False)
 
 
 def export(model, path):

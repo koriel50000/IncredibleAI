@@ -102,10 +102,6 @@ class Trainer(object):
         elif dataset == 'MNIST':
             transform_train = transform_to_tensor
             builder = MirrorMNIST
-
-        elif dataset == 'KIFU':
-            transform_train = transform_to_tensor
-            builder = KIFUDataset
         else:
             raise Exception("Dataset not supported: {}".format(args.dataset))
 

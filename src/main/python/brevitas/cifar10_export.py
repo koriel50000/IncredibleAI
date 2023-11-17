@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import torch
 from models import model_with_cfg
 from brevitas.export import FINNManager
@@ -10,7 +9,7 @@ def load_checkpoint(model, path):
     print('Loading model checkpoint at: {}'.format(path))
     package = torch.load(path, map_location='cpu')
     model_state_dict = package['state_dict']
-    model.load_state_dict(model_state_dict)
+    model.load_state_dict(model_state_dict, strict=False)
 
 
 def export(model, path):
