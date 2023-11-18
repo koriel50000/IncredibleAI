@@ -9,8 +9,8 @@ import shutil
 # see models/download_bnn_pynq_models.sh
 models = [
 #    "TFC_2W2A",
-    "CNV_2W2A",
-#    "CNN_2W2A",
+#    "CNV_2W2A",
+    "CNN_2W2A",
 #    "tfc-w1a1",
 #    "tfc-w1a2",
 #    "tfc-w2a2",
