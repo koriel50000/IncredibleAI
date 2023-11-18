@@ -27,9 +27,9 @@ def parse_function(example_proto):
     }
     features = tf.io.parse_single_example(example_proto, feature_description)
     x = tf.io.decode_raw(features['x'], tf.uint8)
-    y = tf.io.decode_raw(features['y'], tf.uint8)
+    y = tf.io.decode_raw(features['y'], tf.int8)
     x_ = tf.reshape(x, [CHANNELS, ROWS, COLUMNS])
-    y_ = tf.reshape(y, [1])
+    y_ = tf.reshape(tf.divide(tf.subtract(y, 128), 127), [1])
     return x_, y_
 
 

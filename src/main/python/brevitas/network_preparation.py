@@ -1,5 +1,4 @@
 import shutil
-import sys
 from qonnx.core.modelwrapper import ModelWrapper
 from brevitas.export import FINNManager
 
@@ -24,7 +23,7 @@ from qonnx.transformation.infer_data_layouts import InferDataLayouts
 from qonnx.transformation.general import RemoveUnusedTensors
 
 
-def main(args):
+def main():
     network = 'CNN_2W2A'
     brevitas_path = '../../resources/brevitas/experiments'
     finn_build_path = '../../resources/finn-examples/build/bnn-pynq/models'
@@ -58,7 +57,7 @@ def main(args):
     model.save('{}/{}_with_preproc.onnx'.format(brevitas_path, network))
 
     # postprocessing: insert Top-1 node at the end
-    # model = model.transform(InsertTopK(k=1))
+    model = model.transform(InsertTopK(k=1))
     chkpt_name = '{}/{}_pre_post.onnx'.format(brevitas_path, network)
     # tidy-up again
     model = model.transform(InferShapes())
@@ -92,4 +91,4 @@ def main(args):
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
