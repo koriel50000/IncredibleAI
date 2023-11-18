@@ -39,4 +39,4 @@ def calculate_predicted_value(state):
     input = input.to(device, non_blocking=True)
     predictions_ = model(input)
     #print(predictions_[0])
-    return predictions_[0][0].item() / 127
+    return predictions_[0][0].item()

@@ -33,22 +33,6 @@ def parse_function(example_proto):
     return x_, y_
 
 
-def accuracy(output, target, topk=(1,)):
-    # """Computes the precision@k for the specified values of k"""
-    # maxk = max(topk)
-    # batch_size = target.size(0)
-    #
-    # _, pred = output.topk(maxk, 1, True, True)
-    # pred = pred.t()
-    # correct = pred.eq(target.view(1, -1).expand_as(pred))
-    #
-    res = [torch.tensor(0), torch.tensor(0)]
-    # for k in topk:
-    #     correct_k = correct[:k].flatten().float().sum(0)
-    #     res.append(correct_k.mul_(100.0 / batch_size))
-    return res
-
-
 class Trainer(object):
 
     def __init__(self, network, datadir, experiments, resume, gpus):
@@ -77,7 +61,6 @@ class Trainer(object):
         torch.cuda.manual_seed_all(random_seed)
 
         # Init starting values
-        self.loader_len = 32768
         self.starting_epoch = 1
         self.best_val_acc = 0
 
@@ -140,7 +123,7 @@ class Trainer(object):
         #if self.detect_nan:
         #    torch.autograd.set_detect_anomaly(True)
 
-        for epoch in range(self.starting_epoch, epochs + 1):
+        for epoch in range(self.starting_epoch, self.starting_epoch + epochs):
             # Set to training mode
             self.model.train()
             self.criterion.train()
@@ -153,9 +136,11 @@ class Trainer(object):
             end_step = 100
             for step in range(start_step, end_step):
                 train_filename = os.path.join(self.datadir, 'kifu1k{:02d}.tfrecords.gz').format(step)
-                print(train_filename)
                 raw_dataset = tf.data.TFRecordDataset([train_filename], compression_type="GZIP")
-                train_loader = raw_dataset.map(parse_function).batch(batch_size)
+                data_len = 500000  # sum(1 for _ in raw_dataset.as_numpy_iterator())
+                print(train_filename, data_len)
+                train_loader = raw_dataset.map(parse_function)
+                train_loader = train_loader.shuffle(buffer_size=data_len).batch(batch_size)
 
                 for i, data in enumerate(train_loader.as_numpy_iterator()):
                     (raw_input, raw_target) = data
@@ -187,20 +172,19 @@ class Trainer(object):
                     # measure elapsed time
                     epoch_meters.batch_time.update(time.time() - start_batch)
 
-                    if i % int(log_freq) == 0 or i == self.loader_len - 1:
-                        prec1, prec5 = accuracy(output.detach(), target, topk=(1, 5))
+                    if i % int(log_freq) == 0 or i == data_len // batch_size - 1:
                         epoch_meters.losses.update(loss.item(), input.size(0))
-                        epoch_meters.top1.update(prec1.item(), input.size(0))
-                        epoch_meters.top5.update(prec5.item(), input.size(0))
                         self.logger.training_batch_cli_log(
-                            epoch_meters, epoch, i, self.loader_len)
+                            epoch_meters, epoch, i + 1, data_len // batch_size)
+                        if i == data_len // batch_size - 1:
+                            break
 
                     # training batch ends
                     start_data_loading = time.time()
 
             # Set the learning rate
-            if epoch % 40 == 0:
-                self.optimizer.param_groups[0]['lr'] *= 0.5
+            # if epoch % 40 == 0:
+            self.optimizer.param_groups[0]['lr'] *= 0.5
 
             # checkpoint
             self.checkpoint_best(epoch, "checkpoint.tar")
@@ -211,9 +195,10 @@ def main():
     datadir = '../../resources/REVERSI_data'
     experiments = '../../resources/brevitas/experiments'
     resume = None
+    # resume = '{}/{}/checkpoints/checkpoint.tar'.format(experiments, network)
     gpus = '0'
 
-    batch_size = 64
+    batch_size = 100
     epochs = 20
     log_freq = 10
 
