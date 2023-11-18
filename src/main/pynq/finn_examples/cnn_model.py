@@ -27,6 +27,6 @@ def calculate_predicted_values(states):
 #
 def calculate_predicted_value(state):
     state = np.transpose(state.reshape(16, 8, 8), [1, 2, 0])
-    ibuf_normal = state.reshape(accel.ishape_normal()) * 255
+    ibuf_normal = state.reshape(accel.ishape_normal())
     obuf_normal = accel.execute(ibuf_normal)
     return obuf_normal.flatten()[0]
