@@ -39,17 +39,17 @@ def calculate_accuracies(actual_evals, predicted_evals):
     actual_evals.sort(key=lambda x: x['value'], reverse=True)
     predicted_evals.sort(key=lambda x: x['value'], reverse=True)
 
-    # for entry in actual_evals:
-    #     move = feature.coord_to_move(entry['coord'])
-    #     value = entry['value']
-    #     print(' {0}:{1:.2f}'.format(move, value), end='')
-    # print()
-    # for entry in predicted_evals:
-    #     move = feature.coord_to_move(entry['coord'])
-    #     value = entry['value']
-    #     print(' {0}:{1:.2f}'.format(move, value), end='')
-    # print()
-    # print()
+    for entry in actual_evals:
+        move = feature.coord_to_move(entry['coord'])
+        value = entry['value']
+        print(' {0}:{1:.2f}'.format(move, value), end='')
+    print()
+    for entry in predicted_evals:
+        move = feature.coord_to_move(entry['coord'])
+        value = entry['value']
+        print(' {0}:{1:.2f}'.format(move, value), end='')
+    print()
+    print()
 
     count = len(actual_evals)
     if count == 1:
