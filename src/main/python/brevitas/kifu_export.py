@@ -43,7 +43,6 @@ def network_preparation(network, brevitas_path, finn_build_path):
     model = model.transform(InferDataTypes())
     model = model.transform(RemoveStaticGraphInputs())
 
-
     chkpt_name = '{}/{}_tidy.onnx'.format(brevitas_path, network)
     model.save(chkpt_name)
 
