@@ -5,13 +5,39 @@ from dependencies import value
 
 from brevitas.core.bit_width import BitWidthImplType
 from brevitas.core.quant import QuantType
-from brevitas.core.restrict_val import FloatToIntImplType
-from brevitas.core.restrict_val import RestrictValueType
-from brevitas.core.scaling import ScalingImplType
+from brevitas.core.restrict_val import FloatToIntImplType, RestrictValueType
+from brevitas.core.scaling import ScalingImplType, ScalingPerOutputType
 from brevitas.core.zero_point import ZeroZeroPoint
 from brevitas.inject import ExtendedInjector
-from brevitas.quant.solver import ActQuantSolver
-from brevitas.quant.solver import WeightQuantSolver
+from brevitas.quant.solver import ActQuantSolver, WeightQuantSolver
+from brevitas.quant.experimental.float_base import ScaledFloatWeightBase, FloatActBase, Fp4e2m1Mixin
+
+
+class Fp4e3m0Mixin(ExtendedInjector):
+    bit_width = 4
+    exponent_bit_width = 3
+    mantissa_bit_width = 0
+    saturating = True
+
+
+class Int4WeightQuant(Fp4e3m0Mixin,
+                      ScaledFloatWeightBase):
+    scaling_per_output_type = ScalingPerOutputType.TENSOR
+
+    @value
+    def exponent_bias(exponent_bit_width):
+        return 1
+
+
+class Int4ActQuant(Fp4e2m1Mixin,
+                   FloatActBase,
+                   ActQuantSolver):
+    scaling_impl_type = ScalingImplType.CONST
+    scaling_per_output_channel = False
+    restrict_scaling_type = RestrictValueType.FP
+    scaling_const = 1.0
+    max_val = 0.5
+    min_val = -0.5
 
 
 class CommonQuant(ExtendedInjector):

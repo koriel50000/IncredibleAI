@@ -192,7 +192,7 @@ def evaluating_model(path, filenames):
 # メイン
 #
 def main():
-    network = 'CNN_2W2A'
+    network = 'CNN_4W4A'
     resume = '../../resources/brevitas/experiments/{}/checkpoints/checkpoint.tar'.format(network)
     model.load_model(resume)
 

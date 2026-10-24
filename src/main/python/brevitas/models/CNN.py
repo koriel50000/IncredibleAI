@@ -2,18 +2,10 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import torch
-from torch.nn import BatchNorm1d
-from torch.nn import BatchNorm2d
-from torch.nn import MaxPool2d
-from torch.nn import Module
-from torch.nn import ModuleList
+import torch.nn as nn
+import brevitas.nn as qnn
 
-from brevitas.nn import QuantConv2d
-from brevitas.nn import QuantIdentity
-from brevitas.nn import QuantLinear
-
-from .common import CommonActQuant
-from .common import CommonWeightQuant
+from .common import Int4ActQuant, Int4WeightQuant
 
 CNV_OUT_CH_POOL = [(32, False), (32, False), (64, False)]
 INTERMEDIATE_FC_FEATURES = [(256, 256)]
@@ -23,62 +15,62 @@ POOL_SIZE = 2
 KERNEL_SIZE = 3
 
 
-class CNN(Module):
+class CNN(nn.Module):
 
     def __init__(self, weight_bit_width, act_bit_width, in_bit_width, out_bit_width, in_ch):
         super(CNN, self).__init__()
 
-        self.conv_features = ModuleList()
-        self.linear_features = ModuleList()
+        self.conv_features = nn.ModuleList()
+        self.linear_features = nn.ModuleList()
 
-        self.conv_features.append(QuantIdentity(act_quant=CommonActQuant, bit_width=in_bit_width))
+        self.conv_features.append(qnn.QuantIdentity(act_quant=Int4ActQuant))
 
         for out_ch, is_pool_enabled in CNV_OUT_CH_POOL:
             self.conv_features.append(
-                QuantConv2d(
+                qnn.QuantConv2d(
                     kernel_size=KERNEL_SIZE,
                     in_channels=in_ch,
                     out_channels=out_ch,
                     bias=False,
-                    weight_quant=CommonWeightQuant,
+                    weight_quant=Int4WeightQuant,
                     weight_bit_width=weight_bit_width))
             in_ch = out_ch
-            self.conv_features.append(BatchNorm2d(in_ch, eps=1e-4))
+            self.conv_features.append(nn.BatchNorm2d(in_ch))
             self.conv_features.append(
-                QuantIdentity(act_quant=CommonActQuant, bit_width=act_bit_width))
+                qnn.QuantIdentity(act_quant=Int4ActQuant))
             if is_pool_enabled:
-                self.conv_features.append(MaxPool2d(kernel_size=POOL_SIZE))
+                self.conv_features.append(nn.MaxPool2d(kernel_size=POOL_SIZE))
 
         for in_features, out_features in INTERMEDIATE_FC_FEATURES:
             self.linear_features.append(
-                QuantLinear(
+                qnn.QuantLinear(
                     in_features=in_features,
                     out_features=out_features,
                     bias=False,
-                    weight_quant=CommonWeightQuant,
+                    weight_quant=Int4WeightQuant,
                     weight_bit_width=weight_bit_width))
-            self.linear_features.append(BatchNorm1d(out_features, eps=1e-4))
+            self.linear_features.append(nn.BatchNorm1d(out_features))
             self.linear_features.append(
-                QuantIdentity(act_quant=CommonActQuant, bit_width=act_bit_width))
+                qnn.QuantIdentity(act_quant=Int4ActQuant))
 
         self.linear_features.append(
-            QuantLinear(
+            qnn.QuantLinear(
                 in_features=LAST_FC_IN_FEATURES,
                 out_features=LAST_FC_OUT_FEATURES,
                 bias=False,
-                weight_quant=CommonWeightQuant,
+                weight_quant=Int4WeightQuant,
                 weight_bit_width=out_bit_width))
 
         for m in self.modules():
-            if isinstance(m, QuantConv2d) or isinstance(m, QuantLinear):
+            if isinstance(m, qnn.QuantConv2d) or isinstance(m, qnn.QuantLinear):
                 torch.nn.init.uniform_(m.weight.data, -1, 1)
 
     def clip_weights(self, min_val, max_val):
         for mod in self.conv_features:
-            if isinstance(mod, QuantConv2d):
+            if isinstance(mod, qnn.QuantConv2d):
                 mod.weight.data.clamp_(min_val, max_val)
         for mod in self.linear_features:
-            if isinstance(mod, QuantLinear):
+            if isinstance(mod, qnn.QuantLinear):
                 mod.weight.data.clamp_(min_val, max_val)
 
     def forward(self, x):

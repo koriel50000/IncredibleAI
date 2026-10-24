@@ -21,6 +21,7 @@ __all__ = [
     'lfc_1w2a',
     'resnet18_4w4a',
     'cnn_2w2a',
+    'cnn_4w4a',
     'model_with_cfg']
 
 from .CNV import cnv
@@ -113,4 +114,9 @@ def resnet18_4w4a(pretrained=True):
 
 def cnn_2w2a(pretrained=True):
     model, _ = model_with_cfg('cnn_2w2a', pretrained)
+    return model
+
+
+def cnn_4w4a(pretrained=True):
+    model, _ = model_with_cfg('cnn_4w4a', pretrained)
     return model

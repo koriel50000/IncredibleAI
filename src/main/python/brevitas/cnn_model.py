@@ -4,7 +4,7 @@ import torch
 
 from models import model_with_cfg
 
-model, _ = model_with_cfg('CNN_2W2A', False)
+model, _ = model_with_cfg('CNN_4W4A', False)
 device = torch.device('cpu')
 
 

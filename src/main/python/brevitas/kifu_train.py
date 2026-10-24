@@ -191,7 +191,7 @@ class Trainer(object):
 
 
 def main():
-    network = 'CNN_2W2A'
+    network = 'CNN_4W4A'
     datadir = '../../resources/REVERSI_data'
     experiments = '../../resources/brevitas/experiments'
     resume = None
@@ -199,7 +199,7 @@ def main():
     gpus = '0'
 
     batch_size = 100
-    epochs = 20
+    epochs = 5
     log_freq = 10
 
     trainer = Trainer(network, datadir, experiments, resume, gpus)
