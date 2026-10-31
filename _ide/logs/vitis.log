@@ -1,0 +1,37 @@
+14:15:30 INFO  : updated workspace path: E:\workspace\IntelliJ\IncredibleAI
+14:15:30 INFO  : created .gitignore file for the project E:\workspace\IntelliJ\IncredibleAI
+14:15:32 INFO  : Marking the target connection as default Local
+14:15:32 INFO  : Marking the target connection as default Linux Agent
+14:15:32 INFO  : Marking the target connection as default XRTServer
+14:15:32 INFO  : Marking the target connection as default LinuxEmulation
+14:15:32 INFO  : Marking the target connection as default QEMU
+14:15:32 INFO  : cmd.exe, /C, empyro.bat repo -st   D:\Products\Xilinx\2025.2.1\Vitis\data\embeddedsw
+14:15:32 INFO  : created .gitignore file for the project E:\workspace\IntelliJ\IncredibleAI\vitis
+14:15:35 INFO  : [INFO]: Initializing repositories
+14:15:35 INFO  : [INFO]: Successfully set the EmbeddedSW path, refer .repo.yaml for more details.
+14:15:35 INFO  : Successfully created repository data at E:\workspace\IntelliJ\IncredibleAI/_ide\.wsdata
+14:15:35 INFO  : cmd.exe, /C, empyro.bat get_template_data -d C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw0013456225824536715753 -r E:\workspace\IntelliJ\IncredibleAI\_ide\.wsdata\.repo.yaml
+14:15:36 INFO  : Embedded Template List generated successfully
+14:19:02 INFO  : cmd.exe, /C, empyro.bat get_template_data -d C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw002411273603078685716 -r E:\workspace\IntelliJ\IncredibleAI\_ide\.wsdata\.repo.yaml
+14:19:03 INFO  : Embedded Template List generated successfully
+14:19:03 INFO  : cmd.exe, /C, empyro.bat repo -st  D:\Products\Xilinx\2025.2.1\Vitis\data\embeddedsw
+14:19:05 INFO  : [INFO]: Initializing repositories
+14:19:05 INFO  : [INFO]: Successfully set the EmbeddedSW path, refer .repo.yaml for more details.
+14:19:05 INFO  : Successfully created repository data at C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw002250509338755844339
+14:19:05 INFO  : cmd.exe, /C, empyro.bat get_template_data -d C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw006034289802996224150 -r C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw002250509338755844339\.repo.yaml
+14:19:06 INFO  : Embedded Template List generated successfully
+14:19:11 INFO  : cmd.exe, /C, empyro.bat repo -st  D:\Products\Xilinx\2025.2.1\Vitis\data\embeddedsw
+14:19:14 INFO  : [INFO]: Initializing repositories
+14:19:14 INFO  : [INFO]: Successfully set the EmbeddedSW path, refer .repo.yaml for more details.
+14:19:14 INFO  : Successfully created repository data at C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw0015595545054186216079
+14:19:14 INFO  : cmd.exe, /C, empyro.bat get_template_data -d C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw009775622789347690302 -r C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw0015595545054186216079\.repo.yaml
+14:19:15 INFO  : Embedded Template List generated successfully
+14:19:45 INFO  : updated workspace path: E:\workspace\IntelliJ\IncredibleAI
+14:19:45 INFO  : created .gitignore file for the project E:\workspace\IntelliJ\IncredibleAI
+14:19:47 INFO  : [INFO]: Initializing repositories
+14:19:47 INFO  : [INFO]: Successfully set the EmbeddedSW path, refer .repo.yaml for more details.
+14:19:47 INFO  : Successfully created repository data at C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw004786947496161741758
+14:19:47 INFO  : cmd.exe, /C, empyro.bat get_template_data -d C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw0010958883712217854482 -r C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw004786947496161741758\.repo.yaml
+14:19:48 INFO  : Embedded Template List generated successfully
+14:19:48 INFO  : cmd.exe, /C, empyro.bat get_template_data -d C:\Users\jzw00\AppData\Local\Temp\rigel_lopper_jzw003975411795901893724 -r E:\workspace\IntelliJ\IncredibleAI\_ide\.wsdata\.repo.yaml
+14:19:49 INFO  : Embedded Template List generated successfully

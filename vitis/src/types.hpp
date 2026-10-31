@@ -1,0 +1,48 @@
+#pragma once
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#undef INLINE
+#include <ap_int.h>
+#include <hls_stream.h>
+
+using uint4_t = ap_uint<4>;
+using bool_t = ap_uint<1>;
+
+template <typename T>
+using fifo = hls::stream<T>;
+
+template <int N, int W = 4>
+class int_t {
+private:
+	ap_uint<W*N> buf_;
+public:
+	int_t() : buf_(0) {}
+	int_t(uint64_t ul) : buf_(ul) {}
+	int_t(uint64_t w3, uint64_t w2, uint64_t w1, uint64_t w0) {
+		assert(N == 64 && W == 4);
+		buf_.range(256 - 1, 192) = w3;
+		buf_.range(192 - 1, 128) = w2;
+		buf_.range(128 - 1,  64) = w1;
+		buf_.range( 64 - 1,   0) = w0;
+	}
+
+	inline ap_range_ref<W*N, false> word(size_t seg) const {
+		assert(seg < 4);
+		return buf_(64 * seg + 64 - 1, 64 * seg);
+	}
+
+	inline ap_range_ref<W*N, false> operator[](size_t index) const {
+		assert(index < N);
+		return buf_(W * index + W - 1, W * index);
+	}
+
+	inline ap_range_ref<W*N, false> operator[](size_t index) {
+		assert(index < N);
+		return buf_(W * index + W - 1, W * index);
+	}
+
+	inline uint64_t to_uint64() const {
+		return buf_.to_uint64();
+	}
+};

@@ -201,7 +201,7 @@ def main():
 
         namelist = records_zip.namelist()
 
-        filenames = namelist[100000: 100010]
+        filenames = namelist[100000: 100001]
         records_zip.extractall(path, filenames)
 
         with torch.no_grad():

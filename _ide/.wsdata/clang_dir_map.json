@@ -1,0 +1,22 @@
+{
+  "workspaceRoot": "E:\\workspace\\IntelliJ\\IncredibleAI",
+  "mapping": {
+    "vitis\\src\\layers.cpp": "vitis",
+    "vitis\\src\\predictions.hpp": "vitis",
+    "vitis\\src\\xunit.hpp": "vitis",
+    "vitis\\src\\output.hpp": "vitis",
+    "vitis\\src\\layers.hpp": "vitis",
+    "vitis\\src\\types.hpp": "vitis",
+    "vitis\\src\\tb.cpp": "vitis",
+    "vitis\\src\\kernel.hpp": "vitis",
+    "vitis\\src\\all_tests.cpp": "vitis",
+    "vitis\\src\\bitarith_test.hpp": "vitis",
+    "vitis\\src\\window_buffer_test.hpp": "vitis",
+    "vitis\\src\\params.hpp": "vitis",
+    "vitis\\src\\image.hpp": "vitis",
+    "vitis\\src\\predictions_test.hpp": "vitis",
+    "vitis\\src\\window_buffer.hpp": "vitis",
+    "vitis\\src\\bitarith.hpp": "vitis",
+    "vitis\\src\\kernel.cpp": "vitis"
+  }
+}
